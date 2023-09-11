@@ -1,0 +1,107 @@
+﻿.ui-dialog {font-size: 11px;}
+.oa-icon{height: 16px;width: 16px;display: block;overflow: hidden;}
+.icon-delete {background: url("images/common-icons.png") no-repeat scroll -256px -16px transparent !important;cursor: pointer;}
+.icon-calendar {background: url('images/common-icons.png') no-repeat -16px -16px !important;}
+.icon-attach {background: url("images/AttachmentObject_16x16.png") no-repeat transparent !important;height: 16px;min-width: 16px;display: block;overflow: hidden;text-indent: 20px;}
+.status-indicator {margin-right: 5px;}
+.status-indicator.inline {display: inline;}
+.status-indicator.center {width: 100%;height: 100%;}
+.status-inline {display: inline;}
+.status-indicator.center > .status {height: 100%;}
+.status-indicator.center > .status table {height: 100%;width: 100%;text-align: center;}
+.status-progress {background: url('images/spinner.gif');width: 16px;height: 16px;overflow: hidden;display: inline-block;}
+.big-status-progress {display: inline-block;width: 40px;height: 40px;background: url('images/big-progress.gif') no-repeat -0px -0px !important;}
+
+/* Wait Styles */
+.wait-element {background-color: #cccccc;opacity: 0.50;filter: alpha(opacity=50);position: absolute;cursor: wait;z-index: 2000;}
+.wait-box {background-color: #ffffff;border: 1px solid #808080;box-shadow: rgb(128, 128, 128) 0px 0px 10px;cursor: wait;padding: 20px;position: absolute;z-index: 2001;}
+.wait-image {vertical-align: middle;padding-right: 20px;}
+.wait-message {padding-left: 5px;padding-right: 15px;display: inline-block;}
+.wait-button {width: 73px;height: 23px;}    
+
+/* Message Area Control */
+.message-area-control{position: relative;padding: 5px;word-wrap: break-word;white-space: pre-wrap; text-align:left;}
+.message-area-control .clickable{cursor: pointer;}
+.message-area-control.error-message{background-color: #e6b9b9;border: 1px solid #C00000;}
+.message-area-control.warning-message{background-color: #ffffcc;border: 1px solid #D56B01;}
+.message-area-control.info-message{background-color: #dce6f4;border: 1px solid #007acc;}
+.message-area-control.closeable .message-header{margin-right: 16px;}
+.message-area-control .show-details-action{padding-left: 4px;text-transform: none;}
+.message-area-control a{color: #1616EF;}
+.message-area-control .close-action{cursor: pointer;position: absolute;right: 0;top: 0;display: none;}
+.message-area-control.closeable .close-action{display: block;}
+.message-area-control .error-content{padding-top: 10px;}
+.message-area-control.ui-state-highlight2 {border: 1px solid #b8d6fb; background: #f8f8f8 url(/CommonUserControls/_static/css/navy-theme2/images/ui-bg_flat_75_f8f8f8_40x100.png) 50% 50% repeat-x; color: #285c00; }
+.message-area-control.ui-state-highlight2 a { color: #363636; }
+
+.confirmation-dialog{text-align:left;}
+
+/* jquery-ui rewrites */
+.ui-datepicker {font-size:11px;}
+.ui-datepicker a.ui-state-default{border: 1px solid #b8d6fb;background: #dcebfc;color: #363636;}
+.ui-datepicker a.ui-state-highlight{border: 1px solid #AAAAAA;background: #1b3d6b;font-weight: bold; color: #ffffff;}
+.ui-datepicker a.ui-state-hover, .ui-datepicker a.ui-state-active{border: 1px solid #1b3d6b;}
+
+.virtualizing-list-view{border:1px solid #ccc;background-color:#fff;position:relative}
+.virtualizing-list-view>.items{position:absolute;left:0;right:0;list-style-type:none;padding:0;margin:0;white-space:nowrap}
+.virtualizing-list-view.scroll>.items{right:18px}
+.virtualizing-list-view>.items>li{margin:0;cursor:default;white-space:nowrap;padding:2px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border:1px solid transparent}
+.virtualizing-list-view.tree>.items li>div.node-content{white-space:nowrap;cursor:default;overflow:hidden;text-overflow:ellipsis}
+.virtualizing-list-view.tree>.items div.node-content>.icon{float:left}
+.virtualizing-list-view.tree>.items div.node-content>.text{}
+.virtualizing-list-view.tree>.items li.expanded>div.node-content>.node-img.icon{background:url(/CommonUserControls/_static/css/ui/images/oa-icons.png) no-repeat -6288px 50%!important}
+.virtualizing-list-view.tree>.items li.collapsed>div.node-content>.node-img.icon{background:url(/CommonUserControls/_static/css/ui/images/oa-icons.png) no-repeat -6192px 50%!important}
+.virtualizing-list-view>.items>li.selected{border:1px solid #c5d6f1;background-color:#dce6f4}
+.virtualizing-list-view.multi-value>.items>li input{float:left;margin:1px}
+.virtualizing-list-view.multi-value>.items>li label{float:left;margin-left:4px}
+.virtualizing-list-view>.scroller{position:absolute;top:0;right:0;bottom:0;width:3em;overflow-y:scroll;overflow-x:hidden;display:none}
+.virtualizing-list-view.scroll>.scroller{display:block}
+.virtualizing-list-view>.scroller>div{top:0;width:1px;overflow:hidden}
+
+.combo-drop-popup{overflow:hidden;position:fixed;left:-50000px;top:-50000px;z-index:1005;border:1px solid #ccc;background-color:#fff;}
+.combo{position:relative;width:100%;border:1px solid #e6e6e6;height:1.7em;background:#fff}
+.combo.no-background{background-color:transparent;border:none}
+.combo.no-edit.drop>div.wrap>input{cursor:pointer}
+.combo.no-edit.text>div.wrap>input{cursor:default}
+.combo>div.wrap>input.disabled{cursor:default;color:#6d6d6d}
+.combo>div.wrap>input{width:100%;height:100%;border:none;outline:none}
+.combo>div.wrap>input.invalid,.combo.invalid>div.wrap>input{background-color:#ffc}
+.combo>div.preWrapIcon{position:absolute;left:2px;top:1px;height:1.7em;width:1.7em}
+.combo>div.wrap{position:absolute;top:0;left:0;bottom:0;right:0;overflow:hidden;display:block;padding-left:2px}
+.combo.drop>div.wrap{right:20px}.combo>div.wrap.withIcon{left:2em}
+.combo.text>.drop{display:none}
+.combo>.drop{position:absolute;cursor:pointer;overflow:hidden}
+.combo>.drop{background:url(/CommonUserControls/_static/css/ui/images/oa-icons.png) no-repeat -1262px 50%!important}
+.combo.date-time>.drop{background:url(/CommonUserControls/_static/css/ui/images/oa-icons.png) no-repeat -366px 50%!important}
+.combo.no-background>.drop{width:0;height:0}
+.combo.drop>.drop{right:0;height:100%;width:20px}
+.combo>.drop.hover{background-color:#dce6f4}
+.combo.invalid{background-color:#ffc}
+.combo.disabled{background-color:#eee}
+
+.tblAlerts {width:100%;border-collapse: separate; border-spacing: 0;}
+.tblAlerts td {font-weight:bold; vertical-align:top;font-size: 11px;padding: 1px 1px;}
+.tblAlerts textarea{resize:none;}
+fieldset.alerts{border: 1px solid #555 !important; border-radius: 2px !important;}
+fieldset.alerts legend{float:none;}
+
+table.tblSearch {border-collapse: separate; border-spacing: 0; width:100%;}
+table.tblSearch td {padding: 1px; vertical-align: middle; font-weight:bold; font-size: 11px;}
+table.tblSearch span {font-weight:normal;}
+table.tblSearch td div img {position: relative; top:3px;}
+
+/* dialogs */
+.dialog .wrapper {padding: 0;}
+.dialog .wrapper .container{padding: 4px 3px; border:1px solid #D3E1EE; background:#fff; text-align:left;}
+.dialog .wrapper .container hr{ width: 100%; margin-top:10px;border-width:0;border-top:1px solid #D3E1EE;}
+.dialog .wrapper .container label.bold{ font-weight:bold;}
+.dialog .wrapper .container input[type="checkbox"] + label{ display: inline-block; vertical-align: top; padding-top:2px;}
+.dialog .wrapper .container .disabled{
+    cursor: not-allowed; 
+    filter: alpha(opacity=65);
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  opacity: .65;}
+.ui-dialog-buttonset {width:100%;text-align:right;}
+button.success, button.success[disabled], button.success:hover{color: #F0F0F0 !important; font-weight: bold; background: #064708 none !important;}
+button.cancel, button.cancel[disabled], button.cancel:hover{color: #F0F0F0 !important; border: 1px solid #940b0e !important; font-weight: bold; background: #740b0e none !important; float:left;}

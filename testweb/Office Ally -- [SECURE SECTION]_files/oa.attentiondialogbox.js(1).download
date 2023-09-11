@@ -1,0 +1,126 @@
+﻿(function ($) {
+    $.oa = $.oa || {};
+    $.extend($.oa, {
+        //This will create a confirmation dialog box.  No html is necessary.
+        //To use this object throughout our applications register this js file on the aspx file then instantiate it like this, for example:
+        //return $.oa.confirm(
+        //    'Confirm Delete'                                                                                           - message title
+        //    , 'Are you sure you want to remove selected message(s) permanently?'                                       - message text
+        //    , function () { alert('You clicked OK'); return true; }                                                    - what to run if user clicks the OK button
+        //    , function () { alert('You clicked Cancel'); return false; }                                               - what to run if the user clicks the Cancel button, usually just "return false;"
+        //    , $('#control_ID_of_location_to_place_the_dialog') //optional only needed in an Service Center iFrame      - not needed in PM/EMR, just SC because javascript or jQuery version is older
+        //    , function () { doOnInitialize(); }                                                                        - this is the function that will run immediatly after the popup is created, in case it immediate function execution is needed
+        //);
+        //$('.confirmClass').css('text-align','left');                                                                   - put this immediately after the control if the text-align in the message doesn't flush left.
+        confirm: function (dialogTitle, dialogText, okFunc, cancelFunc, target, onInit) {
+            var dialog = $('<div style="padding: 10px; max-width: 500px; word-wrap: break-word; font-size: 12px"><span style="float:left" class="confirmClass">' + dialogText + '</span></div>').dialog({
+                modal: true,
+                dialogClass: 'oa-popup-gray',
+                resizable: false,
+                width: 'auto',
+                title: dialogTitle || 'Confirm',
+                minHeight: 75,
+                buttons: {
+                    OK: {
+                        text: 'OK',
+                        'class': 'green',
+                        click: function () {
+                            if (typeof (okFunc) == 'function') {
+                                okFunc();
+                            }
+                            $(this).dialog('destroy');
+                        }
+                    },
+                    Cancel: function () {
+                        if (typeof (cancelFunc) == 'function') {
+                            cancelFunc();
+                        }
+                        $(this).dialog('destroy');
+                    }
+                },
+                position: {
+                    my: "center",
+                    at: "center",
+                    of: target || $(window),
+                    collision: 'fit'
+                },
+                create: function () {
+                    //note that the confirmClass in the span above doesn't really exist, I stuck it in there so that I could select that span and set its style
+                    //this could be extended here, this code will execute after the dialog pops up
+                }
+            });
+            if (onInit) {
+                onInit();
+            }
+            // This is a Hack fix until we unify the style across our application.  It is due to differnces in the version of jQuery opening the dialog.
+            CssClassAdjustment(dialog);
+
+            return false;
+        },
+        //To use this method register this js file on the aspx file and call this function like this:
+        //$.oa.alert(
+        //'Missing Information'                                            - message title
+        //, 'The following information is missing: Text goes here'         - message text
+        //, function () { alert('You clicked OK'); }                       - what to do when the user clicks OK (which is the only button), usually it is just "return true;"
+        //, $('#control_ID_of_location_to_place_the_dialog') //optional only needed in an Service Center iFrame      - not needed in PM/EMR, just SC because javascript or jQuery version is older
+        //, function () { doOnInitialize(); }                              - this is the function that will run immediatly after the popup is created, in case it immediate function execution is needed
+        //);
+        //$('.alertClass').css('text-align','left');                       - put this immediately after the control if the text-align in the message doesn't flush left.
+        alert: function (dialogTitle, dialogText, okFunc, target, onInit) {
+            var dialog = $('<div style="padding: 10px 32px 10px 10px; max-width: 500px; word-wrap: break-word; font-size: 12px"><span style="float:left" class="alertClass">' + dialogText + '</span></div>').dialog({
+                modal: true,
+                dialogClass: 'quickadd oa-popup-gray',
+                resizable: false,
+                width: 'auto',
+                title: dialogTitle || 'Notice',
+                minHeight: 75,
+                buttons: {
+                    OK: {
+                        text: 'OK',
+                        'class': 'green',
+                        click: function () {
+                            if (typeof (okFunc) == 'function') {
+                                setTimeout(okFunc, 50);
+                            }
+                            $(this).dialog('destroy');
+                        }
+                    }
+                },
+                create: function () {
+                    //note that the alertClass in the span above doesn't really exist, I stuck it in there so that I could select that span and set its style
+                    //this could be extended here, this code will execute after the dialog pops up
+                },
+                position: {
+                    my: "center",
+                    at: "center",
+                    of: target || $(window)
+                }
+            });
+            if (onInit) {
+                onInit();
+            }
+            // This is a Hack fix until we unify the style across our application.  It is due to differnces in the version of jQuery opening the dialog.
+            CssClassAdjustment(dialog);
+            return false;
+        }
+    });
+
+    function CssClassAdjustment(dialog)
+    {
+        var xButton = $(dialog.parent().find('.ui-dialog-titlebar-close')[0]);
+
+        if (!xButton.hasClass('ui-button')) {
+            xButton.addClass('ui-button');
+        }
+        if (!xButton.hasClass('ui-widget')) {
+            xButton.addClass('ui-widget');
+        }
+        if (!xButton.hasClass('ui-state-default')) {
+            xButton.addClass('ui-state-default');
+        }
+        if (!xButton.hasClass('ui-button-icon-only')) {
+            xButton.addClass('ui-button-icon-only');
+        }
+    }
+}
+)(jQuery);

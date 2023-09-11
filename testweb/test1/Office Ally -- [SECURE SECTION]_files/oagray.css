@@ -1,0 +1,77 @@
+﻿#api_grid_dialog {
+    background-color: #DADDE5 !important;
+}
+.oa-popup-gray.ui-dialog {
+    padding: 0;
+    text-align: left !important;
+    min-width: 250px;
+    background-color: #DADDE5 !important;
+}
+
+.oa-popup-gray .ui-dialog-titlebar {
+    text-align: left;
+    background: #0C0459;
+    font-size: 14px;
+    border: none;
+    border-bottom: 1px solid #CACACA;
+    color: #ffffff;
+    padding: 5px 10px !important;
+}
+
+.oa-popup-gray .ui-dialog-titlebar .ui-dialog-titlebar-close .ui-button-text {
+    display: none;
+}
+
+.oa-popup-gray .ui-dialog-title {
+    padding: initial;
+    font-size: inherit;
+    font-weight: inherit;
+    overflow: visible !important;
+    padding-right: 23px;
+}
+
+.oa-popup-gray .ui-widget-content .ui-state-default,
+.oa-popup-gray .ui-widget-header .ui-state-default {
+    background-image: none;
+}
+
+.oa-popup-gray .ui-dialog-titlebar-close.ui-state-default {
+    background-image: none;
+    background: #AAAAAA;
+    margin-right: 3px;
+}
+
+.oa-popup-gray .ui-dialog-buttonset button.ui-state-hover {
+    background: #fff;
+    color: #000;
+    border-color: gray;
+}
+
+.oa-popup-gray .ui-dialog-buttonset button {
+    -moz-border-radius: 2px !important;
+    -webkit-border-radius: 2px !important;
+    -o-border-radius: 2px !important;
+    border-radius: 2px !important;
+}
+
+.oa-popup-gray .ui-dialog-buttonset button.green {
+    background: #064708;
+    background-image: none;
+    color: #ffffff;
+    border-color: #053A06;
+}
+
+.oa-popup-gray .ui-dialog-buttonset button.green.ui-state-hover {
+    border-color: gray;
+    background-color: white;
+    color: inherit;
+}
+
+.oa-popup-gray .ui-dialog-buttonpane {
+    border-color: #DEDCDC;
+}
+
+.oa-popup-gray button {
+    background-color: #0C0459;
+    color: #fff;
+}

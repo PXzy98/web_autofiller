@@ -1,0 +1,190 @@
+﻿//----------------------------------------------------------
+// Copyright (C) Office Ally. All rights reserved.
+//----------------------------------------------------------
+(function ($) {
+    var B=1,w=3e5,t=w,j={},h=false,f=false;
+    var b = $.oa.core;
+    Error.ajax = function (c, d) {
+        var a = Error.create($.oa.core.string.format("Ajax request failed with status: {0}.", d),
+        { name: $.oa.ajax.Exceptions.AjaxException, response: c.responseText, xhr: c });a.popStackFrame(); return a
+    };
+    Error.ajaxTimeout = function (b) { var a = Error.create("Ajax request has been timed out.", { name: $.oa.ajax.Exceptions.AjaxTimeoutException, status: b.status, xhr: b }); a.popStackFrame(); return a };
+    Error.network = function (b) { var a = Error.create("Network error.", { name: $.oa.ajax.Exceptions.NetworkException, status: b.status, xhr: b }); a.popStackFrame(); return a };
+
+    $.oa.ajax = $.oa.ajax || {};
+    (function (a) {
+        a.AjaxException = "AjaxException";
+        a.AjaxTimeoutException = "AjaxTimeoutException";
+        a.NetworkException = "NetworkException" 
+        })($.oa.ajax.Exceptions || ($.oa.ajax.Exceptions = {}));
+
+    function resizeElement(b) {
+        var a = b.options.wait;
+        if (!a.entireWindow) {
+            a.element.css("margin-top", -parseInt(a.target.css("padding-top"), 10));
+            a.element.css("margin-left", -parseInt(a.target.css("padding-left"), 10));
+            a.element.height(a.target.outerHeight());
+            a.element.width(a.target.outerWidth())
+        }
+        if (a.msgElement) {
+			a.msgElement.css("top",a.element.position().top+(a.element.height()-a.msgElement.height())/2+parseInt(a.element.css("margin-top"),10));
+			a.msgElement.css("left",a.element.position().left+(a.element.width()-a.msgElement.width())/2+parseInt(a.element.css("margin-left"),10));
+			}
+    }
+    var ShowLoading = function (c) {
+        var d = "", e = "", a = c.options.wait;
+        if (a.image) d += '<img class="wait-image" src="' + a.image + '" />';
+        if (a.message) d += '<div class="wait-message">' + a.message + "</div>";
+        if (d.length > 0) { a.target.prepend('<div class="wait-box">' + d + "</div>"); a.msgElement = a.target.children(".wait-box").first() }
+        a.target.prepend('<div class="wait-element"></div>');
+        a.element = a.target.children(".wait-element").first();
+        resizeElement(c);
+        $(window).bind("resize." + c.requestId, function () { resizeElement(c) });
+        if (!a.minLifetime) a.minLifetime = 100;
+        a.timeout = $.oa.core.delay(this, a.minLifetime, function () { delete a.timeout; a.end() })
+		//a.timeout=0;
+    };
+
+    function endSuccessRequest(a, onSuccess) {
+        return function (d, c, e) { $.oa.ajax.endRequest(d, c, e, onSuccess, a) }
+    }
+    function endErrorRequest(d, onError) {
+        return function (e, g) {
+            $.oa.ajax.endRequest(null, g, e, function () {
+                var d;
+                if (g === "timeout") $.oa.OnError(Error.ajaxTimeout(e), onError);
+                else if (e.status === 0) !$.oa.ajax.unloadRequested && !$.oa.ajax.unloading && $.oa.core.delay(this, 2e3, function () {
+                    !$.oa.ajax.unloadRequested && !$.oa.ajax.unloading && $.oa.OnError(Error.network(e), onError)
+                });
+                else if (e.status >= 12e3 && e.status < 13e3) !$.oa.ajax.unloadRequested && !$.oa.ajax.unloading && $.oa.OnError(Error.network(e), onError);
+                else {
+                    if ($.oa.ajax.unloading && g === "abort") return;
+                    try { d = $.oa.core.Utils.parseMSJSON(e.responseText, false) } catch (i) { }
+                    if (d) $.oa.OnError(Error.serverError(d), onError);
+                    else $.oa.OnError(Error.ajax(e, e.statusText || e.status), onError)
+                }
+            }, d)
+        }
+    }
+    function onBeforeUnload() {
+        $.oa.ajax.unloadRequested = true;
+        $.oa.core.delay(this, 2e3, function () {
+            $.oa.ajax.unloadRequested = false
+        })
+    }
+    $(window).bind("beforeunload", onBeforeUnload);
+    $(window).bind("unload", function () {
+        $.oa.ajax.unloading = true;
+        $.each(j, function (b, a) {
+            if (a.xhr) try {
+                a.xhr.abort()
+            } catch (c) { }
+        })
+    });
+
+    $.extend($.oa.ajax, {
+        unloading: false,
+        unloadRequested: false,
+        startWait: function (c) {
+            var a = c.options.wait;
+            a.end = function () {
+                if (a.element)if (c.isComplete && !a.timeout) {
+                    if (a.fade !== false) {
+                        a.element.css("cursor", "auto");
+                        a.element.fadeOut("fast", function () { a.element.remove(); a.element = null });
+						if(a.msgElement){
+						a.msgElement.css("cursor","auto");
+						a.msgElement.fadeOut("fast",function(){a.msgElement.remove();a.msgElement=null})}
+                    }
+                    else {
+                        a.element.css("cursor", "auto");
+                        a.element.remove();
+                        a.element = null;
+						if(a.msgElement){a.msgElement.css("cursor","auto");a.msgElement.remove();a.msgElement=null}
+                    }
+                    $(window).unbind("resize." + c.requestId)
+                }
+            };
+            if (!a.showDelay) a.showDelay = 150;
+            if (!a.target) { a.entireWindow = true; a.target = $("body") }
+            a.target.children(".wait-element").hide();
+            a.target.children(".wait-box").hide();
+            if (a.showDelay !== 0) c.showTimer = $.oa.core.delay(this, a.showDelay, function () { delete c.showTimer; ShowLoading(c) });
+            else ShowLoading(c);
+        },
+        endWait: function (a) {
+            a.options.wait.end();
+            if (a.showTimer) { a.showTimer.cancel(); delete a.showTimer }
+        },
+        beginRequest: function (h, i, c) {
+            var b, e;
+            b = { isComplete: false, requestId: B++, options: c };
+            c && c.wait && $.oa.ajax.startWait(b);
+            e = h + " (" + b.requestId + ")";
+            if (!c || c.showGlobalProgressIndicator !== false) b.progressActionId = $.oa.globalProgressIndicator.actionStarted(e);
+            j[b.requestId] = b;
+            return b
+        },
+        endRequest: function (n, l, h, onSuccess, b) {
+            var e, g, i, f;
+            b.isComplete = true;
+            delete j[b.requestId];
+            b.options !== null && b.options !== undefined && b.options.wait !== null && b.options.wait !== undefined && $.oa.ajax.endWait(b);
+            if (onSuccess) try { onSuccess(n, l, h) } catch (ex) { $.oa.OnError(ex) }
+            b.progressActionId && $.oa.globalProgressIndicator.actionCompleted(b.progressActionId);
+        }
+    });
+        
+    $.oa.ajax.doGet = function A(url,params,onSuccess,onError,options){
+        var a = $.oa.ajax.beginRequest(url, params, options);
+        a.xhr=jQuery.ajax(url,$.extend({
+            type:"GET",
+            data:params,
+            success:endSuccessRequest(a,onSuccess),
+            error:endErrorRequest(a,onError),
+            dataType:"json",
+            //converters:{"text json":r},
+            traditional:true,
+            timeout:t},options));
+            return a}
+
+    $.oa.ajax.doPost = function (url, params, onSuccess, onError, options, dataType) {
+        var c, b;
+        //params = $.extend(params || {}, { __RequestVerificationToken: $.oa.core.getAntiForgeryTokenValue() });
+        //c = $.oa.core.getAntiForgeryTokenValue2(); if (c) params = $.extend(a, { __RequestVerificationToken2: c });
+        //b = $.oa.ajax.beginRequest(options);
+        b = $.oa.ajax.beginRequest(url, params, options);
+        //try {
+            b.xhr = jQuery.ajax(url, $.extend({
+                type: "POST",
+                data: params,
+                success: endSuccessRequest(b, onSuccess),
+                error: endErrorRequest(b, onError),
+                dataType: typeof dataType === "undefined" ? "json" : dataType,
+                //converters: { "text json": r },
+                traditional: true,
+                timeout:t}, options));
+            //} catch (err) { $.oa.OnError(err) } 
+		return b}
+
+    $.oa.ajax.doGetHtml = function(url,params,onSuccess,onError,options){
+        var a = $.oa.ajax.beginRequest(url, params, options);
+        a.xhr=jQuery.ajax(url,$.extend({
+            type:"GET",
+            data:params,
+            success:endSuccessRequest(a,onSuccess),
+            error:endErrorRequest(a,onError),
+            dataType:"html",
+            traditional:true,
+            cache:false},options));return a}
+			
+	$.oa.ajax.postForm = function (url, options) {
+	    b = $.oa.ajax.beginRequest(url, null, options);
+		return b;
+    }
+
+	$.oa.ajax.postFormEnd = function (b) {
+		$.oa.ajax.endRequest(null, null, null, null, b);
+	}
+}
+)(jQuery);

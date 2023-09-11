@@ -1,0 +1,20 @@
+function isES6Supportted() {
+    try {
+        Function("() => {};"); return true;
+    }
+    catch (err) {
+        return false;
+    }
+}
+(function () {
+    if (!isES6Supportted()) {
+        console.log("ES6 is not supported on this browser.");
+        return;
+    }
+    else {
+        var docereeBaseUrl = "https://servedbydoceree.doceree.com/resources/p/render-es6.js";
+        var s = document.createElement('script');
+        s.setAttribute('src', docereeBaseUrl);
+        document.body.appendChild(s);
+    }
+})();

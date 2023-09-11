@@ -1,0 +1,657 @@
+
+var ENV = "https://ecaresvs-sbx.pdrnet.com/productlookup.svc/";
+
+/*************************
+C O N S T A N T S 
+**************************/
+var DRGNAME_LIM = 18;
+var GENNAME_LIM = 36;
+
+/********************/
+/* GLOBAL VARIABLES */
+/********************/
+var isIE;
+var onClickPoint;
+var PtHandler;
+var OrigElem;
+var postBody;
+var GlobalIdentifier;
+var GlobalIdentifier_i;
+
+var PopUpDisplayOn = false;
+var InLineDisplayOn = false;
+
+var isIE8 = window.XDomainRequest ? true : false;
+
+var pdr_divName = "";
+var pdr_checkCleanUp = false;
+var pdr_t;
+var pdr_DrugType;
+var pdr_AppName;
+
+function callOtherDomain(data) {
+    if (pdr_AppName == undefined) {
+        pdr_AppName = "emr";
+    } else if (pdr_AppName == "sc") {
+        pdr_AppName = "oa";
+    }
+    $.ajax({
+        type: 'POST',
+        url: "/" + pdr_AppName + "/CommonUserControls/GetPDRURL.ashx",
+        data: "Action=hover&" + data,
+        success: JSON_Plugin,
+        error: GenerateNotFoundHTML
+    });
+}
+
+function logPDRClick(drugType, drugID) {
+    var data = "Action=click&drugTypeID=" + drugType + "&drugID=" + drugID;
+    if (pdr_AppName == undefined) {
+        pdr_AppName = "emr";
+    }
+    $.ajax({
+        type: 'POST',
+        url: "/" + pdr_AppName + "/CommonUserControls/GetPDRURL.ashx",
+        data: data
+    });
+}   
+
+function getFrameElement() {
+    var iframes = parent.document.getElementsByTagName('iframe');
+    for (var i = iframes.length; i-- > 0; ) {
+        var iframe = iframes[i];
+        try {
+            var idoc = 'contentDocument' in iframe ? iframe.contentDocument : iframe.contentWindow.document;
+        } catch (e) {
+            continue;
+        }
+        if (idoc === document)
+            return iframe;
+    }
+    return null;
+}
+function LOAD_PDR_BRIEF(e, params, appName) {
+    var curTop = 0, curLeft = 0;
+    pdr_AppName = appName;
+    if (window.location != window.parent.location) {
+        curTop = $("#" + e.id).offset().top + $("#" + getFrameElement().id, parent.document).offset().top;
+        curLeft = $("#" + e.id).offset().left + $("#" + getFrameElement().id, parent.document).offset().left;
+    }
+    else {
+        curTop = $("#" + e.id).offset().top;
+        curLeft = $("#" + e.id).offset().left;
+    }
+        
+    PtHandler = { "X": curLeft + 14, "Y": curTop + 8 };
+
+    var data = "strUrl=" + params[0] + "/" + params[1] + "&app=" + appName;
+    //-----------------------------------------
+    //Request pop-up window
+    //-----------------------------------------
+    if (PopUpDisplayOn == false) {
+        GlobalIdentifier = params[1];
+        pdr_DrugType = params[0];
+        callOtherDomain(data);
+    }
+    else {
+        if (GlobalIdentifier != params[1]) {
+            GlobalIdentifier = params[1];
+            pdr_DrugType = params[0];
+            callOtherDomain(data);
+        }
+    }
+}
+
+function Init() {
+    DrugName = null;
+    GenericName = null;
+    LastUpdated_Info = null;
+    FullLabel_Info = null;
+    Concise_Info = null;
+    ClinicalDate = null;
+    CME_Info = null;
+    BoxedWarning_Info = null;
+    REMS_Info = null;
+    PM_Info = null;
+    IsCritical = null;
+}
+
+//DrugName
+var DrugName;
+
+//Ingrediants
+var GenericName;
+
+//Last updated information.
+var LastUpdated_Info;
+
+//Contains full label URL and textual representation of the URL.  Ex:  "View"
+var FullLabel_Info;
+
+//Contains Concise info
+var Concise_Info;
+
+//Last Clinical label date updated
+var ClinicalDate;
+
+//Contains URL for CME and textual representation of the URL.  Ex:  "CME"
+var CME_Info;
+
+//Contains Boxed Warning information, along with the label "BOXED WARNING" and 
+//textual representation to the URL such "View".
+var BoxedWarning_Info;
+
+//Contains REM
+var REMS_Info
+
+
+//Contains three pieces of information:  Category Information Text, Message Text and URL.
+var PM_Info;
+
+
+//Sets boolean if the drug label has been modified recently
+var IsCritical;
+
+//Original
+function JSON_Plugin(response) {
+    if (response != "Error occurred") {
+        Init();
+        var obj = JSON.parse(response);
+        if (obj.lblSet != null) {
+            DrugName = obj.lblSet[0].lblDisplayName;
+            GenericName = obj.lblSet[0].lblIngredient;
+            ClinicalDate = { "Day": obj.lblSet[0].lblClinicalDate.d, "Month": obj.lblSet[0].lblClinicalDate.m, "Year": obj.lblSet[0].lblClinicalDate.y };
+            IsCritical = obj.lblSet[0].lblRecentChangeFlag.toLowerCase() == "true" ? true : false;
+
+            for (i = 0; i < obj.lblSet[0].contents.length; i++) {
+                var content = obj.lblSet[0].contents[i];
+                switch (content.type) {
+                    case "FL":
+                        FullLabel_Info = content;
+                        break;
+                    case "CO":
+                        Concise_Info = content;
+                        break;
+                    case "FLC":
+                        CME_Info = content;
+                        break;
+                    case "BW":  //BW      
+                        BoxedWarning_Info = content;
+                        break;
+                    case "RN":  //RN
+                        REMS_Info = content;
+                        break;
+                    case "PM":
+                        if (PM_Info == null) { PM_Info = [{ "index": content}]; } else { PM_Info.push({ "index": content }); }
+                        break;
+                }
+            }
+
+            GeneratePopupHTML();
+        }
+        else
+            GenerateNotFoundHTML();
+    }
+    else
+        GenerateNotFoundHTML();
+    
+}
+
+var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+var drugRowWidth = 0;
+
+/*************************************************
+Drug Name, Generic Name and close-icon
+**************************************************/
+function p_R1() {
+    
+    var drugNameTitle, genericNameTitle;
+
+    drugNameTitle = DrugName;
+    if (DrugName.length > DRGNAME_LIM) {
+    	
+        var index1 = DrugName.toUpperCase().indexOf('<SUP>');
+        if (index1 != -1) {
+            var smbolInMiddle = false;
+            if (index1 >= DRGNAME_LIM - 1) {
+                //if the superscript falls out of 22-range...truncate the drug
+                DrugName = DrugName.substr(0, DRGNAME_LIM - 1);
+                DrugName += "...";
+            }
+            else //if the super-script falls in middle.  perform computations.
+            {
+                var index2 = DrugName.toUpperCase().indexOf('</SUP>');
+                var mark_len = (index2 - index1) + 6
+                var firsthalf = DrugName.substr(0, index1);
+                var lasthalf = DrugName.substr(index2 + 6, DrugName.length - index2 - 6);
+
+                if (firsthalf.length + lasthalf.length > DRGNAME_LIM) {
+
+                    var lasthalf_trunc = lasthalf.substr(0, DRGNAME_LIM - firsthalf.length - 1);
+                    lasthalf_trunc += "...";
+                    DrugName = firsthalf + DrugName.substr(index1, mark_len) + lasthalf_trunc;
+                }
+            }
+        }
+        else {
+            
+            DrugName = DrugName.substr(0, DRGNAME_LIM);
+            DrugName += "...";
+        }
+
+    } else { drugNameTitle = DrugName; }
+
+    
+    if (GenericName.length > GENNAME_LIM) {
+        genericNameTitle = GenericName;
+        GenericName = GenericName.substr(0, GENNAME_LIM)
+        GenericName = GenericName + "...";
+    } else { genericNameTitle = GenericName; }
+
+
+    var row = "<tr>";
+    row += "<td style='padding-left: 20px;' class = 'p_R1'>";
+
+    row += "<table border = '0' cellpadding = '0' cellspacing = '0px' width = '100%'>";
+
+    row += "<tr>";
+
+    row += "<td style = 'height: 30px;'><font size = '4px' title = \"" + drugNameTitle + "\" >" + DrugName + "</font></td>";
+    //Cell 4
+    //-------
+    row += "<td  align = 'right' style='padding-right:15px' ><img src='/pm/CommonUserControls/Images/icon_close.png' onclick='cleanUpAbsolute();' style='cursor:pointer;' /></td>";
+    row += "</tr>";
+
+    row += "<tr><td colspan = '2' width = '100%' style='padding-right:15px'><font size = '2px' title = \"" + genericNameTitle + "\" >" + GenericName + "</font></td></tr>";
+
+    row += "</table border = '0' cellpadding = '0' cellspacing = '0px'></td></tr>";
+    
+    return row;
+}
+
+function p_R2() {
+    var row = "<tr><td><table border = '0' cellpadding = '0' cellspacing = '0px' width = '100%'><tr>";
+
+    var LabelInfo = (FullLabel_Info != null) ? FullLabel_Info : Concise_Info;
+    var className = (IsCritical) ? "p_R2_RED" : "p_R2_PLAIN";
+    
+    //Cell 1
+    //-------
+    if (IsCritical) {
+        row += "<td width = '20px'  class = '" + className + "'  align = 'center'><b><font face = 'Arial' color='white' size='6px'>!</font></b></td>";
+    }
+    else { row += "<td width = '20px' class = '" + className + "' >&nbsp;</td>"; }
+
+    row += "<td class = '" + className + "'  >";
+
+    //Cell 2
+    //-------
+
+    if (IsCritical) {
+        row += "<td class = '" + className + "'   nowrap=\"nowrap\">" + generateURL(LabelInfo.webUrl, "white") + "<b>" + applyFontStyle("Recent Label Change: " + monthNames[ClinicalDate.Month - 1] + " " + ClinicalDate.Year, '2px') + "</b></a></td>";
+    }
+    else {
+        row += "<td class = '" + className + "'    >" + generateURL(LabelInfo.webUrl, "#2B60DE") + "<b>" +applyFontStyle("Prescribing Information", '2px') + "</b></a></td>";
+    }
+
+    //Cell4
+    //------
+    if (CME_Info) {
+        var cmeCell = "<td class = '" + className + "'  align = 'right' style = 'padding-right:15px'>";
+        if (IsCritical) {
+            cmeCell += " " + generateURL(CME_Info.webUrl, "white") + applyFontStyle("CME", '2px') + "</a></td>";
+            row += cmeCell;
+        }
+        else {
+            cmeCell += " " + generateURL(CME_Info.webUrl, "#2B60DE") + applyFontStyle("CME", '2px') + "</a></td>";
+            row += cmeCell;
+        }
+    }
+    else {
+        //row += "<td  class = '" + className + "' ></td>";
+    }
+
+    //end Row
+    //--------
+    row += "</tr></table></td></tr>";
+
+    return row;
+}
+
+function p_R3() {
+
+    if (BoxedWarning_Info || REMS_Info) {
+        var row = "<tr><td>";
+
+        row += "<table  border = '0' cellpadding = '0' cellspacing = '0px' width = '100%'><tr>";
+
+        row += "<td class = 'p_R3' width = '20px'>&nbsp;</td>";
+
+        //Cell 2 & 3
+        //----------
+        if (BoxedWarning_Info) {
+            //Cell 2
+            //----------
+            var bwCell = "<td class = 'p_R3' width = '170px'>";
+            if (BoxedWarning_Info.bwRecentChangeFlag.toLowerCase() == 'false') {
+                bwCell += "<table  border = '0' cellpadding = '0' cellspacing = '0px'><tr><td nowrap='nowrap' class = 'BX_WARNING' ><b><font face='Verdana' size='2px'> Boxed WARNINGS </font></b></td></tr></table>";
+            }
+            else {  //#4D4D4D
+                bwCell += applyFontStyle("Updated " + monthNames[BoxedWarning_Info.revisionDate.m - 1] + " " + BoxedWarning_Info.revisionDate.y, "2px", "#4D4D4D");
+                bwCell += "</br>";
+                bwCell += "<table  border = '0' cellpadding = '0' cellspacing = '0px'><tr><td nowrap='nowrap' class = 'BX_WARNING' ><b><font face='Verdana' size='2px'> Boxed WARNINGS </font></b></td></tr></table>";
+            }
+            bwCell += "</td>";
+            row += bwCell;
+
+            //Cell 3
+            //---------
+            row += "<td class = 'p_R3' width = '60px'>" + generateURL(BoxedWarning_Info.webUrl, "#2B60DE") + applyFontStyle("View", '2px') + "</a></td>";
+
+            //If REMS exists.
+            //---------------
+            if (REMS_Info != null) {
+                var remsViewCell = "<td class = 'p_R3' align = 'right' style = 'padding-right:15px'>";
+                remsViewCell += generateURL(REMS_Info.webUrl, "#2B60DE") + applyFontStyle("REMS", '2px') + "</b></a></td>";
+                row += remsViewCell;
+            }
+            else {
+                row += "<td class = 'p_R3' width = '55px'>&nbsp;</td>";
+            }
+        }
+        else {
+
+            //Cell 2
+            //----------
+            var remsViewCell = "<td class = 'p_R3' colspan = 3 >" + generateURL(REMS_Info.webUrl, "#2B60DE") + applyFontStyle("REMS Notification", '2px') + "</a></td>";
+            row += remsViewCell;
+        }
+
+        //End row
+        //--------
+        row += "</tr></table></td></tr>";
+        return row;
+    }
+    else {
+        return "";
+    }
+}
+
+function p_R4() {
+
+    var colorVal = new Array();
+
+    if (REMS_Info == null && BoxedWarning_Info == null) {
+        colorVal[0] = "#E6E6E6";
+        colorVal[1] = "white";
+    }
+    else {
+        colorVal[0] = "white";
+        colorVal[1] = "#E6E6E6";
+    }
+    //Add commercial messages to PDR Brief
+    //----------------------------------        
+    if (PM_Info != null) {
+        var PmCellTxt = "";
+        for (i = 0; i < PM_Info.length; i++) {
+
+
+            var color = (i % 2 == 0) ? colorVal[0] : colorVal[1];
+            //Render each PM
+            //----------------
+            var PMRow = "<tr><td class = 'p_R4' BGCOLOR = '" + color + "' style = 'padding-left : 20px;padding-right:15px' ><table border = '0' cellpadding = '0' cellspacing = '0px' width = '100%'><tr>";
+            
+            PMRow += "<td BGCOLOR = '" + color + "'><font color = '#4D4D4D' size = '2px'>" + PM_Info[i].index.category;
+            PMRow += "</font> <br/>";
+            PMRow += generateURL(PM_Info[i].index.webUrl, "#2B60DE") + applyFontStyle(PM_Info[i].index.msgTxt, 2) + "</a>";
+            PMRow += "</td>";
+
+            PMRow += "</tr></table></td></tr>";
+
+            
+            PmCellTxt += PMRow;
+        }
+        return PmCellTxt;
+    }
+    else
+        return "";
+        
+}
+
+
+
+function p_R5() {
+    //border-bottom:1px solid gray
+
+    var tos1 = "<a href='#' style='text-decoration: none;' onmouseover=\"this.style.textDecoration = 'underline';  this.style.color='#4D4D4D';  \" onmouseout=\"this.style.textDecoration = 'none'\" onClick=\"window.open('http://www.pdrnetwork.com/pages/terms.html','myWin','scrollbars=yes, resizable=yes');\">" + applyFontStyle("Terms of Service", "1", "#4D4D4D") + "</a>";
+
+    var rowBottom1 = "<tr><td style = 'padding-left: 20px'><table border = '0' cellpadding = '0' cellspacing = '0px' width = '100%'><tr>";
+    
+    rowBottom1 += "<td height='29' >";
+
+    rowBottom1 += tos1 + "</td><td align='right' style='padding-right:15px' ><img src='/pm/CommonUserControls/Images/logo.png' onclick=\"window.open('http://www.pdr.net');\" style='cursor:pointer;' /></td></tr></table>";
+    
+    rowBottom1 += "</td></tr>";
+
+
+    return rowBottom1;
+}
+
+function GeneratePopupHTML() {
+    var isDIS = FullLabel_Info ? true : false;
+
+    var TableInfo = "<table id = 'pdrtable' border = '0' cellpadding = '0' cellspacing = '0px' width='310px'>";
+
+    TableInfo += p_R1();
+
+    TableInfo += p_R2();
+
+    TableInfo += p_R3();
+    
+    TableInfo += p_R4();
+    
+    TableInfo += p_R5();
+    
+
+    TableInfo += "</table>";
+
+    //document.getElementById("IdentifierBx").value = TableInfo;
+    //----------------------------------------------
+    var outerDiv;
+    var divElem;
+    var imgElem;
+
+    if (window.location != window.parent.location) {
+        outerDiv = parent.document.createElement("div");
+        divElem = parent.document.createElement("div");
+        imgElem = parent.document.createElement("img");
+    }
+    else {
+        outerDiv = document.createElement("div");
+        divElem = document.createElement("div");
+        imgElem = document.createElement("img");
+    }
+    outerDiv.id = "OuterDiv";
+    divElem.id = "PDRBrief";
+    
+    divElem.innerHTML = TableInfo;
+
+    imgElem.setAttribute("src", "/pm/CommonUserControls/Images/Arrow2.png");
+
+
+    var divPosX = 0; var divPosY = 0;
+
+    outerDiv.appendChild(divElem);
+    outerDiv.appendChild(imgElem);
+
+    if (window.location != window.parent.location) {
+        parent.document.body.appendChild(outerDiv);
+    }
+    else {
+        document.body.appendChild(outerDiv);
+    }
+    var height = divElem.offsetHeight;
+    if (window.location != window.parent.location) {
+        parent.document.body.removeChild(outerDiv);
+    }
+    else {
+        document.body.removeChild(outerDiv);
+    }
+
+    divPosX = PtHandler.X; divPosY = PtHandler.Y;
+    divPosY = divPosY - height - 43;
+    divPosX = divPosX - 49;
+
+    divPosY = divPosY < 0 ? 0 : divPosY;
+    if (window.location == window.parent.location) {
+        divPosX = divPosX + 310 > $(window).width() ? $(window).width() - 310 : divPosX;
+    }
+    divPosX = divPosX < 0 ? 0 : divPosX;
+
+    //Patch for IE.  IE-8 and 7 do not support CSS3.
+    if (navigator.appName == 'Microsoft Internet Explorer') {
+        divElem.style.behavior = "url(/emr/CommonUserControls/CSS/PIE.htc)";
+        imgElem.style.left = "20px";
+    }
+
+    outerDiv.style.position = "absolute";
+    outerDiv.style.display = "block";
+    outerDiv.style.textAlign = "left";
+
+    divElem.style.borderRadius = "5px";
+    divElem.style.border = "2px solid #646060";
+    divElem.style.position = "relative";
+    divElem.style.backgroundColor = "#FFFFFF";
+    divElem.style.boxShadow = "0px 0px 10px #333333";
+    divElem.style.width = "310px";
+    
+    imgElem.style.position = "relative";
+    imgElem.style.paddingLeft = "20px";
+    
+    imgElem.style.marginTop = "-2px";
+    outerDiv.style.top = "" + divPosY + "px";
+    outerDiv.style.left = "" + divPosX + "px";
+
+    cleanUp();
+    
+    outerDiv.appendChild(divElem);
+    outerDiv.appendChild(imgElem);
+    if (window.location != window.parent.location) {
+        parent.document.body.appendChild(outerDiv);
+        //when the user mouses over the pdr popup, leave the popup open
+        $("#OuterDiv", parent.document).mouseenter(function () {
+            pdr_checkCleanUp = false;
+        });
+
+        //when the user mouses out of the pdr popup, have the popup close
+        $("#OuterDiv", parent.document).mouseleave(function (event) {
+            cleanUpAbsolute();
+        });
+    }
+    else {
+        document.body.appendChild(outerDiv);
+        //when the user mouses over the pdr popup, leave the popup open
+        $("#OuterDiv").mouseenter(function () {
+            pdr_checkCleanUp = false;
+        });
+
+        //when the user mouses out of the pdr popup, have the popup close
+        $("#OuterDiv").mouseleave(function (event) {
+            cleanUpAbsolute();
+        });
+    }
+    
+    //calling checkCleanUp function after 3 seconds
+    PopUpDisplayOn = true;
+    pdr_checkCleanUp = true;
+    window.clearTimeout(pdr_t);
+    pdr_t = window.setTimeout("checkCleanUp();", 3000);
+}
+
+//if the user has not hovered over the popup after three seconds close the popup.
+function checkCleanUp() {
+    if (pdr_checkCleanUp == true) {
+        cleanUpAbsolute();
+    }
+}
+
+function GenerateNotFoundHTML() {
+
+}
+
+function cleanUp() {
+    if (window.location != window.parent.location) {
+        var oldchild = parent.document.getElementById("OuterDiv");
+        if (oldchild != null) {
+            parent.document.body.removeChild(oldchild);
+        }
+    }
+    else {
+        var oldchild = document.getElementById("OuterDiv");
+        if (oldchild != null) {
+            document.body.removeChild(oldchild);
+        }
+    }
+    
+}
+
+function cleanUpAbsolute() {
+    cleanUp();
+    GlobalIdentifier = null;
+    GlobalIdentifier_i = null;
+    PM_Info = null;
+
+    PopUpDisplayOn = false;
+}
+
+//Apply font style/size
+//---------------------
+function applyFontStyle(text, size, color) {
+    if (color != null) {
+        return "<font size='" + size + "' color = '" + color + "' >" + text + "</font>";
+    }
+    else
+        return "<font size='" + size + "' >" + text + "</font>";
+}
+
+function getInternetExplorerVersion() {
+    // Returns the version of Internet Explorer or a -1
+    // (indicating the use of another browser).
+
+    var rv = -1;
+    if (navigator.appName == 'Microsoft Internet Explorer') {
+        var ua = navigator.userAgent;
+        var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+        if (re.exec(ua) != null)
+            rv = parseFloat(RegExp.$1);
+    }
+    return rv;
+}
+
+//Generate URL
+//------------
+function generateURL(linkUrl, underline_color, noClose) {
+    if (noClose)
+        return "<a style=\"text-decoration: underline; color: " + underline_color + "\" href=\"#\" class=\"linkDrug\" onClick=\"logPDRClick('" + pdr_DrugType + "', " + GlobalIdentifier + "); window.open('" + linkUrl + "','_blank','scrollbars=yes, resizable=yes'); \" >";
+    else
+        return "<a style=\"text-decoration: underline; color: " + underline_color + "\" href=\"#\" class=\"linkDrug\" onClick=\"logPDRClick('" + pdr_DrugType + "', " + GlobalIdentifier + "); window.open('" + linkUrl + "','_blank','scrollbars=yes, resizable=yes'); cleanUpAbsolute(); \" >";
+}
+
+
+function removePopUp() {
+    if (window.location != window.parent.location) {
+        var oldchild = parent.document.getElementById("PDRBrief");
+        if (oldchild != null) {
+            parent.document.body.removeChild(oldchild);
+        }
+    }
+    else {
+        var oldchild = document.getElementById("PDRBrief");
+        if (oldchild != null) {
+            document.body.removeChild(oldchild);
+        }
+    }
+    
+    document.getElementById('IdentifierBx').value = document.body.outerHTML;
+}

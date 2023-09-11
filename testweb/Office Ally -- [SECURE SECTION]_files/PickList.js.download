@@ -1,0 +1,557 @@
+function PickList(obj, OffsetLeft, OffsetTop, Width, Height, FieldID, KeyEvent)
+{
+    var keyCode = event.keyCode;
+    switch (keyCode) 
+    {
+    case 13:
+        if (intItemCount == 0)
+            return false;
+
+        if (intIndex >= 0 && intIndex < intItemCount)
+        {
+            AutoComplete_SetValue(intIndex, 1);
+            return false;
+        }
+        break;
+        
+    case 38:
+        //up
+        if (intItemCount == 0)
+            return false;
+
+        if (KeyEvent == 0)
+        {
+            intIndex = intIndex - 1;
+            if (intIndex <= -1)
+                intIndex = intItemCount-1;
+
+            AutoComplete_Highlight(intIndex);
+        }
+        break;
+        
+    case 40:
+        //down
+        if (intItemCount == 0)
+            return false;
+
+        if (KeyEvent == 0)
+        {
+            intIndex = intIndex + 1;
+            if (intIndex == intItemCount)
+                intIndex = 0;
+
+            AutoComplete_Highlight(intIndex);
+        }
+        break;
+
+    case 9:
+        //tab
+        AutoComplete_Hide(AC_DropdownName);
+        break;
+   
+    case 27:
+        AutoComplete_Hide(AC_DropdownName);
+        break;
+        
+    default:
+        if (KeyEvent == 1)
+        {
+            if ((document.getElementById(AC_DropdownName).style.visibility == "visible") && (FieldID == AC_FieldID)) 
+            {
+                AutoComplete_Hide(AC_DropdownName);
+                break;
+            }
+
+            objTextbox = obj;
+            divDropdownName = AC_DropdownName
+            
+            var pos = FindPos(obj);
+            document.getElementById(AC_DropdownName).style.left = pos[0] + OffsetLeft;
+            document.getElementById(AC_DropdownName).style.top = pos[1] + OffsetTop;
+            if (Width == 0)
+                document.getElementById(AC_DropdownName).style.width = 325;
+            else
+                document.getElementById(AC_DropdownName).style.width = Width;
+            
+            if (Height == 0)
+                document.getElementById(AC_DropdownName).style.height = 200;
+            else
+                document.getElementById(AC_DropdownName).style.height = Height;
+
+            AC_SampleData = obj.value;
+            AC_FieldID = FieldID
+
+            PickList_GetData();
+        }
+        break;
+    }
+    return true;
+}
+
+function PickList_GetData()
+{
+    var arrPickList = new Array(100);
+    var intItemCount = 0;
+    var strResponseText = "";
+
+    switch (AC_FieldID) 
+    {
+    case 'EditUB04_BillType':
+        arrPickList[0] = "111 - Hospital Services; Inpatient; Use for most inpatient billings, including patients with Medicare Part A coverage only.";
+        arrPickList[1] = "121 - Hospital Services; Inpatient; Use for patients with Medicare Part B coverage only.";
+        arrPickList[2] = "131 - Hospital Services; Outpatient; Use for most outpatient billings.";
+        arrPickList[3] = "141 - Hospital Services; Outpatient; Referenced Diagnostic Services";
+        arrPickList[4] = "321 - Home Health Services; Admit through Discharge Claim: Encompasses an entire home health";
+        arrPickList[5] = "322 - Home Health Services; First Claim: Use for the first of an expected series of payment claims for the same home health start of care.";
+        arrPickList[6] = "323 - Home Health Services; Interim-Continuing Claim: Use when one or more claims for the same home health start of care have already been submitted, and further claims are expected to be submitted at a later date.";
+        arrPickList[7] = "324 - Home Health Services; Interim-Last Claim: Use for a claim which is the last of a series for a home health start of care. The 'through' date of this claim (FL 6) is the discharge date or date of death for this service span."
+        arrPickList[8] = "721 - Kidney Dialysis Services; Independent End Stage Renal Dialysis Facilities";
+        arrPickList[9] = "811 - Hospice Services; Non-hospital based hospice services; Admit through Discharge Claim: Encompasses an entire course of hospice treatment. Use when no further bills will be submitted for this client (i.e., client revokes or expires within the first billing period).";
+        arrPickList[10] = "812 - Hospice Services; Non-hospital based hospice services; First Claim: Use this code for the first of an expected series of payment bills for course of treatment.";
+        arrPickList[11] = "813 - Hospice Services; Non-hospital based hospice services; Interim-Continuing Claim: Use when a bill has been submitted and further bills area expected to be submitted.";
+        arrPickList[12] = "814 - Hospice Services; Non-hospital based hospice services; Last Claim: Use for a bill which is the last of a series for a hospice course of treatment. The through date of this bill (FL6) is the discharge date or date of death.";
+        arrPickList[13] = "821 - Hospice Services; Hospital based hospice services; Admit through Discharge Claim: Encompasses an entire course of hospice treatment. Use when no further bills will be submitted for this client (i.e., client revokes or expires within the first billing period).";
+        arrPickList[14] = "822 - Hospice Services; Hospital based hospice services; First Claim: Use this code for the first of an expected series of payment bills for course of treatment.";
+        arrPickList[15] = "823 - Hospice Services; Hospital based hospice services; Interim-Continuing Claim: Use when a bill has been submitted and further bills area expected to be submitted.";
+        arrPickList[16] = "824 - Hospice Services; Hospital based hospice services; Last Claim: Use for a bill which is the last of a series for a hospice course of treatment. The through date of this bill (FL6) is the discharge date or date of death.";
+        arrPickList[17] = "831 - Hospital Services; Outpatient; Hospital-based ambulatory surgery";
+        intItemCount = 18;
+        break;
+
+    case 'EditUB04_PatientStatus':
+        arrPickList[0] = "01 - Discharged to home or self care (routine discharge)";
+        arrPickList[1] = "02 - Discharged or transferred to another acute care hospital";
+        arrPickList[2] = "03 - Discharged or transferred to skilled nursing facility (SNF)";
+        arrPickList[3] = "04 - Discharged or transferred to an intermediate care facility (ICF)"
+        arrPickList[4] = "05 - Discharged or transferred to another type of institution (not another acute care hospital)";
+        arrPickList[5] = "06 - Discharged or transferred to home under care of home health service organization";
+        arrPickList[6] = "07 - Left against medical advice";
+        arrPickList[7] = "08 - Discharged to home under care of Home Enteral/Parenteral Provider";
+        arrPickList[8] = "09 - Admitted as an inpatient to this hospital (Medicare Outpatient Only)";
+        arrPickList[9] = "20 - Expired";
+        arrPickList[10] = "30 - Still a patient";
+        arrPickList[11] = "40 - Expired at home";
+        arrPickList[12] = "41 - Expired in a medical facility; e.g., hospital, SNF, ICF, or free-standing hospice (Medicare Hospice Care Only)";
+        arrPickList[13] = "42 - Expired - place unknown (Medicare Hospice Care Only)";
+        arrPickList[14] = "43 - Discharged to Federal Health Care Facility";
+        intItemCount = 15;
+        break;
+
+    case 'EditUB04_ReasonForDelay':
+        arrPickList[0] = "1 - Proof of Eligibility Unknown or Unavailable";
+        arrPickList[1] = "2 - Litigation";
+        arrPickList[2] = "3 - Authorization Delays";
+        arrPickList[3] = "4 - Delay in Certifying Provider"
+        arrPickList[4] = "5 - Delay in Supplying Billing Forms";
+        arrPickList[5] = "6 - Delay in Delivery of Custom-made Appliances";
+        arrPickList[6] = "7 - Third Party Processing Delay";
+        arrPickList[7] = "8 - Delay in Eligibility Determination";
+        arrPickList[8] = "9 - Original Claim Rejected or Denied Due to a Reason Unrelated to the Billing Limitation Rules";
+        arrPickList[9] = "10 - Administration Delay in the Prior Approval Process";
+        arrPickList[10] = "11 - Other";
+        intItemCount = 11;
+        break;
+
+    case 'EditUB04_POA_0':
+    case 'EditUB04_POA_1':
+    case 'EditUB04_POA_2':
+    case 'EditUB04_POA_3':
+    case 'EditUB04_POA_4':
+    case 'EditUB04_POA_5':
+    case 'EditUB04_POA_6':
+    case 'EditUB04_POA_7':
+    case 'EditUB04_POA_8':
+    case 'EditUB04_POA_9':
+    case 'EditUB04_POA_10':
+    case 'EditUB04_POA_11':
+    case 'EditUB04_POA_12':
+    case 'EditUB04_POA_13':
+    case 'EditUB04_POA_14':
+    case 'EditUB04_POA_15':
+    case 'EditUB04_POA_16':
+    case 'EditUB04_POA_17':
+        arrPickList[0] = "Y - Yes (Present on Arrival for Diagnosis Codes)";
+        arrPickList[1] = "N - No";
+        arrPickList[2] = "U - No information on record";
+        arrPickList[3] = "W - Clinically undetermined"
+        intItemCount = 4;
+        break;
+
+    case 'EditUB04_PayerState':
+    case 'EditUB04_BillingState':
+    case 'EditUB04_PayToState':
+    case 'EditUB04_PatState':
+    case 'EditUB04_AccidentState':
+    case 'txtFacilityState':
+    case 'EditUB04_SubState':
+        arrPickList[0] = "AA - Armed Forces (the) Americas"
+        arrPickList[1] = "AE - Armed Forces Europe"
+        arrPickList[2] = "AP - Armed Forces Pacific"
+        arrPickList[3] = "AK - Alaska"
+        arrPickList[4] = "AL - Alabama"
+        arrPickList[5] = "AR - Arkansas"
+        arrPickList[6] = "AS - American Samoa"
+        arrPickList[7] = "AZ - Arizona"
+        arrPickList[8] = "CA - California"
+        arrPickList[9] = "CO - Colorado"
+        arrPickList[10] = "CT - Connecticut"
+        arrPickList[11] = "DC - District of Columbia"
+        arrPickList[12] = "DE - Delaware"
+        arrPickList[13] = "FL - Florida"
+        arrPickList[14] = "FM - Federated States of Micronesia"
+        arrPickList[15] = "GA - Georgia"
+        arrPickList[16] = "GU - Guam"
+        arrPickList[17] = "HI - Hawaii"
+        arrPickList[18] = "IA - Iowa"
+        arrPickList[19] = "ID - Idaho"
+        arrPickList[20] = "IL - Illinois"
+        arrPickList[21] = "IN - Indiana"
+        arrPickList[22] = "KS - Kansas"
+        arrPickList[23] = "KY - Kentucky"
+        arrPickList[24] = "LA - Louisiana"
+        arrPickList[25] = "MA - Massachusetts"
+        arrPickList[26] = "MD - Maryland"
+        arrPickList[27] = "ME - Maine"
+        arrPickList[28] = "MH - Marshall Islands"
+        arrPickList[29] = "MI - Michigan"
+        arrPickList[30] = "MN - Minnesota"
+        arrPickList[31] = "MO - Missouri"
+        arrPickList[32] = "MP - Northern Mariana Islands"
+        arrPickList[33] = "MS - Mississippi"
+        arrPickList[34] = "MT - Montana"
+        arrPickList[35] = "NC - North Carolina"
+        arrPickList[36] = "ND - North Dakota"
+        arrPickList[37] = "NE - Nebraska"
+        arrPickList[38] = "NH - New Hampshire"
+        arrPickList[39] = "NJ - New Jersey"
+        arrPickList[40] = "NM - New Mexico"
+        arrPickList[41] = "NV - Nevada"
+        arrPickList[42] = "NY - New York"
+        arrPickList[43] = "OH - Ohio"
+        arrPickList[44] = "OK - Oklahoma"
+        arrPickList[45] = "OR - Oregon"
+        arrPickList[46] = "PA - Pennsylvania"
+        arrPickList[47] = "PR - Puerto Rico"
+        arrPickList[48] = "PW - Palau"
+        arrPickList[49] = "RI - Rhode Island"
+        arrPickList[50] = "SC - South Carolina"
+        arrPickList[51] = "SD - South Dakota"
+        arrPickList[52] = "TN - Tennessee"
+        arrPickList[53] = "TX - Texas"
+        arrPickList[54] = "UT - Utah"
+        arrPickList[55] = "VA - Virginia"
+        arrPickList[56] = "VI - Virgin Islands"
+        arrPickList[57] = "VT - Vermont"
+        arrPickList[58] = "WA - Washington"
+        arrPickList[59] = "WI - Wisconsin"
+        arrPickList[60] = "WV - West Virginia"
+        arrPickList[61] = "WY - Wyoming"
+        intItemCount = 62;
+        break;
+
+    case 'EditUB04_COBSubGender1':
+    case 'EditUB04_COBSubGender2':
+    case 'EditUB04_COBSubGender3':
+        arrPickList[0] = "M - Male"
+        arrPickList[1] = "F - Female"
+        arrPickList[2] = "U - Unknown"
+        intItemCount = 3;
+        break;
+
+    case 'EditADA_RenderingProviderSpecialty':
+        arrPickList[0] = "122300000X - DENTIST";
+        arrPickList[1] = "1223G0001X - General Practice";
+        arrPickList[2] = "1223D0001X - Dental Public Health";
+        arrPickList[3] = "1223E0200X - Endodontics"
+        arrPickList[4] = "1223X0400X - Orthodontics";
+        arrPickList[5] = "1223P0221X - Pediatric Dentistry";
+        arrPickList[6] = "1223P0300X - Periodontics";
+        arrPickList[7] = "1223P0700X - Prosthodontics";
+        arrPickList[8] = "1223P0106X - Oral & Maxillofacial Pathology";
+        arrPickList[9] = "1223D0008X - Oral & Maxillofacial Radiology";
+        arrPickList[10] = "1223S0112X - Oral & Maxillofacial Surgery";
+        intItemCount = 11;
+        break;
+
+    case 'EditADA_AreaCavity1':
+    case 'EditADA_AreaCavity2':
+    case 'EditADA_AreaCavity3':
+    case 'EditADA_AreaCavity4':
+    case 'EditADA_AreaCavity5':
+    case 'EditADA_AreaCavity6':
+    case 'EditADA_AreaCavity7':
+    case 'EditADA_AreaCavity8':
+    case 'EditADA_AreaCavity9':
+    case 'EditADA_AreaCavity10':
+        arrPickList[0] = "00 - Entire Oral Cavity";
+        arrPickList[1] = "01 - Maxillary Area";
+        arrPickList[2] = "02 - Mandibular Area";
+        arrPickList[3] = "09 - Other Area of Oral Cavity"
+        arrPickList[4] = "10 - Upper Right Quadrant";
+        arrPickList[5] = "20 - Upper Left Quadrant";
+        arrPickList[6] = "30 - Lower Left Quadrant";
+        arrPickList[7] = "40 - Lower Right Quadrant";
+        arrPickList[8] = "L - Left";
+        arrPickList[9] = "R - Right";
+        intItemCount = 10;
+        break;
+
+    case 'EditADA_ToothSurface1':
+    case 'EditADA_ToothSurface2':
+    case 'EditADA_ToothSurface3':
+    case 'EditADA_ToothSurface4':
+    case 'EditADA_ToothSurface5':
+    case 'EditADA_ToothSurface6':
+    case 'EditADA_ToothSurface7':
+    case 'EditADA_ToothSurface8':
+    case 'EditADA_ToothSurface9':
+    case 'EditADA_ToothSurface10':
+    case 'Dental_EditVisit_ToothSurface1':
+    case 'Dental_EditVisit_ToothSurface2':
+    case 'Dental_EditVisit_ToothSurface3':
+    case 'Dental_EditVisit_ToothSurface4':
+    case 'Dental_EditVisit_ToothSurface5':
+    case 'Dental_EditVisit_ToothSurface6':
+    case 'Dental_EditVisit_ToothSurface7':
+    case 'Dental_EditVisit_ToothSurface8':
+    case 'Dental_EditVisit_ToothSurface9':
+    case 'Dental_EditVisit_ToothSurface10':
+        arrPickList[0] = "[none]";
+        arrPickList[1] = "B - Buccal";
+        arrPickList[2] = "D - Distal";
+        arrPickList[3] = "F - Facial"
+        arrPickList[4] = "I - Incisal"
+        arrPickList[5] = "L - Lingual"
+        arrPickList[6] = "M - Mesial"
+        arrPickList[7] = "O - Occlusal"
+        intItemCount = 8;
+        break;
+
+    case '':
+        intItemCount = 0;
+        break;
+
+    default:
+        intItemCount = 0;
+    }
+
+    for (i = 0; i < intItemCount; i++)
+    {
+        if (strResponseText == "")
+            strResponseText = arrPickList[i];
+        else
+            strResponseText = strResponseText + "|" + arrPickList[i];
+    }
+
+    if (strResponseText == "")
+    {
+        AutoComplete_Hide(AC_DropdownName);
+    }
+    else
+    {
+        PickList_AddResults(AC_DropdownName, strResponseText);
+        AutoComplete_Show(AC_DropdownName);
+    }
+}
+
+function PickList_AddResults(divid, data)
+{
+    var newDiv    = null;
+    var text      = null;
+
+    while (document.getElementById(divid).childNodes.length > 0)
+    {
+        document.getElementById(divid).removeChild(document.getElementById(divid).childNodes[0]);
+    }
+    arrData = data.split("|");   
+
+    intItemCount = arrData.length;
+    intIndex = -1;
+
+    for (i=0; i < arrData.length; i++)
+    {
+        newDiv = document.createElement('div');
+        newDiv.setAttribute('id', 'autocomplete_item_' + i);
+        newDiv.setAttribute('index', i);
+        newDiv.style.zIndex = '99';
+        if (i % 2)
+            newDiv.className = 'autocomplete_item_odd'; 
+        else
+            newDiv.className = 'autocomplete_item'; 
+        
+        newDiv.onmouseover = function() {AutoComplete_Highlight(this.getAttribute('index'))};
+        newDiv.onclick = function() {PickList_SetValue(this.getAttribute('index'), 0);};
+
+        text   = document.createTextNode(arrData[i]);
+        newDiv.appendChild(text);
+        
+        document.getElementById(divid).appendChild(newDiv);
+    }
+}
+
+function PickList_SetValue(intIndex, CR)
+{
+    switch (AC_FieldID) 
+    {
+    case 'EditUB04_BillType':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+        //document.getElementById("BillType").value = SelectData;
+		document.getElementById(objTextbox.id).value = SelectData;
+        break;
+
+    case 'EditUB04_PatientStatus':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+        //document.getElementById("PatientStatus").value = SelectData;
+		document.getElementById(objTextbox.id).value = SelectData;
+        break;
+
+    case 'EditUB04_ReasonForDelay':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+        //document.getElementById("ReasonForDelay").value = SelectData;
+		document.getElementById(objTextbox.id).value = SelectData;
+        break;
+
+    case 'EditUB04_POA_0':
+    case 'EditUB04_POA_1':
+    case 'EditUB04_POA_2':
+    case 'EditUB04_POA_3':
+    case 'EditUB04_POA_4':
+    case 'EditUB04_POA_5':
+    case 'EditUB04_POA_6':
+    case 'EditUB04_POA_7':
+    case 'EditUB04_POA_8':
+    case 'EditUB04_POA_9':
+    case 'EditUB04_POA_10':
+    case 'EditUB04_POA_11':
+    case 'EditUB04_POA_12':
+    case 'EditUB04_POA_13':
+    case 'EditUB04_POA_14':
+    case 'EditUB04_POA_15':
+    case 'EditUB04_POA_16':
+    case 'EditUB04_POA_17':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+        //document.getElementById(AC_FieldID.replace('EditUB04_', '')).value = SelectData;
+		document.getElementById(objTextbox.id).value = SelectData;
+        break;
+
+    case 'EditUB04_PayerState':
+    case 'EditUB04_BillingState':
+    case 'EditUB04_PayToState':
+    case 'EditUB04_PatState':
+    case 'EditUB04_AccidentState':
+    case 'txtFacilityState':
+    case 'EditUB04_SubState':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+        //document.getElementById(AC_FieldID.replace('EditUB04_', '')).value = SelectData;
+		document.getElementById(objTextbox.id).value = SelectData;
+        break;
+
+    case 'EditUB04_COBSubGender1':
+    case 'EditUB04_COBSubGender2':
+    case 'EditUB04_COBSubGender3':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+        //document.getElementById(AC_FieldID.replace('EditUB04_', '')).value = SelectData;
+		document.getElementById(objTextbox.id).value = SelectData;
+        break;
+
+    case 'EditADA_RenderingProviderSpecialty':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+        //document.getElementById(AC_FieldID.replace('EditADA', 'ctl00_phFolderContent')).value = SelectData;
+		document.getElementById(objTextbox.id).value = SelectData;
+        break;
+
+    case 'EditADA_AreaCavity1':
+    case 'EditADA_AreaCavity2':
+    case 'EditADA_AreaCavity3':
+    case 'EditADA_AreaCavity4':
+    case 'EditADA_AreaCavity5':
+    case 'EditADA_AreaCavity6':
+    case 'EditADA_AreaCavity7':
+    case 'EditADA_AreaCavity8':
+    case 'EditADA_AreaCavity9':
+    case 'EditADA_AreaCavity10':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+		document.getElementById(objTextbox.id).value = SelectData;
+        break;
+
+    case 'EditADA_ToothSurface1':
+    case 'EditADA_ToothSurface2':
+    case 'EditADA_ToothSurface3':
+    case 'EditADA_ToothSurface4':
+    case 'EditADA_ToothSurface5':
+    case 'EditADA_ToothSurface6':
+    case 'EditADA_ToothSurface7':
+    case 'EditADA_ToothSurface8':
+    case 'EditADA_ToothSurface9':
+    case 'EditADA_ToothSurface10':
+    case 'Dental_EditVisit_ToothSurface1':
+    case 'Dental_EditVisit_ToothSurface2':
+    case 'Dental_EditVisit_ToothSurface3':
+    case 'Dental_EditVisit_ToothSurface4':
+    case 'Dental_EditVisit_ToothSurface5':
+    case 'Dental_EditVisit_ToothSurface6':
+    case 'Dental_EditVisit_ToothSurface7':
+    case 'Dental_EditVisit_ToothSurface8':
+    case 'Dental_EditVisit_ToothSurface9':
+    case 'Dental_EditVisit_ToothSurface10':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf(' -');
+        if (intPos > 0)
+            SelectData = SelectData.substring(0, intPos);
+        else
+            SelectData = "";
+        //strFieldName = AC_FieldID.replace('Dental_EditVisit', 'ctl00_phFolderContent').replace('EditADA', 'ctl00_phFolderContent');
+        if (document.getElementById(objTextbox.id).value.length >= 5)
+            alert("Maximum 5 surfaces can be selected")
+        else
+			document.getElementById(objTextbox.id).value = document.getElementById(objTextbox.id).value + SelectData;
+        break;
+    
+    default:
+        document.getElementById(objTextbox.id).value = document.getElementById(objTextbox.id).value.substr(0, document.getElementById(objTextbox.id).value.length - (AC_SampleData.length+2));
+        document.getElementById(objTextbox.id).value = document.getElementById(objTextbox.id).value + document.getElementById("autocomplete_item_" + intIndex).innerHTML + "\r";
+        break;
+    }
+
+    AutoComplete_Hide(AC_DropdownName);
+}

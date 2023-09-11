@@ -1,0 +1,53 @@
+@font-face {
+    font-family: 'ModernEra';
+    src: url('/CommonUserControls/_static/css/fonts/ModernEra/ModernEra-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.0625em;
+}
+@font-face {
+    font-family: 'ModernEra';
+    src: url('/CommonUserControls/_static/css/fonts/ModernEra/ModernEra-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-size: 1.0625em;
+}
+html, body, input, button, select, ul, p, b, h2, td, th, span {
+    font-family: ModernEra, sans-serif;
+}
+a:link, a:visited{font-style:normal; text-decoration:none;}
+a:hover{text-decoration:underline}
+body, ul, p, b, h2, td, .calendar, .header, .footer{text-decoration:none;}
+ul{color:#000;font-weight:lighter;list-style:outside;}
+p, ul{font-weight:normal;}
+b, p{font-style:normal;}
+body, h2, ul, .footer{font-size:10pt;}
+td{font-size:9pt;}
+p, .calendar, .header{font-size:8pt;}
+.header, .footer{color:#fff;}
+b, .footer, .textbold{font-weight:bold;}
+.frameheader{font-size:11px;color:#555;font-weight:bold}
+.text, .textbold, .textbox, .button, .SimpleButton{font-size:11px}
+.textbox, .button{border:1px solid #999}
+.button{font-weight:bold;cursor:pointer;}
+a.button:hover{background-color:#eee}
+.PageHeader, .PageContent{border:1px solid #888;float:left;font-size:11px;font-weight:bold;margin:0 0 2px 15px;text-decoration:none;zoom:1;}
+.PageHeader{padding:3px 10px 3px 10px;width:775px;}
+.PageContent{padding:10px 10px 10px 10px;width:775px;}
+.BannerTitle, .BannerTitleSimple, .BannerTitleText, .CalendarTitle{font-size:11px;font-weight:bold;text-decoration:none;}
+.BannerTitle, .BannerTitleSimple{margin:0 15px 2px 15px;border:1px solid #888;padding:3px 10px 3px 10px;}
+.BannerTitle{background-color:#5e5e68; color: #ffffff;}
+.BannerTitleSimple{background:#ccc;}
+.Banner, .BannerNoPadding{margin:0 15px 2px 15px;border:1px solid #888;font-family:arial,helvetica,sans-serif;font-size:11px;font-weight:bold;text-decoration:none;}
+.Banner{background:#e6eafb;padding:10px;}
+.BannerNoPadding{background:#ddd;padding:0 0 0 0;}
+.SpanRight{width:100%;text-align:right}
+#MenuLeft, #MenuRight{background:transparent;}
+#MenuLeft ul, #MenuRight ul{margin:0;padding:0;list-style-type:none;background:transparent;height:1.5em}
+#MenuLeft li, #MenuRight li{display:block;margin:5px 10px 5px 0;}
+#MenuLeft li{float:left;}
+#MenuRight li{float:right;}
+.SimpleButton{display:block;width:75px;color:blue;background:transparent;font-weight:bold;text-decoration:none;text-align:center;border-top:2px solid #daa520;border-bottom:2px solid #daa520}
+.SimpleButton:hover{cursor:pointer;color:green;border-top:2px solid red;border-bottom:2px solid red;text-decoration:none}
+.CalendarTitle{margin:0 0 0 0;border:1px solid #888;background:#daa520;padding:3px 10px 3px 10px;text-align:center;width:700px}
+span[disabled]{opacity:.5}

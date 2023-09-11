@@ -1,0 +1,189 @@
+/*
+* Create by: Thanh T. 6/25/2007 
+*/
+
+//Updated by: Peter Beck 6/8/2011
+//  Fixed logic bug: Arrays allocated for 20 slots but loop accessed indexes from 1 to 20 (index 20 is not allocated for and should not be accessed, only 0-19).
+//  Cleaned up: Reduced redundant code for each ajax request object.
+//  Added support: XHR object creation works for all browsers now (not just IE).
+var intMaxAjaxObject = 20;
+var arrAjax = new Array(intMaxAjaxObject);
+var arrAjaxDiv = new Array(intMaxAjaxObject);
+var arrAjaxStatus = new Array(intMaxAjaxObject);
+
+for (j = 0; j < intMaxAjaxObject; j++)
+{
+    arrAjaxStatus[j] = 0;
+}
+
+function Ajax(obj, url)
+{
+    var intObjectFound;
+    for (j = 0; j < intMaxAjaxObject; j++)
+    {
+        if (arrAjaxStatus[j] == 0)
+        {
+            arrAjaxStatus[j] = 1;
+            intObjectFound = j;
+            break;
+        }
+    }
+    if (intObjectFound == undefined)
+    {
+        alert("All AJAX objects are busy")
+        return;
+    }
+    
+    arrAjax[intObjectFound] = null;
+    try {
+        //add support for browsers that don't suck
+        if (window.XMLHttpRequest) {
+            arrAjax[intObjectFound] = new XMLHttpRequest(); 
+        } else {
+            arrAjax[intObjectFound] = new ActiveXObject("Msxml2.XMLHTTP");
+        }
+    }
+    catch(e)
+    {
+        try
+        {
+            arrAjax[intObjectFound] = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        catch(oc)
+        {
+            arrAjax[intObjectFound] = null;
+        }
+    }
+    
+    if (arrAjax[intObjectFound] != null)
+    {
+        arrAjaxDiv[intObjectFound] = obj;
+        arrAjax[intObjectFound].onreadystatechange = function () { Ajax_OnComplete(intObjectFound); };
+        arrAjax[intObjectFound].open("GET", url, true);
+        arrAjax[intObjectFound].send(null);
+    }
+}
+
+function Ajax_OnComplete(AjaxIndex) {
+    if (arrAjax[AjaxIndex].readyState == 4) {
+        if (arrAjax[AjaxIndex].status == 200) {
+            if (arrAjaxDiv[AjaxIndex] != "") {
+                if (arrAjax[AjaxIndex].responseText == '') {
+                    document.getElementById(arrAjaxDiv[AjaxIndex]).style.display = 'none';
+                }
+                else {
+                    document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                    ResizePanel(arrAjaxDiv[AjaxIndex]);
+                }
+            }
+        }
+        else {
+            alert("Incomplete: " + arrAjax[AjaxIndex].statusText + ", r=" + arrAjax[AjaxIndex].responseText);
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+
+function ResizePanel(PanelName)
+{
+    if (PanelName.indexOf("_Contents") != -1)
+    {
+        if (document.getElementById(PanelName).offsetHeight > 150)
+        {
+            document.getElementById(PanelName).style.height = 150;
+        }
+        else
+        {
+            document.getElementById(PanelName).style.height = document.getElementById(PanelName).offsetHeight;
+        }    
+
+        if (document.getElementById(PanelName).offsetHeight == 0)
+        {
+            if (document.getElementById(PanelName).innerHTML.indexOf("No data") != -1)
+            {
+                document.getElementById(PanelName).style.height = 21;
+            }
+            else
+            {
+                document.getElementById(PanelName).style.height = 150;
+            }
+        }
+    }
+    else
+    {
+        //
+    }
+}
+
+
+function SyncAjaxPost(obj, url) {
+    if (!window.jQuery) {
+        //jQuery toolkit is missing, cannot proceed
+        return "The action requested was not able to be completed at this time.";
+    }
+    var returnMsg;
+    jQuery.ajax(
+    {
+        async: false,
+		type: "POST",
+        url: url,
+        data: obj,
+        error: function(xhr, textStatus, errorThrown) {
+            returnMsg = "An error occurred while processing the request.";
+        },
+        success: function(data, textStatus, xhr) {
+            //SyncAjax should return data, not empty string
+            returnMsg = data;
+        }
+    });
+    return returnMsg;
+}
+
+
+// Performs a synchronous ajax call
+//For this case, the sync returns the data upon success
+function SyncAjax(obj, url) {
+    if (!window.jQuery) {
+        //jQuery toolkit is missing, cannot proceed
+        return "The action requested was not able to be completed at this time.";
+    }
+    var returnMsg;
+    jQuery.ajax(
+    {
+        async: false,
+        url: url,
+        data: obj,
+        error: function(xhr, textStatus, errorThrown) {
+            returnMsg = "An error occurred while processing the request.";
+        },
+        success: function(data, textStatus, xhr) {
+            //empty string return value from this function signifies success 
+			//returnmsg needs to return the data - i added this specifically for the username check
+            returnMsg = data;
+        }
+    });
+    return returnMsg;
+}
+
+function SyncAjax2(obj, url) {
+    if (!window.jQuery) {
+        //jQuery toolkit is missing, cannot proceed
+        return "The action requested was not able to be completed at this time.";
+    }
+    var returnMsg;
+    jQuery.ajax(
+    {
+        async: false,
+        url: url,
+        data: obj,
+        error: function(xhr, textStatus, errorThrown) {
+            returnMsg = "An error occurred while processing the request.";
+        },
+        success: function(data, textStatus, xhr) {
+            //empty string return value from this function signifies success 
+            returnMsg = "";
+        }
+    });
+    return returnMsg;
+}

@@ -1,0 +1,152 @@
+.PDRBrief_HeaderRow
+{ 
+    height             :    55px;        
+}
+
+.PDRBrief_DrugName
+{
+    font-family         :   Arial;    
+    color               :   Black;        
+}
+
+.PDRBrief_GenericName
+{
+    font-family         :   Arial;    
+    color               :   Black;        
+}
+
+
+.ProductMessage
+{
+   
+}
+
+.p_R1
+{    
+    height              : 50px;
+    padding-top         : 3px;
+    padding-bottom      : 3px;     
+    font-family : Arial;   
+}
+
+.p_R2_RED
+{
+    height : 40px;
+    background-color : Red;        
+    border-top:1px solid black;
+    border-bottom:1px solid black;
+}
+
+.p_R2_PLAIN
+{
+    height : 40px;
+    background-color : transparent;
+    border-top:1px solid gray;
+    border-bottom:1px solid gray;
+}
+
+.BX_WARNING
+{
+    background-color:#E0E0E0;
+    border-right:2px solid black; 
+    border-left:2px solid black;
+    border-bottom:2px solid black;
+    border-top:2px solid black; 
+    padding : 3px;
+}
+
+.p_R3
+{
+    padding-top : 5px;
+    padding-bottom : 5px;
+    height : 45px;
+    background-color: #E6E6E6;
+    border-bottom:1px solid gray;
+}
+
+.p_R4
+{
+    padding-top : 5px;
+    padding-bottom : 5px;    
+    height : 45px;
+    border-bottom:1px solid gray;        
+}
+
+.i_R2
+{
+    padding-left:7px;
+    padding-right:7px;
+    
+    border-bottom:1px solid #65A0D4; 
+    
+    padding-bottom:7px;
+    padding-top:7px;
+    
+}
+
+.i_R3
+{
+
+    padding-left:7px;
+    padding-right:7px;
+    
+    padding-top:7px;
+    padding-bottom:7px; 
+
+  
+    font-family : Arial;    
+}
+
+.i_R4
+{
+    padding-left:7px;
+    padding-right:7px;
+
+     border-top:1px solid #65A0D4; 
+    
+    padding-top:7px;
+    padding-bottom:7px;    
+}
+
+.i_BX_WARNING
+{    
+    border-right:2px solid black; 
+    border-left:2px solid black;
+    border-bottom:2px solid black;
+    border-top:2px solid black; 
+    padding : 2px;
+}
+
+.i_R5
+{
+    padding-left:7px;
+    padding-right:7px; 
+    padding-top:5px; 
+    padding-bottom:5px;
+    border-top:1px solid #65A0D4;
+}
+.scroll-chat {
+    height: 25px;
+    padding: 8px 8px 12px;
+    background: #0098ca;
+    position: fixed;
+    bottom: 0;
+    right: 25px;
+    opacity: .89;
+    filter: alpha(opacity=89);
+    z-index: 499841;
+    font-family: sans-serif;
+    color: #fff;
+    text-decoration: none !Important;
+}
+
+.scroll-chat:hover {
+    background-color: #1b8aae
+}
+
+.scroll-text {
+    padding-left: 5px;
+    padding-right: 10px;
+    font-size: 18px;
+    color: #fff;
+} 

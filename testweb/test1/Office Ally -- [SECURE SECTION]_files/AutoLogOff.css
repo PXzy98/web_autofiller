@@ -1,0 +1,99 @@
+﻿.continuesession {
+    background-color: rgb(106, 189, 69) !important;
+    border-bottom-color: rgb(106, 189, 69) !important;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-image-outset: 0px;
+    border-image-repeat: stretch;
+    border-image-slice: 100%;
+    border-image-source: none;
+    border-image-width: 1;
+    border-left-color: rgb(106, 189, 69);
+    border-left-style: solid;
+    border-left-width: 1px;
+    border-right-color: rgb(106, 189, 69);
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-top-color: rgb(106, 189, 69);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-top-style: solid;
+    border-top-width: 1px;
+    box-sizing: border-box;
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    height: 38px;
+    line-height: 20px;
+    min-width: 140px;
+    padding-bottom: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 8px;
+    text-align: center;
+    text-decoration-color: rgb(255, 255, 255);
+    text-decoration-line: none;
+    text-decoration-skip: objects;
+    text-decoration-style: solid;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
+    transition-delay: 0s;
+    transition-duration: 0.2s;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    user-select: none;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: 155.25px;
+    -webkit-box-direction: normal;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.innactive-logout-dialog {
+    top: 25% !important;
+    left: 50% !important;
+    position: fixed !important;
+    padding: 0 !important;
+    margin-left: -175px;
+}
+.innactive-logout-dialog .ui-dialog-titlebar {
+    display: none
+}
+
+.innactive-logout-dialog .ui-dialog-content {
+    padding: 0 !important;
+}
+
+.card-header-dark {
+    background-color: rgb(101, 101, 101);
+    box-sizing: border-box;
+    color: rgb(41, 43, 44);
+    display: block;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    height: 59px;
+    line-height: 24px;
+    /*adding-bottom: 5px;*/
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 16px;
+}
+
+.card-title-text-white {
+    box-sizing: border-box;
+    color: rgb(255, 255, 255) !important;
+    display: block;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    height: 26px;
+    line-height: 26.4px;
+    margin-bottom: 12px;
+    margin-top: 0px;
+}

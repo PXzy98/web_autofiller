@@ -1,0 +1,64 @@
+﻿$(document).ready(function () {
+    checkSession.init();
+});
+
+var checkSession = (function () {
+    var _ = {
+        cookieVal: ''        
+    }
+    var pub = {
+        init: init,
+        defaultURL: ''
+    };
+
+    function init() {
+        _.cookieVal = getCookie('TRK');
+
+        _.interval = setInterval(validateCookie, 3000);
+
+        $("body").append("<div id='divInvalidSession' title='Invalid Session' style='display:none;'>This session is no longer valid.  You cannot be  logged into multiple Office Ally accounts in other tabs or windows at the same time.  Any information entered during this session that was not saved has been lost.<br /><br />Clicking Close will redirect you to the active session or the log in page.</div>");
+
+    }
+
+    function validateCookie() {
+        if (_.cookieVal != '' + getCookie('TRK')) {
+            clearInterval(_.interval);
+            openInvalidSessionDialog();
+        }
+    }
+
+    function openInvalidSessionDialog() {
+        $("#divInvalidSession").dialog({
+            width: '370px',
+            modal: true,
+            position: 'top',
+            close: function () {
+                window.location.href = checkSession.defaultURL;
+            },
+            buttons: {
+                'Close': function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    }
+
+    function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    return pub;
+
+})();

@@ -1,0 +1,1025 @@
+var docereeBaseUrl = "https://bidder.doceree.com";
+var oldAdserverBaseUrl = "https://programmatic.doceree.com/";
+var docereeTrackingBaseUrl = "https://tracking.doceree.com";
+var styleCssPath = "https://servedbydoceree.doceree.com/resources/p/style_t.css"
+var displayFormPath = "https://servedbydoceree.doceree.com/resources/p/render-display.js"
+
+var docereeUserContext = docereeUserContext || {};
+var docereeAdCode = docereeAdCode || "DOC_";
+var docereeBannerCode = docereeBannerCode || "_DOC_SLOT";
+var docereeAdBlockLevelEnum = {
+    inappropriateAd: 'inappropriateAd',
+    overlappingAd: 'overlappingAd',
+    notInterestedInCampaign: 'notInterestedInCampaign',
+    notInterestedInBrand: 'notInterestedInBrand',
+    notInterestedInBrandType: 'notInterestedInBrandType',
+    notInterestedInClientType: 'notInterestedInClientType'
+}
+var docereeProcessedIds = docereeProcessedIds || {};
+var docereeAds = docereeAds || {};
+var docereeIdsBeingTracked = docereeIdsBeingTracked || new Set();
+var newDocereeIdsBeingTracked = newDocereeIdsBeingTracked || new Set();
+var docereeScrollEventListenerPresent = docereeScrollEventListenerPresent || false;
+var percentageRequired = 90;
+var adRefreshCycle = 30000;
+
+if (typeof adViewObserver != 'undefined') {
+} else {
+    window.adViewObserver = (function () {
+        let observer = null;
+        let status = {};
+        function log(msg) {
+            logging('error in ad rendering view observer: ' + msg);
+        }
+
+        var refresh = (id) => {
+            try {
+                if (status[id]['interval'] != null) {
+                    status[id].isViewable = false;
+                    status[id].stopInterval = true
+                    docereeAds[id].isEditingDisplayForm = false
+                }
+                observer.unobserve(status[id].elem);
+            } catch (error) {
+                log(error.message);
+            }
+        }
+
+        var unObserver = function () {
+            try {
+                for (var i in status) {
+                    refresh(i);
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        };
+
+        var observeAgain = function () {
+            try {
+                for (var i in status) {
+                    observer.observe(status[i].elem);
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        }
+
+
+        document.addEventListener('visibilitychange', function (event) {
+            try {
+                if (document.hidden) {
+                    unObserver();
+                }
+                else {
+                    observeAgain();
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        });
+        window.addEventListener('focus', function() {
+            try {
+                observeAgain();
+            } catch (e) {
+                log(e.message);
+            }
+        }, false);
+        window.addEventListener('blur', function() {
+            try {
+                unObserver();
+            } catch (e) {
+                log(e.message);
+            }
+        }, false);
+
+        let callback = (entries) => {
+            try {
+                entries.forEach(entry => {
+                    let id = entry.target.id;
+                    if (entry.intersectionRatio >= percentageRequired / 100) {
+                        status[id].isViewable = true
+                        if (!status[id].isRendered) {
+                            getDynamicImage(id);
+                            status[id].isRendered = true;
+                        }
+                        if (status[id]['interval'] == null) {
+                            status[id]['interval'] = setInterval(() => {
+                                if (!docereeAds[id].isEditingDisplayForm) {
+                                    status[id].elem.innerHTML = '';
+                                    divObserver.refresh(id);	
+                                    if (status[id].isViewable) {
+                                        getDynamicImage(id);
+                                        status[id].stopInterval = false
+                                    } else {
+                                        clearInterval(status[id]['interval']);
+                                        status[id]['interval'] = null; 
+                                        status[id].isRendered = false;
+                                    }
+                                    if (status[id].stopInterval) {
+                                        clearInterval(status[id]['interval']);
+                                        status[id]['interval'] = null;
+                                        status[id].stopInterval = false
+                                    }
+                                }
+                            }, adRefreshCycle);
+                        }
+                    } else {
+                        status[id].isViewable = false
+                    }
+                });
+            } catch (e) {
+                log(e.message);
+            }
+
+        };
+
+        var init = function () {
+            try {
+                if (window.IntersectionObserver) {
+                    observer = new IntersectionObserver(callback, {
+                        root: null,
+                        threshold: [percentageRequired / 100]
+                    })
+                } else {
+                    log('IntersectionObserver not supported');
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        }
+
+        var register = function (elementId) {
+            try {
+                let obj = {
+                    isRendered: false,
+                    interval: null,
+                    isViewable: false,
+                    elem: null,
+                }
+                let box = document.getElementById(elementId);
+                obj.elem = box;
+                status[elementId] = obj;
+                if (observer) {
+                    observer.observe(box);
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        }
+        init();
+        return {
+            register
+        }
+    })();
+}
+
+if (typeof divObserver != 'undefined') {
+} else {
+    window.divObserver = (function () {
+        let observer = null;
+        let status = [];
+        function log(msg) {
+            logging('error in viewability tracker : ' + msg);
+        }
+
+        var diffPixel = function (id) {
+            try {
+                status[id]['outTime'] = new Date().getTime();
+                status[id]['timer'] = false;
+                var difference = status[id]['outTime'] - status[id]['timeIn'];
+                status[id]['outTime'] = 0;
+                status[id]['timeIn'] = 0;
+                difference = difference / 1000;
+                difference = parseInt(difference);
+                if (difference > 0) {
+                    pixelFire(id, difference, 50, 0, "mrc");
+                }
+            } catch (error) {
+                log(error.message);
+            }
+        }
+
+        var refresh = (id) => {
+            try {
+                if (status && status[id]) {
+                    if (status[id]['timeout'] && status[id]['timeout'] != null) {
+                        clearTimeout(status[id]['timeout']);
+                        status[id]['timeout'] = null;
+                    }
+
+                    if (status[id]['interval'] && status[id]['interval'] != null) {
+                        clearTimeout(status[id]['interval']);
+                        status[id]['interval'] = null;
+                    }
+                    if (status[id]['timeIn'] && status[id]['timeIn'] > 0 && status[id]['timer'] && status[id]['timer'] == true) {
+                        diffPixel(id);
+                    }
+                    let box = document.getElementById(id);
+                    observer.unobserve(box);
+                }
+            } catch (error) {
+                log(error.message);
+            }
+
+        }
+
+
+        var pixelFire = (id, time, percent, type = 0, std = "mrc") => {
+            try {
+                let url = status[id]['url'];
+                if (type == 0) {
+                    url = url.replace('_viewTotalTime', time);
+                }
+                else {
+                    url = url.replace('_viewTime', time);
+                }
+                url = url.replace('_viewPercentage', percent);
+                url = url.replace('_std', std);
+                var x = new Date();
+                (new Image()).src = url + "&rd=" + x.getTime();
+
+            } catch (error) {
+                log(error.message);
+            }
+        }
+
+        var unObserver = function () {
+            try {
+                for (var i in status) {
+                    refresh(i);
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        };
+        var observeAgain = function () {
+            try {
+                for (var i in status) {
+                    let box = document.getElementById(i);
+                    observer.observe(box);
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        }
+
+
+        document.addEventListener('visibilitychange', function (event) {
+            try {
+                if (document.hidden) {
+                    unObserver();
+                }
+                else {
+                    observeAgain();
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        });
+
+        let callback = (entries) => {
+            try {
+                entries.forEach(entry => {
+                    let id = entry.target.id;
+                    if (entry.intersectionRatio >= 0.5) {
+                        if (status[id]['mrcFire'] == false) {
+                            if (status[id]['timeout'] == null) {
+                                status[id]['timeout'] = setTimeout(() => {
+                                    status[id]['mrcFire'] = true;
+                                    pixelFire(id, 1, 50, 1, "mrc");
+                                }, 1000);
+                            }
+                        }
+                        if (status[id]['timer'] == false) {
+                            status[id]['timeIn'] = new Date().getTime();
+                            status[id]['timer'] = true;
+                        }
+
+                    } else {
+                        if (status[id]['timeout'] != null) {
+                            clearTimeout(status[id]['timeout']);
+                            status[id]['timeout'] = null;
+                        }
+                        if (status[id]['timeIn'] > 0 && status[id]['timer'] == true) {
+                            diffPixel(id);
+                        }
+                    }
+                    if (entry.intersectionRatio >= status[id]['limit'] && status[id]['customEvent'] == true) {
+                        if (status[id]['interval'] == null) {
+                            var timeNow = status[id]['time'];
+                            status[id]['interval'] = setTimeout(() => {
+                                pixelFire(id, timeNow, status[id]['limit'] * 100, 1, "custom");
+                                status[id]['customEvent'] = false;
+                                status[id]['interval'] = null;
+                            }, timeNow * 1000);
+                        }
+                    }
+                    else {
+                        clearTimeout(status[id]['interval']);
+                        status[id]['interval'] = null;
+                    }
+                });
+            } catch (e) {
+                log(e.message);
+            }
+
+        };
+
+        var init = function () {
+            try {
+                if (window.IntersectionObserver) {
+                    observer = new IntersectionObserver(callback, {
+                        root: null,
+                        threshold: [0.5, 0.6, 0.8, 0.7, 0.9, 1]
+                    })
+                }
+                else {
+                    log('IntersectionObserver not supported');
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        }
+
+        var register = function (response, elementId) {
+            try {
+                if (response && response.hasOwnProperty('viewLink') && response.viewLink) {
+                    let obj = {
+                        'id': elementId,
+                        'mrcFire': false,
+                        'interval': null,
+                        'limit': response.hasOwnProperty('minViewPercentage') ? response.minViewPercentage : null,
+                        'time': response.hasOwnProperty('minViewTime') ? response.minViewTime : null,
+                        'timeout': null,
+                        'url': response.viewLink,
+                        'timer': false,
+                        'timeIn': 0,
+                        'outTime': 0,
+                        'customEvent': false
+                    }
+                    if (obj.limit && obj.time && obj.limit >= 50) {
+                        obj.limit = obj.limit / 100;
+                        obj.customEvent = true;
+                    }
+                    let box = document.getElementById(elementId);
+                    status[elementId] = obj;
+                    if (observer) {
+                        observer.observe(box);
+                    }
+                }
+            } catch (e) {
+                log(e.message);
+            }
+        }
+        init();
+        return {
+            register,
+            refresh
+        }
+    })();
+
+}
+
+function docReady(fn) {
+    if (document.readyState != 'loading') {
+        fn();
+    } else if (document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', fn);
+    } else {
+        document.attachEvent('onreadystatechange', function () {
+            if (document.readyState != 'loading')
+                fn();
+        });
+    }
+}
+
+docReady(initDocereeSlotRenderer);
+
+function initDocereeSlotRenderer() {
+    try {
+        let ids = document.querySelectorAll('div[id^=DOC_]');
+        let listOfDocereeAdIds = [];
+        Array.prototype.forEach.call(ids, function (el, i) {
+            if (el.id.indexOf(docereeBannerCode) === -1 && (listOfDocereeAdIds.indexOf((el.id).split(docereeAdCode)[0]) === -1) && (el.id).includes(docereeAdCode)) {
+                listOfDocereeAdIds.push((el.id));
+            }
+        });
+
+        for (let codeSnippetId of listOfDocereeAdIds) {
+            let process = false;
+            if (docereeProcessedIds.ids && docereeProcessedIds.ids.includes(codeSnippetId)) {
+                process = false;
+            } else {
+                if (docereeProcessedIds.ids) {
+                    docereeProcessedIds.ids.push(codeSnippetId);
+                } else {
+                    docereeProcessedIds.ids = [];
+                    docereeProcessedIds.ids.push(codeSnippetId);
+                }
+                process = true;
+            }
+
+            if (process) {
+                adViewObserver.register(codeSnippetId)
+            }
+        }
+    } catch (err) {
+        logging('error in initDocereeSlotRenderer: ' + err.message);
+    }
+}
+
+
+function processHTMLAndRender(responseJson, creativeHtml, unesc, elementId) {
+    if (responseJson.sourceURL) {
+        creativeHtml = creativeHtml.replace('<head>', `<head><style>html,body{padding:0;margin:0;}</style><base href="${responseJson.sourceURL.split('index.html')[0]}" target="_blank">`);
+    }
+    creativeHtml = creativeHtml.replaceAll('[TRACKING_LINK]', responseJson.ctaLink);
+    creativeHtml = creativeHtml.replaceAll(/DOCEREE_CLICK_URL_UNESC/g, unesc);
+    while (creativeHtml.indexOf("_ucid") > -1) {
+        creativeHtml = creativeHtml.replace("_ucid", uuidv4())
+    }
+
+    insertAnIFrame(responseJson, creativeHtml);
+    docereeIdsBeingTracked.add(elementId);
+    // addDocereeScrollListener();
+
+    var element = document?.getElementById(elementId);
+    if (element) {
+        addUserConsentOptions(element, elementId, responseJson.height, responseJson.width, responseJson.isDisplayAd, responseJson.isDisplayFormEnable, responseJson.displayCtaType);
+    }
+}
+
+function getDynamicImage(elementId) {
+    try {
+        let hcpLoggedInUser = getHCPFromPublisherPage();
+        let gdpr_params = '&gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_1063}&gdpr_pd=${GDPR_PD}';
+        let query = 'id=' + elementId + '&publisherDomain=' + document.domain + '&pubRequestedURL=' + encodeURIComponent(document.URL) + '&loggedInUser=' + hcpLoggedInUser + '&sessionToken=' + getCookie('_docereeSession') + '&currentUrl=' + window.encodeURIComponent(window.location.href) + gdpr_params;
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                if (this.status == 200) {
+                    try {
+                        docereeAds[elementId] = docereeAds[elementId] || {};
+                        let responseJson = JSON.parse(xhttp.responseText);
+                        docereeAds[elementId].response = responseJson;
+                        // following statements will be called if we are not able to deduce
+                        // the hcp in 15 seconds in first login attempt as well as upon
+                        // successful ad rendering                    
+                        if (responseJson && responseJson.newPlatformUid) {
+                            let cookieContent = { platformUid: responseJson.newPlatformUid, version: responseJson.version };
+                            document.cookie = "_docereeId=" + JSON.stringify(cookieContent) + ';path=/;max-age=' + responseJson.maxAge;
+                        }
+                        let impressionLink = "";
+                        if (responseJson.impressionLink) {
+                            impressionLink = (responseJson.impressionLink.includes("http:") || responseJson.impressionLink.includes("https:")) ? responseJson.impressionLink : ('//' + responseJson.impressionLink);
+                            docereeAds[elementId].impressionLink = impressionLink;
+                        }
+                        let ctaLink = "";
+                        if (responseJson.ctaLink) {
+                            ctaLink = (responseJson.ctaLink.includes("http:") || responseJson.ctaLink.includes("https:")) ? responseJson.ctaLink : ('//' + responseJson.ctaLink);
+                            docereeAds[elementId].ctaLink = ctaLink;
+                        }
+                        // following statements will be called upon successful ad rendering
+                        if (responseJson && responseJson.DIVID) {
+                            // this is the case where ad butler is not involved
+                            if (!responseJson.passbackTag) {
+                                let unesc = '';
+                                if (docereeAds && docereeAds[elementId] && docereeAds[elementId].click && docereeAds[elementId].click.indexOf('http') > -1) {
+                                    unesc = docereeAds[elementId].click;
+                                }
+                                if (responseJson.creativeType && responseJson.creativeType !== 'banner') {
+                                    if (responseJson.sourceHTML) {
+                                        responseJson.sourceHTML = responseJson.sourceHTML.replace(/[\uE000-\uF8FF]/g, '');
+                                        processHTMLAndRender(responseJson, responseJson.sourceHTML, unesc, elementId)
+                                    } else {
+                                        fetchHTMLAd(responseJson.sourceURL, function (error, creativeHtml) {
+                                            if (!error) {
+                                                processHTMLAndRender(responseJson, creativeHtml, unesc, elementId)
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    // in the case of banner ad, we are having the CTA link as optional
+                                    if (responseJson.ctaLink) {
+                                        docereeAds[elementId].clickCount = 0;
+                                        let navigationCustomURL = docereeAds[elementId].ctaLink;
+                                        navigationCustomURL = navigationCustomURL.replace('DOCEREE_CLICK_URL_UNESC', unesc);
+                                        let htmlString = "<a id='" + responseJson.DIVID + docereeBannerCode + "' name='" + responseJson.CBID + "'  href='" + navigationCustomURL
+                                            + "'  target='blank'><img onload='window.parent.registerImpression(" + elementId + "); window.parent.onAdsLoaded(" + elementId + ");' src='" + responseJson.sourceURL + "'></a>";
+                                        insertAnIFrame(responseJson, htmlString);
+                                    } else {
+                                        let htmlString = "<div id='" + responseJson.DIVID + docereeBannerCode + "' name='" + responseJson.CBID + "'><img onload='window.parent.registerImpression(" + elementId + "); window.parent.onAdsLoaded(" + elementId + ");' src='" + responseJson.sourceURL + "'></a>";
+                                        insertAnIFrame(responseJson, htmlString);
+                                    }
+                                    docereeIdsBeingTracked.add(elementId);
+                                    // addDocereeScrollListener();
+
+                                    var element = document?.getElementById(elementId);
+                                    if (element) {
+                                        addUserConsentOptions(element, elementId, responseJson.height, responseJson.width, responseJson.isDisplayAd, responseJson.isDisplayFormEnable, responseJson.displayCtaType);
+                                    }
+                                }
+                            } else {
+                                insertAnIFrame(responseJson, responseJson.passbackTag);
+                            }
+                        }
+                    } catch (error) {
+                        logging('Exception : getImage API: ' + error.message + ', ' + JSON.stringify({
+                            codeSnippetId: elementId,
+                        }));
+                    }
+                } else {
+                    let responseJson = JSON.parse(xhttp.responseText);
+                    if (responseJson && responseJson.newPlatformUid) {
+                        let cookieContent = { platformUid: responseJson.newPlatformUid, version: responseJson.version };
+                        document.cookie = "_docereeId=" + JSON.stringify(cookieContent) + ';path=/;max-age=' + responseJson.maxAge;
+                    }
+                    let errMessage = responseJson.errMessage;
+                    logging('Exception : getImage API: ' + errMessage + ', ' + JSON.stringify({
+                        codeSnippetId: elementId,
+                    }));
+                }
+            }
+        };
+        xhttp.withCredentials = true;
+        xhttp.crossDomain = true;
+        var url = docereeBaseUrl + "/v1/adrequest?" + query;
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    } catch (error) {
+        logging('Exception : getImage API: ' + error.message + ', ' + JSON.stringify({
+            codeSnippetId: elementId,
+        }));
+    }
+}
+
+function getCookiePlatformUid() {
+    let docereeScriptVersion = '0.1';
+    let cookieContent = getCookie('_docereeId');
+    if (!!cookieContent) {
+        cookieContent = JSON.parse(cookieContent)
+        if (cookieContent.version == docereeScriptVersion) {
+            return cookieContent.platformUid;
+        }
+    }
+}
+
+function getHCPFromPublisherPage() {
+    let docereeScriptVersion = '0.1';
+    let hcpData = {};
+    hcpData['version'] = docereeScriptVersion;
+
+    let platformUid = getCookiePlatformUid()
+    if (platformUid) {
+        hcpData['platformUid'] = platformUid
+    }
+
+    let encryptedContextSet = getCookie('_docereeContext');
+    if (!!encryptedContextSet) {
+        let contextSet = JSON.parse(decodeURIComponent(atob(encryptedContextSet)));
+        hcpData['email'] = contextSet['email'];
+        hcpData['firstName'] = contextSet['firstName'];
+        hcpData['lastName'] = contextSet['lastName'];
+        hcpData['specialization'] = contextSet['specialization'];
+        hcpData['city'] = contextSet['city'];
+        hcpData['state'] = contextSet['state'];
+        hcpData['zipCode'] = contextSet['zipCode'];
+        hcpData['npi'] = contextSet['npi'];
+        hcpData['gmc'] = contextSet['gmc'];
+        hcpData['hashedGMC'] = contextSet['hashedGMC'];
+        hcpData['hashedNPI'] = contextSet['hashedNPI'];
+        hcpData['hashedEmail'] = contextSet['hashedEmail'];
+        hcpData['hashedMobile'] = contextSet['hashedMobile'];
+        hcpData['gender'] = contextSet['gender'];
+        hcpData['mciRegistrationNumber'] = contextSet['mciRegistrationNumber'];
+    } else {
+        // INFO: this indicates that the user context is not set, i.e. HCP may have clicked logout. In this case, we have to remove the _docereeId cookie
+        eraseCookie('_docereeContext');
+    }
+
+    let dmdEncryptedContext = getCookie('_docereeDmdContext');
+    if (!!dmdEncryptedContext) {
+        try {
+            let dmdData = JSON.parse(decodeURIComponent(atob(dmdEncryptedContext)));
+            hcpData['dmd'] = dmdData;
+        } catch (error) {
+            // sometime dmd does not send well formed JSON
+            logging('error in parsing dmd data: ' + error.message + ', ' + JSON.stringify({
+                data: dmdEncryptedContext,
+            }));
+        }
+    } else {
+        // INFO: this indicates that the dmd context is not set
+        eraseCookie('_docereeDmdContext');
+    }
+
+    if (docereeUserContext && Object.keys(docereeUserContext).length) {
+        hcpData['specialization'] = hcpData['specialization'] || docereeUserContext['specialization'];
+        hcpData['city'] = hcpData['city'] || docereeUserContext['city'];
+        hcpData['zipCode'] = hcpData['zipCode'] || docereeUserContext['zipCode'];
+        hcpData['firstName'] = hcpData['firstName'] || docereeUserContext['firstName'];
+        hcpData['state'] = hcpData['state'] || docereeUserContext['state'];
+    }
+
+    hcpData = JSON.stringify(hcpData);
+    let encryptedHCP = btoa(encodeURIComponent(hcpData));
+    return encryptedHCP;
+};
+
+function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return '';
+};
+
+function eraseCookie(name) {
+    document.cookie = name + '=; Max-Age=-99999999;';
+};
+
+function insertAnIFrame(responseJson, iFrameContent) {
+    var iFrame = document.createElement('iframe');
+    iFrame.loading = "lazy";
+    iFrame.frameBorder = 0;
+    iFrame.scrolling = "no";
+    iFrame.noresize = "noresize";
+    iFrame.marginheight = 0;
+    iFrame.marginwidth = 0;
+    if (!responseJson.height && !responseJson.width) {
+        if (docereeAds && docereeAds[responseJson.DIVID] && docereeAds[responseJson.DIVID].content_sizes) {
+            let size = docereeAds[responseJson.DIVID].content_sizes[0].split(' x ');
+            if (size && size.length == 2) {
+                responseJson.width = size[0];
+                responseJson.height = size[1];
+            }
+        }
+    }
+    if (responseJson.width) {
+        iFrame.style.width = iFrame.width = responseJson.width + 'px';
+    }
+    if (responseJson.height) {
+        iFrame.style.height = iFrame.height = responseJson.height + 'px';
+    }
+
+    document.getElementById(responseJson.DIVID).appendChild(iFrame);
+
+    if (responseJson.creativeType && responseJson.creativeType !== 'banner') {
+        html = iFrameContent;
+        iFrame.id = `${responseJson.DIVID}${docereeBannerCode}`;
+        iFrame.name = responseJson.CBID;
+        iFrame.onload = function (event) {
+            registerImpression(document.getElementById(responseJson.DIVID));
+            onAdsLoaded(document.getElementById(responseJson.DIVID));
+        }
+    } else {
+        html = "<!DOCTYPE HTML><html><head><style>html,body{padding:0;margin:0;}</style></head><body><div id=" + responseJson.DIVID + ">" + iFrameContent + "</div>";
+        html += "</body></html>";
+    }
+
+    let contentDocument = iFrame.contentDocument;
+    contentDocument.open();
+    contentDocument.write(html);
+    contentDocument.close();
+    divObserver.register(responseJson, responseJson.DIVID);
+}
+
+function UserAction(listenerType, link) {
+    try {
+        let xhttp = new XMLHttpRequest();
+        xhttp.withCredentials = true;
+        xhttp.crossDomain = true;
+        xhttp.open("GET", link, true);
+        xhttp.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+        xhttp.send();
+    } catch (error) {
+        logging('error in UserAction: ' + error.message + ', ' + JSON.stringify({
+            actionType: listenerType,
+            link: link,
+        }));
+    }
+}
+
+function fetchHTMLAd(link, callback) {
+    try {
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                callback(null, this.responseText);
+            } else {
+                callback(`error in fetching html a`);
+            }
+        };
+        xhttp.open("GET", link, true);
+        xhttp.setRequestHeader('Content-type', 'plain/html; charset=utf-8');
+        xhttp.send();
+    } catch (error) {
+        logging('error in fetchHTMLAd: ' + error.message + ', ' + JSON.stringify({
+            link: link,
+        }));
+    }
+}
+
+function logging(errorMsg) {
+    let xhttp = new XMLHttpRequest();
+    let currentDataTime = new Date();
+    xhttp.open("POST", docereeTrackingBaseUrl + "/logExceptions", true);
+    xhttp.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+    xhttp.send(JSON.stringify({
+        timestamp: currentDataTime.toUTCString(),
+        path: window.location.origin,
+        error: errorMsg,
+    }));
+}
+
+function addUserConsentOptions(elem, elementId, height, width, isDisplayAd, isFormEnable, cta) {
+    // setting parent relative
+    elem.style.position = 'relative';
+    elem.style.display = 'inline-block';
+
+    let adSize = '200x200'; // default size
+    if (height && width) {
+        adSize = `${width}x${height}`
+    } else {
+        try {
+            let a = elem.children[0].innerHTML
+            adSize = a.substring(a.indexOf("[") + 1, a.indexOf("]")).split(" ").join("");
+            adSize = adSize.substring(1, adSize.length - 1);
+        } catch (err) {
+            // error in parsing size will go with 200x200
+        }
+    }
+
+    // add css for actions
+    const styleLink = document.createElement('link');
+    // styleLink.href = docereeBaseUrl + '/render/getCSS';
+    styleLink.href = styleCssPath;
+    styleLink.rel = "stylesheet";
+    styleLink.type = "text/css";
+    elem.appendChild(styleLink);
+
+    //render actions for ad
+    let actions = `
+        <div class="action info-action" onclick="showAdBlockerForm(event, ${elementId})">
+            <div class="info-label">
+                <span>Ads by doceree</span>
+            </div>
+            <span style="color: #000 !important;">
+                <svg  height="15" width="15" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15 15"><path d="M7.5,1.5a6,6,0,1,0,0,12a6,6,0,1,0,0,-12m0,1a5,5,0,1,1,0,10a5,5,0,1,1,0,-10ZM6.625,11l1.75,0l0,-4.5l-1.75,0ZM7.5,3.75a1,1,0,1,0,0,2a1,1,0,1,0,0,-2Z"  stroke="#6c40f7" stroke-width="0.4"></path></svg>
+            </span>
+        </div>
+        ${
+            isDisplayAd ? `
+            <div class="action contact-action ${isFormEnable ? '' : 'disableAction'}" id="display_plus_ad_icon" onclick="showContactForm(event, ${elementId}, 'doceree-da-display-form-1', ${height}, ${width}, '${cta}', [])">
+            <div class="info-label">
+                <span>Display+ HCP Actions</span>
+            </div>    
+            <svg xmlns="http://www.w3.org/2000/svg" height="11" width="11" xml:space="preserve" baseProfile="basic" viewBox="0 0 90 90"><path d="m38.789 51.211 10.876 10.876a3.122 3.122 0 0 0 3.684.543l13.034-6.997a3.12 3.12 0 0 1 3.07.066L88.47 66.984a3.113 3.113 0 0 1 1.268 3.933c-1.625 3.698-4.583 10.476-5.758 13.473-.247.631-.615 1.209-1.127 1.652-12.674 10.986-37.89-2.4-57.191-21.701C6.358 45.039-7.028 19.823 3.958 7.149c.444-.512 1.022-.88 1.652-1.127C8.606 4.847 15.385 1.889 19.083.264a3.113 3.113 0 0 1 3.933 1.268l11.285 19.017c.558.941.583 2.106.066 3.07L27.37 36.651a3.122 3.122 0 0 0 .543 3.684l10.876 10.876z"/></svg>
+          </div>` : ''
+        }
+        
+        <div class="action close-action" onclick="showAdBlockerForm(event, ${elementId})">
+            <svg height="15" width="15" xmlns="//www.w3.org/2000/svg">
+                <path d="M0,0l15,0l0,15l-15,0Z" fill="#fff"></path>
+                <path d="M3.25,3.25l8.5,8.5M11.75,3.25l-8.5,8.5" stroke="#6c40f7" stroke-width="1.25"></path>
+            </svg>
+        </div>
+    `;
+
+    const divOfActions = document.createElement('div');
+    divOfActions.classList.add('da-action-container');
+    divOfActions.classList.add('opacityadd');
+    divOfActions.style.opacity = 0; 
+    divOfActions.innerHTML = actions;
+    elem.appendChild(divOfActions);
+
+    let formConainer = `
+        <div id="da-irrelative-form-1" class="da-irrelative-form size_${adSize}">
+            <div class="da-back-action" onclick="hideAdBlockerForm(event, ${elementId})">
+                <svg viewBox="0 0 64 64" width="15" width="15" fill="#6c40f7" xmlns="http://www.w3.org/2000/svg">
+                    <path width="15" width="15" d="M54 30H14.101l15.278-14.552a2 2 0 10-2.759-2.897L9.172 29.171A3.978 3.978 0 008 32c0 1.068.417 2.073 1.207 2.862l17.414 16.586c.387.369.883.552 1.379.552a1.999 1.999 0 001.38-3.448L14.038 34H54a2 2 0 000-4z" />
+                </svg>
+            </div>
+            <div class="da-form-heading">Ads by doceree</div>
+            <div class="action-button-container">
+                <div class="action-button" onclick="showAdBlockerForm2(event, ${elementId})">Report this Ad</div>
+                <a href="https://support.doceree.com/hc/en-us/articles/360050646094-Why-this-Ad-" target="_blank" class="why-this-da">
+                    <div class="action-button">
+                        Why this Ad?
+                        <div class='icon'>
+                            <svg height="15" width="15" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15 15">
+                                <path d="M7.5,1.5a6,6,0,1,0,0,12a6,6,0,1,0,0,-12m0,1a5,5,0,1,1,0,10a5,5,0,1,1,0,-10ZM6.625,11l1.75,0l0,-4.5l-1.75,0ZM7.5,3.75a1,1,0,1,0,0,2a1,1,0,1,0,0,-2Z" stroke="#6c40f7" stroke-width="0.3"></path>
+                            </svg></span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+          </div>
+          <div id="da-irrelative-form-2" class="da-irrelative-form size_${adSize}">
+              <div class="action-button-container">
+                  <div class="action-button" onclick="showAdBlockerForm4(event, ${elementId}, '${elementId}', '${docereeAdBlockLevelEnum.overlappingAd}')">
+                      Ad is covering the content of the website.
+                  </div>
+                  <div class="action-button" onclick="showAdBlockerForm4(event, ${elementId}, '${elementId}', '${docereeAdBlockLevelEnum.inappropriateAd}')">
+                      Ad was inappropriate.
+                  </div>
+                  <div class="action-button" onclick="showAdBlockerForm3(event, ${elementId})">
+                      Not interested in this Ad.
+                  </div>
+              </div>
+          </div>
+          <div id="da-irrelative-form-3" class="da-irrelative-form size_${adSize}">
+              <div class="action-button-container">
+                  <div class="action-button" onclick="showAdBlockerForm4(event, ${elementId}, '${elementId}', '${docereeAdBlockLevelEnum.notInterestedInCampaign}')">
+                      I'm not interested in seeing ads for this product.
+                  </div>
+                  <div class="action-button" onclick="showAdBlockerForm4(event, ${elementId}, '${elementId}', '${docereeAdBlockLevelEnum.notInterestedInBrand}')">
+                      I'm not interested in seeing ads for this brand.
+                  </div>
+                  <div class="action-button" onclick="showAdBlockerForm4(event, ${elementId},'${elementId}', '${docereeAdBlockLevelEnum.notInterestedInBrandType}')">
+                      I'm not interested in seeing ads for this category.
+                  </div>
+                  <div class="action-button" onclick="showAdBlockerForm4(event, ${elementId}, '${elementId}', '${docereeAdBlockLevelEnum.notInterestedInClientType}')">
+                      I'm not interested in seeing ads from pharmaceutical brands.
+                  </div>
+              </div>
+          </div>
+          <div id="da-irrelative-form-4" class="da-irrelative-form size_${adSize}">
+              <p class="thank-you-message">
+                  Thank you for reporting this to us. Your feedback will help us improve.
+              </p>
+              <p>This ad by doceree will now be closed.</p>
+          </div>
+        `;
+
+    function appendForm() {
+        const divOfForm = document.createElement('div');
+        divOfForm.classList.add('da-container');
+        divOfForm.classList.add('opacityadd');
+        divOfForm.style.opacity = 0;
+        divOfForm.innerHTML = formConainer;
+        elem.appendChild(divOfForm)
+    }
+
+    if (isDisplayAd) {
+        const script = document.createElement('script');
+        script.src = displayFormPath;
+        script.addEventListener('load', function () {
+            let a = window.getDisplayAd(elem, elementId, height, width, isDisplayAd, isFormEnable, cta);
+            formConainer += a;
+            appendForm();
+        });
+        document.head.appendChild(script);
+    } else {
+        appendForm();
+    }
+    
+    window.showAdBlockerForm = function (event, elem) {
+        event.stopPropagation();
+        event.preventDefault();
+        elem.querySelector(`[id=da-irrelative-form-1]`).style.display = 'flex';
+    }
+
+    window.hideAdBlockerForm = function (event, elem) {
+        event.stopPropagation();
+        event.preventDefault();
+        elem.querySelector(`[id=da-irrelative-form-1]`).style.display = 'none';
+    }
+
+    window.showAdBlockerForm2 = function (event, elem) {
+        event.stopPropagation();
+        event.preventDefault();
+        elem.querySelector(`[id=da-irrelative-form-2]`).style.display = 'flex';
+    }
+
+    window.showAdBlockerForm3 = function (event, elem) {
+        event.stopPropagation();
+        event.preventDefault();
+        elem.querySelector(`[id=da-irrelative-form-3]`).style.display = 'flex';
+    }
+
+    window.showAdBlockerForm4 = function (event, elem, elementId, blockReason) {
+        event.stopPropagation();
+        event.preventDefault();
+        let campaignId = ''
+        try {
+            if (docereeAds && docereeAds[elementId] && docereeAds[elementId].impressionLink) {
+                let adLink = docereeAds[elementId].impressionLink;
+                campaignId = new URL(adLink).searchParams.get("sb");
+            } else {
+                let iFrameElem = elem.getElementsByTagName("iframe")[0];
+                let aTags = iFrameElem.contentWindow.document.getElementsByTagName('a');
+                if (aTags.length == 0) {
+                    let innerIframe = iFrameElem.contentWindow.document.getElementsByTagName('iframe');
+                    if (innerIframe.length) {
+                        aTags = innerIframe[0].contentWindow.document.getElementsByTagName('a');
+                    }
+                }
+                if (aTags) {
+                    let adLink = aTags[0].href;
+                    campaignId = new URL(adLink).searchParams.get("sb");
+                }
+            }
+        } catch (error) {
+            // not doing anything here
+        }
+
+        elem.querySelector(`[id=da-irrelative-form-4]`).style.display = 'flex';
+        let hcpUser = getHCPFromPublisherPage();
+        let blockingInfo = {
+            publisherACSID: elementId.trim(),
+            advertiserCampID: campaignId,
+            blockLevel: blockReason,
+        }
+        try {
+            let userInfo = JSON.parse(decodeURIComponent(atob(hcpUser)));
+            if (userInfo.platformUid) {
+                blockingInfo.platformUid = userInfo.platformUid;
+            }
+        } catch (error) {
+            // not doing anything here
+        }
+        saveAdBlockingInfo(blockingInfo);
+    }
+}
+
+function saveAdBlockingInfo(options) {
+    try {
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                if (this.status == 200) {
+                    // saved successfully.
+                    setTimeout(() => {
+                        // add timeout to show thank you message.
+                        document.getElementById(options.publisherACSID).innerHTML = '';
+                        divObserver.refresh(options.publisherACSID);
+                        getDynamicImage(options.publisherACSID);
+                    }, 2000);
+                } else {
+                    logging('error in saving adblock info' + JSON.stringify({ codeSnippetId: options.publisherACSID }));
+                }
+            }
+        };
+        xhttp.open("POST", docereeTrackingBaseUrl + "/saveadblockinfo", true);
+        xhttp.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+        xhttp.send(JSON.stringify(options));
+    } catch (error) {
+        logging('error in saving adblock info: ' + error.message + ', ' + JSON.stringify({ codeSnippetId: options.publisherACSID }));
+    }
+}
+
+function registerImpression(docElem) {
+    try {
+        const link = docereeAds[docElem.id] && docereeAds[docElem.id].impressionLink;
+        if (link) {
+            UserAction('CPM', link);
+        }
+    } catch (error) {
+        logging('error in registering impression: ' + error.message + ', ' + JSON.stringify({
+            codeSnippetId: docElem.id,
+            link: docereeAds[docElem.id] && docereeAds[docElem.id].impressionLink
+        }));
+    }
+}
+
+function registerClick(docElem) {
+    try {
+        const link = docereeAds[docElem.id] && docereeAds[docElem.id].ctaLink;
+        if (docereeAds[docElem.id].clickCount < 1) {
+            docereeAds[docElem.id].clickCount++;
+            UserAction('CPC', link);
+        }
+    } catch (error) {
+        logging('error in registering click: ' + error.message + ', ' + JSON.stringify({
+            codeSnippetId: docElem.id,
+            link: docereeAds[docElem.id] && docereeAds[docElem.id].ctaLink
+        }));
+    }
+}
+
+function onAdsLoaded(docElemId, adbElemId) {
+    try {
+        if (typeof docElemId !== 'string') {
+            docElemId = docElemId.id;
+        }
+        let elem = document.getElementById(docElemId);
+        const controlsElem = elem.getElementsByClassName("da-action-container")[0];
+        controlsElem.style.display = 'flex';
+        tracking();
+    } catch (error) {
+        //not able to display controls
+    }
+}
+
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+
+}

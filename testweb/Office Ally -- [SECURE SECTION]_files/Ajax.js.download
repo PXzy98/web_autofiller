@@ -1,0 +1,612 @@
+/*
+* Create by: Thanh T. 6/25/2007 
+*/
+var arrAjax = new Array(20);
+var arrAjaxDiv = new Array(20);
+var arrAjaxStatus = new Array(20);
+var intMaxAjaxObject = 20
+
+for (j = 1; j <= intMaxAjaxObject; j++)
+{
+    arrAjaxStatus[j] = 0;
+}
+
+function Ajax(obj, url)
+{
+    var intObjectFound = 0;
+    for (j = 1; j <= intMaxAjaxObject; j++)
+    {
+        if (arrAjaxStatus[j] == 0)
+        {
+            arrAjaxStatus[j] = 1;
+            intObjectFound = j;
+            break;
+        }
+    }
+    if (intObjectFound == 0)
+    {
+        alert("All AJAX objects are busy")
+        return;
+    }
+    
+    arrAjax[intObjectFound] = null;
+    try
+    {
+        arrAjax[intObjectFound] = new ActiveXObject("Msxml2.XMLHTTP");
+    }
+    catch(e)
+    {
+        try
+        {
+            arrAjax[intObjectFound] = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        catch(oc)
+        {
+            arrAjax[intObjectFound] = null;
+        }
+    }
+    
+    if (arrAjax[intObjectFound] != null)
+    {
+        arrAjaxDiv[intObjectFound] = obj;
+        switch (intObjectFound)
+        {
+        case 1:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete1 ;
+            break;
+        case 2:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete2 ;
+            break;
+        case 3:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete3 ;
+            break;
+        case 4:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete4 ;
+            break;
+        case 5:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete5 ;
+            break;
+        case 6:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete6 ;
+            break;
+        case 7:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete7 ;
+            break;
+        case 8:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete8 ;
+            break;
+        case 9:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete9 ;
+            break;
+        case 10:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete10 ;
+            break;
+        case 11:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete11 ;
+            break;
+        case 12:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete12 ;
+            break;
+        case 13:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete13 ;
+            break;
+        case 14:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete14 ;
+            break;
+        case 15:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete15 ;
+            break;
+        case 16:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete16 ;
+            break;
+        case 17:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete17 ;
+            break;
+        case 18:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete18 ;
+            break;
+        case 19:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete19 ;
+            break;
+        case 20:
+            arrAjax[intObjectFound].onreadystatechange = Ajax_OnComplete20 ;
+            break;
+        default:
+            break;
+        }
+        arrAjax[intObjectFound].open("GET", url, true);
+        arrAjax[intObjectFound].send(null);
+    }
+}
+
+function Ajax_OnComplete1()
+{
+    AjaxIndex = 1
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                if (arrAjax[AjaxIndex].responseText == '')
+                {
+                    document.getElementById(arrAjaxDiv[AjaxIndex]).style.display = 'none';
+                }
+                else
+                {
+                    document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                    ResizePanel(arrAjaxDiv[AjaxIndex]);
+                }
+            }
+        }
+        else
+        {
+            alert("Incomplete: " + arrAjax[AjaxIndex].statusText + ", r=" + arrAjax[AjaxIndex].responseText);
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete2()
+{
+    AjaxIndex = 2
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+            alert("Incomplete: " + arrAjax[AjaxIndex].statusText + ", r=" + arrAjax[AjaxIndex].responseText);
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete3()
+{
+    AjaxIndex = 3
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+            alert("Incomplete: " + arrAjax[AjaxIndex].statusText + ", r=" + arrAjax[AjaxIndex].responseText);
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete4()
+{
+    AjaxIndex = 4
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+            alert("Incomplete: " + arrAjax[AjaxIndex].statusText + ", r=" + arrAjax[AjaxIndex].responseText);
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete5()
+{
+    AjaxIndex = 5
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+            alert("Incomplete: " + arrAjax[AjaxIndex].statusText + ", r=" + arrAjax[AjaxIndex].responseText);
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete6()
+{
+    AjaxIndex = 6
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete7()
+{
+    AjaxIndex = 7
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete8()
+{
+    AjaxIndex = 8
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete9()
+{
+    AjaxIndex = 9
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete10()
+{
+    AjaxIndex = 10
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete11()
+{
+    AjaxIndex = 11
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete12()
+{
+    AjaxIndex = 12
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete13()
+{
+    AjaxIndex = 13
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete14()
+{
+    AjaxIndex = 14
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete15()
+{
+    AjaxIndex = 15
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete16()
+{
+    AjaxIndex = 16
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete17()
+{
+    AjaxIndex = 17
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete18()
+{
+    AjaxIndex = 18
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete19()
+{
+    AjaxIndex = 19
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function Ajax_OnComplete20()
+{
+    AjaxIndex = 20
+    if (arrAjax[AjaxIndex].readyState == 4)
+    {
+        if (arrAjax[AjaxIndex].status == 200)
+        {
+            if (arrAjaxDiv[AjaxIndex] != "")
+            {
+                document.getElementById(arrAjaxDiv[AjaxIndex]).innerHTML = arrAjax[AjaxIndex].responseText;
+                ResizePanel(arrAjaxDiv[AjaxIndex]);
+            }
+        }
+        else
+        {
+        }
+        arrAjaxStatus[AjaxIndex] = 0;
+    }
+}
+
+function ResizePanel(PanelName)
+{
+    if (PanelName.indexOf("_Contents") != -1)
+    {
+        if (document.getElementById(PanelName).offsetHeight > 150)
+        {
+            document.getElementById(PanelName).style.height = 150;
+        }
+        else
+        {
+            document.getElementById(PanelName).style.height = document.getElementById(PanelName).offsetHeight;
+        }    
+
+        if (document.getElementById(PanelName).offsetHeight == 0)
+        {
+            if (document.getElementById(PanelName).innerHTML.indexOf("No data") != -1)
+            {
+                document.getElementById(PanelName).style.height = 21;
+            }
+            else
+            {
+                document.getElementById(PanelName).style.height = 150;
+            }
+        }
+    }
+    else
+    {
+        //
+    }
+}
+
+function SyncAjax(obj, url)
+{
+    var intObjectFound = 0;
+    for (j = 1; j <= intMaxAjaxObject; j++)
+    {
+        if (arrAjaxStatus[j] == 0)
+        {
+            arrAjaxStatus[j] = 1;
+            intObjectFound = j;
+            break;
+        }
+    }
+    if (intObjectFound == 0)
+    {
+        return "All AJAX objects are busy";
+    }
+    
+    arrAjax[intObjectFound] = null;
+    try
+    {
+        arrAjax[intObjectFound] = new ActiveXObject("Msxml2.XMLHTTP");
+    }
+    catch(e)
+    {
+        try
+        {
+            arrAjax[intObjectFound] = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        catch(oc)
+        {
+            arrAjax[intObjectFound] = null;
+        }
+    }
+    
+    if (arrAjax[intObjectFound] != null)
+    {
+        arrAjaxDiv[intObjectFound] = obj;
+        arrAjax[intObjectFound].open("GET", url, false);
+        arrAjax[intObjectFound].send(null);
+        strRet = arrAjax[intObjectFound].responseText;
+        arrAjaxStatus[intObjectFound] = 0;
+        return strRet;
+    }
+    else
+    {
+        return "Cannot create AJAX object"
+    }
+}

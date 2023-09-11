@@ -1,0 +1,379 @@
+/*
+* Notes: some of these codes and concepts are from @ Richard Heyes
+*               and codeproject.com
+* Rewrite and Modified by: Thanh T. 6/12/2007 for EMR
+*       - customize code for multiple AutoComplete calls per input box
+*       - simplify code
+*       - add Dropdown div and Data URL params for re-use ability
+*/
+var objAjax;
+var objTextbox;
+var divDropdownName;
+var intIndex = -1;
+var intItemCount = 0;
+var strKey = "";
+var blnAutoComplete = true;
+var objTimer;
+
+var AC_SampleData = "";
+var AC_FieldID = "";
+var AC_Status = 0;
+var AC_DropdownName = 'divAutoComplete';
+var AC_url = '/pm/Common/GetAutoCompleteData.aspx';
+
+function AutoQuickList(obj, OffsetLeft, OffsetTop, FieldID, KeyEvent)
+{
+    var keyCode = event.keyCode;
+    switch (keyCode) 
+    {
+    case 13:
+        if (intItemCount == 0)
+            return false;
+
+        if (intIndex >= 0 && intIndex < intItemCount)
+        {
+            AutoComplete_SetValue(intIndex, 1);
+            return false;
+        }
+        break;
+        
+    case 38:
+        //up
+        if (intItemCount == 0)
+            return false;
+
+        if (KeyEvent == 0)
+        {
+            intIndex = intIndex - 1;
+            if (intIndex <= -1)
+                intIndex = intItemCount-1;
+
+            AutoComplete_Highlight(intIndex);
+        }
+        break;
+        
+    case 40:
+        //down
+        if (intItemCount == 0)
+            return false;
+
+        if (KeyEvent == 0)
+        {
+            intIndex = intIndex + 1;
+            if (intIndex == intItemCount)
+                intIndex = 0;
+
+            AutoComplete_Highlight(intIndex);
+        }
+        break;
+
+    case 9:
+        //tab
+        AutoComplete_Hide(AC_DropdownName);
+        break;
+   
+    case 27:
+        AutoComplete_Hide(AC_DropdownName);
+        break;
+        
+    default:
+        if (KeyEvent == 1)
+        {
+            if ((obj.value.length > 0) && (obj.value.length % 2) == 0)
+            {
+                break;
+                return true;
+            }
+            objAjax = null;
+            try
+            {
+                objAjax = new ActiveXObject("Msxml2.XMLHTTP");
+            }
+            catch(e)
+            {
+                try
+                {
+                    objAjax = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                catch(oc)
+                {
+                    objAjax = null;
+                }
+            }
+            
+            if (objAjax != null)
+            {
+                objTextbox = obj;
+                divDropdownName = AC_DropdownName
+                
+                var pos = FindPos(obj);
+                document.getElementById(AC_DropdownName).style.left = pos[0] + OffsetLeft;
+                document.getElementById(AC_DropdownName).style.top = pos[1] + OffsetTop;
+
+                AC_SampleData = obj.value;
+                AC_FieldID = FieldID
+
+                objAjax.onreadystatechange = AutoComplete_OnComplete;
+                objAjax.open("GET", AC_url + "?FieldID=" + AC_FieldID + "&Key=" + AC_SampleData, true);
+                objAjax.send(null);
+            }
+        }
+        break;
+    }
+    return true;
+}
+
+function AutoComplete_Highlight(intIndex)
+{
+    for (j=0; j < intItemCount; j++)
+    {
+        if (j % 2)
+            document.getElementById("autocomplete_item_" + j).className = "autocomplete_item_odd";
+        else
+            document.getElementById("autocomplete_item_" + j).className = "autocomplete_item";
+
+    }
+    document.getElementById("autocomplete_item_" + intIndex).className = "autocomplete_item_highlighted";
+}
+
+function AutoComplete_OnComplete()
+{
+    if (objAjax.readyState == 4)
+    {
+        if (objAjax.status == 200)
+        {
+            if(objAjax.responseText == "")
+            {
+                AutoComplete_Hide(AC_DropdownName);
+            }
+            else
+            {
+                AutoComplete_AddResults(AC_DropdownName, objAjax.responseText);
+                AutoComplete_Show(AC_DropdownName);
+            }
+        }
+        else
+        {
+            document.getElementById(AC_DropdownName).innerHTML = "There was a problem retrieving data:<br>" + objAjax.statusText;
+        }
+    }
+}
+
+function AutoComplete_AddResults(divid, data)
+{
+    var newDiv    = null;
+    var text      = null;
+
+    while (document.getElementById(divid).childNodes.length > 0)
+    {
+        document.getElementById(divid).removeChild(document.getElementById(divid).childNodes[0]);
+    }
+    arrData = data.split("|");   
+
+    intItemCount = arrData.length;
+    intIndex = -1;
+
+    for (i=0; i < arrData.length; i++)
+    {
+        newDiv = document.createElement('div');
+        newDiv.setAttribute('id', 'autocomplete_item_' + i);
+        newDiv.setAttribute('index', i);
+        newDiv.style.zIndex = '99';
+        if (i % 2)
+            newDiv.className = 'autocomplete_item_odd'; 
+        else
+            newDiv.className = 'autocomplete_item'; 
+        
+        newDiv.onmouseover = function() {AutoComplete_Highlight(this.getAttribute('index'))};
+        newDiv.onclick = function() {AutoComplete_SetValue(this.getAttribute('index'), 0);};
+
+        text   = document.createTextNode(arrData[i]);
+        newDiv.appendChild(text);
+        
+        document.getElementById(divid).appendChild(newDiv);
+    }
+}
+
+function AutoComplete_Show(divid)
+{
+    document.getElementById(divid).style.visibility = "visible";
+    ShowHideDDLs(divid, 'none');
+    objTimer = setInterval("AutoComplete_Hide('" + divid + "')", 30000)
+}
+
+function AutoComplete_Hide(divid)
+{
+    while (document.getElementById(divid).childNodes.length > 0) 
+    {
+        document.getElementById(divid).removeChild(document.getElementById(divid).childNodes[0]);
+    }
+    document.getElementById(divid).style.visibility="hidden";
+    intItemCount = 0;
+    intIndex = -1;
+    AC_SampleData = "";
+    strKey = "";
+    ShowHideDDLs(divid, '');
+    if (objTimer)
+    {
+        clearInterval(objTimer);
+    }
+}
+
+function ShowHideDDLs(divid, DisplayMode) 
+{
+	if (navigator.appName == 'Microsoft Internet Explorer' && (navigator.userAgent.indexOf('MSIE 5') > 0 || navigator.userAgent.indexOf('MSIE 5.5') > 0 || navigator.userAgent.indexOf('MSIE 6') > 0))
+	{
+	    // go on    
+    }	    
+	else
+	{
+	    return;
+    }
+    
+    var pos = FindPos(document.getElementById(divid));
+    var intListY1 = pos[1];
+    var intListY2 = pos[1] + (intItemCount * 15);
+    var intCtrlTop;
+    var pos;
+    
+    var inputCtrls = document.getElementsByTagName("select");
+    var inputCtrlsNo = inputCtrls.length;
+    for (var x=0; x < inputCtrlsNo; x++) 
+    { 
+        if (DisplayMode == 'none')
+        {
+            pos = FindPos(inputCtrls[x]);
+            intCtrlTop = pos[1];
+            if (intCtrlTop >= intListY1 && intCtrlTop <= intListY2 && intItemCount > 0)
+                inputCtrls[x].style.display = DisplayMode;
+            else
+                inputCtrls[x].style.display = '';
+        }
+        else
+        {
+            inputCtrls[x].style.display = '';
+        }
+    }
+}
+
+function AutoComplete_SetValue(intIndex, CR)
+{
+    switch (AC_FieldID) 
+    {
+    case 'EditAppointment_LastName':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf('[');
+        if (intPos > 0)
+        {
+            SelectData1 = SelectData.substring(0, intPos);
+            SelectData2 = SelectData.substring(intPos, SelectData.length);
+        }
+        else
+        {
+            SelectData1 = SelectData;
+            SelectData2 = "";
+        }
+        arrData1 = SelectData1.split(" ")   
+        arrData2 = SelectData2.split(",")   
+        document.getElementById("ctl00_phFolderContent_LastName").value = arrData1[0].replace(",","");
+        document.getElementById("ctl00_phFolderContent_FirstName").value = arrData1[1];
+        document.getElementById("ctl00_phFolderContent_PatientID").value = arrData2[3].replace("ID: ","").replace("]","").replace(" ","");
+        document.getElementById("ctl00_phFolderContent_HomePhone").value = arrData2[2].replace(" ","");
+        break;
+
+    case 'EditAppointment_FirstName':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf('[');
+        if (intPos > 0)
+        {
+            SelectData1 = SelectData.substring(0, intPos);
+            SelectData2 = SelectData.substring(intPos, SelectData.length);
+        }
+        else
+        {
+            SelectData1 = SelectData;
+            SelectData2 = "";
+        }
+        arrData1 = SelectData1.split(" ")   
+        arrData2 = SelectData2.split(",")   
+        document.getElementById("ctl00_phFolderContent_LastName").value = arrData1[1];
+        document.getElementById("ctl00_phFolderContent_FirstName").value = arrData1[0];
+        document.getElementById("ctl00_phFolderContent_PatientID").value = arrData2[3].replace("ID: ","").replace("]","").replace(" ","");
+        document.getElementById("ctl00_phFolderContent_HomePhone").value = arrData2[2].replace(" ","");
+        break;
+
+    case 'EditAppointment_HomePhone':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf('[');
+        if (intPos > 0)
+        {
+            SelectData1 = SelectData.substring(0, intPos);
+            SelectData2 = SelectData.substring(intPos, SelectData.length);
+        }
+        else
+        {
+            SelectData1 = SelectData;
+            SelectData2 = "";
+        }
+        arrData1 = SelectData1.split(" ")   
+        arrData2 = SelectData2.split(",")   
+        document.getElementById("ctl00_phFolderContent_LastName").value = arrData1[2];
+        document.getElementById("ctl00_phFolderContent_FirstName").value = arrData1[1];
+        document.getElementById("ctl00_phFolderContent_PatientID").value = arrData2[2].replace("ID: ","").replace("]","").replace(" ","");
+        document.getElementById("ctl00_phFolderContent_HomePhone").value = arrData1[0].replace(",","");
+        break;
+
+    case 'EditAppointment_ReasonForVisit':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        document.getElementById("ctl00_phFolderContent_ReasonForVisit").value = SelectData;
+        break;
+
+    case 'ApplyPayment_LastName':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf('[');
+        if (intPos > 0)
+        {
+            SelectData1 = SelectData.substring(0, intPos);
+            SelectData2 = SelectData.substring(intPos, SelectData.length);
+        }
+        else
+        {
+            SelectData1 = SelectData;
+            SelectData2 = "";
+        }
+        arrData1 = SelectData1.split(" ")   
+        arrData2 = SelectData2.split(",")   
+        document.getElementById("ctl00_phFolderContent_PatientLastName").value = arrData1[0].replace(",","");
+        document.getElementById("ctl00_phFolderContent_PatientFirstName").value = arrData1[1];
+        document.getElementById("ctl00_phFolderContent_PatientID").value = arrData2[3].replace("ID: ","").replace("]","").replace(" ","");
+        break;
+
+    case 'ApplyPayment_FirstName':
+        SelectData = document.getElementById("autocomplete_item_" + intIndex).innerHTML;
+        intPos = SelectData.indexOf('[');
+        if (intPos > 0)
+        {
+            SelectData1 = SelectData.substring(0, intPos);
+            SelectData2 = SelectData.substring(intPos, SelectData.length);
+        }
+        else
+        {
+            SelectData1 = SelectData;
+            SelectData2 = "";
+        }
+        arrData1 = SelectData1.split(" ")   
+        arrData2 = SelectData2.split(",")   
+        document.getElementById("ctl00_phFolderContent_PatientLastName").value = arrData1[1];
+        document.getElementById("ctl00_phFolderContent_PatientFirstName").value = arrData1[0];
+        document.getElementById("ctl00_phFolderContent_PatientID").value = arrData2[3].replace("ID: ","").replace("]","").replace(" ","");
+        break;
+
+    default:
+        document.getElementById(objTextbox.id).value = document.getElementById(objTextbox.id).value.substr(0, document.getElementById(objTextbox.id).value.length - (AC_SampleData.length+2));
+        document.getElementById(objTextbox.id).value = document.getElementById(objTextbox.id).value + document.getElementById("autocomplete_item_" + intIndex).innerHTML + "\r";
+        break;
+    }
+
+    AutoComplete_Hide(AC_DropdownName);
+}
+

@@ -1,0 +1,1527 @@
+﻿//----------------------------------------------------------
+// Copyright (C) Office Ally. All rights reserved.
+//----------------------------------------------------------
+(function ($) {
+
+    $.oa.ui.controls = $.oa.ui.controls || {};
+    var h = [], Q = {};
+    var n = $.oa.host.notificationService;
+
+    $.oa.ui.controls.base = function () {
+        function f(a) { if (this.getType() === f) throw new Error("You cannot instantiate an abstract type."); this.getTypeName(); this.initializeOptions(a) }
+        f.enhance = function (b, e, a) {
+            var d, c, h, g;
+            if (typeof b !== "function") { a = e; e = b; b = this }
+            if (e instanceof f) c = e.getElement();
+            else c = $(e);
+            if (!d) {
+                if ($.isFunction(a)) a = a.call(b, c);
+                d = new b(a);
+                d.enhance(c);
+            }
+            return d
+        };
+        f.getType = function () { return this };
+        f.prototype._attemptInitialize = function () { this._options.earlyInitialize && this.initialize() };
+        f.prototype._bind = function (b, c, d, f) { var a, g = this, e; if (typeof b === "string") { f = d; d = c; c = b; b = this._element } a = $(b); if (a.length > 0) { e = this._getEventNameSpace(); a.bind($.map(c.split(" "), function (a) { return a + "." + e }).join(" "), d); f && a.each(function () { this !== g._element[0] && g._trackElement(this) }) } return this };
+        f.prototype._unbind = function (b, c, f, d) { var a, g = this, e; if (typeof b === "string") { f = d; d = c; c = b; b = this._element } a = $(b); if (a.length > 0) { e = this._getEventNameSpace(); a.unbind($.map(c.split(" "), function (a) { return a + "." + e }).join(" "), f); d && a.each(function () { this !== g._element[0] && g._untrackElement(this) }) } return this };
+        f.prototype.delayExecute = function (c, d, f, e) {
+            var b;
+            if (!c) { $.oa.core.delay(this, d, e); return }
+            if (!this._delayedFunctions) this._delayedFunctions = {};
+            b = this._delayedFunctions[c];
+            if (b) { b.setDelay(d); b.setMethod(this, e) } else { b = new $.oa.core.delayedFunction(this, d, c, e); this._delayedFunctions[c] = b }
+            if (f) b.reset(); else b.start()
+        };
+        f.prototype.cancelDelayedFunction = function (b) { var a; if (this._delayedFunctions) { a = this._delayedFunctions[b]; if (a) { a.cancel(); return true } } return false };
+        f.prototype._enhance = function (a) { this._setElement(a) };
+        f.prototype._fire = function (a, b, c) { if (typeof a === "string") { c = b; b = a; a = this._element } return a.trigger(b, c) };
+        f.prototype._getEventNameSpace = function () { if (!this._eventNamespace) this._eventNamespace = this.getTypeName().replace(/\./g, "_") + this._getId(); return this._eventNamespace };
+        f.prototype._getUniqueId = function () { return $.oa.ui.getId() };
+        f.prototype._getId = function () { !this._id && this._setId(this._getUniqueId()); return this._id };
+        f.prototype._setElement = function (c) {
+            var e = this.getType(), b;
+            if (this._element !== c) {
+                this._element = c;
+                this._setStyles();
+            }
+        };
+        f.prototype._setId = function (a) { this._id = a };
+        f.prototype._setStyles = function () { this._options.coreCssClass && this._element.addClass(this._options.coreCssClass); this._options.cssClass && this._element.addClass(this._options.cssClass) };
+        f.prototype.enhance = function (a) { this._enhance(a); this._attemptInitialize() };
+        f.prototype.getElement = function () { return this._element };
+        f.prototype.getType = function () { return this.constructor };
+        f.prototype.getTypeName = function () { if (!this._typeName) this._typeName = f.getTypeName(this.getType()); return this._typeName };
+        f.prototype.initializeOptions = function (a) { this._options = $.extend({ earlyInitialize: true, enabled: true }, a) };
+        f.prototype.initialize = function () { this._initialized = true; };
+        f.getTypeName = function (a) { var b; if (typeof a !== "function") a = this; b = a._typeName || "oa.ui.controls." + $.oa.getTypeName(a); return b };
+        f.registerJQueryWidget = function (b, a, d) {
+            var c; if (typeof b === "string") { d = a; a = b; b = this }
+            if (!a) { a = b._widgetName; if (!a) { c = f.getTypeName(b); m(c ? true : false, "_widgetName or _typeName needs to present in order to register this control as JQuery widget."); a = c.split("."); a = a[a.length - 1] } }
+            $.fn[a] = function (options) { return this.each(function () { f.enhance(b, $(this), $.extend(d || {}, options)) }) }
+        };
+        f.prototype._cleanup = function () {
+            var c = this.getType(), b; if (this._element) {
+                this._unbind("remove.remove_" + this.getTypeName());
+                this._element.unbind("." + this._getEventNameSpace());
+            }
+        };
+        f.prototype._dispose = function () { var b = this._trackedElements, a, c; if (b) for (a = 0, c = b.length; a < c; a++) $(b[a]).unbind("." + this._getEventNameSpace()); this._trackedElements = null; this._disposed = true };
+        f.prototype.dispose = function () { this._cleanup(); this._dispose() };
+        return f;
+    }();
+
+    $.oa.ui.controls.BaseDataSource = function () {
+        function b(b) {
+            this._options = $.extend({ sorted: false, comparer: $.oa.core.string.localeIgnoreCaseComparer }, b);
+            this.setSource(this._options.source);
+        }
+        b.prototype.setSource = function (a) { this._source = a; this._items = null; this._allItems = null };
+        b.prototype.prepareSource = function (c) {
+            var b = c || [];
+            this._options.sorted && a.ArrayUtils.sortIfNotSorted(b, this._options.comparer || a.StringUtils.localeIgnoreCaseComparer);
+            this.setItems(b)
+        };
+        b.prototype.getComparer = function () { return this._options.comparer };
+        b.prototype.ensureItems = function () {
+            var a;
+            if (!this._items) {
+                a = this._source;
+                if ($.isFunction(a)) a = a.call(this);
+                this.prepareSource(a)
+            }
+        };
+        b.prototype.getItems = function (a) { this.ensureItems(); return a ? this._allItems : this._items };
+        b.prototype.setItems = function (b, a) { this._items = b || []; this._allItems = a || this._items };
+        b.prototype.getCount = function (a) { return this.getItems(a).length };
+        b.prototype.getItem = function (a, b) { return this.getItems(b)[a] };
+        b.prototype.getItemText = function (a, b) { return this.getItem(a, b) + "" };
+        b.prototype.getItemIndex = function (c, m, d) {
+            var b, k, i, j, e, g = this._options.comparer, h, f, l;
+            if (!c) return -1;
+            h = this.getItems(d);
+            if (this._options.sorted) {
+                e = c.length;
+                j = 0;
+                i = h.length - 1;
+                while (i >= j) {
+                    b = j + i >> 1;
+                    l = this.getItemText(b, d);
+                    f = g(c, l.substr(0, e));
+                    if (f < 0) i = b - 1;
+                    else if (f > 0) j = b + 1;
+                    else break
+                }
+                if (f === 0)
+                    if (l.length === e) return b;
+                    else if (m) {
+                        while (b > 0 && g(c, this.getItemText(b - 1, d).substr(0, e)) === 0) b--;
+                        return b
+                    }
+            } else if (m) {
+                for (b = 0, k = h.length; b < k; b++)
+                    if ($.oa.core.string.startsWith(this.getItemText(b, d), c, g)) return b
+            } else
+                for (b = 0, k = h.length; b < k; b++)
+                    if (g(this.getItemText(b, d), c) === 0) return b; return -1
+        };
+        b.prototype.nextIndex = function (a, c, d) {
+            var b = this.getCount(d);
+            return b < 1 ? -1 : a < 0 ? 0 : c > 0 ? a === b - 1 ? -1 : Math.min(b - 1, a + c) : a === 0 ? -1 : Math.max(0, a + c)
+        };
+        return b;
+    }();
+
+    $.oa.ui.controls.ListDataSource = function (b) {
+        $.oa._extends(a, b);
+        function a(a) { b.call(this, a) }
+        return a
+    }($.oa.ui.controls.BaseDataSource);
+
+    $.oa.ui.controls.webcontrol = function (b) {
+        $.oa._extends(a, b);
+        function a(a) { b.call(this, a) }
+        a.createIn = function (b, a, e) { var d, c; if (typeof b !== "function") { e = a; a = b; b = this } d = new b(e); if (a instanceof $.oa.ui.controls.base) c = a.getElement(); else c = $(a); d.createIn(c); return d };
+        a.prototype.initializeOptions = function (a) { b.prototype.initializeOptions.call(this, $.extend({ tagName: "div" }, a)) };
+        a.prototype.createIn = function (a) { this._createIn(a); this._initializeElement(); this._attemptInitialize() };
+        a.prototype.dispose = function () { b.prototype.dispose.call(this); if (this._element) { this._element.remove(); this._element = null } };
+        a.prototype._createIn = function (a) { this._createElement(); a.append(this._element) };
+        a.prototype._createElement = function () { var a = $($.oa.ui.dom(this._options.tagName || "div")); this._setElement(a) };
+        a.prototype._initializeElement = function () { if (this._element) this._options.id && this._setId(this._options.id) };
+        a.prototype._setStyles = function () {
+            var a = this._element;
+            this._options.width && a.width(this._options.width);
+            this._options.height && a.height(this._options.height);
+            this._options.title && a.attr("title", this._options.title);
+            b.prototype._setStyles.call(this)
+        };
+        a.prototype.focus = function () { this._element.focus() };
+        a.prototype._fireChange = function (a) {
+            var b; a = a || this;
+            if ($.isFunction(this._options.change)) { b = arguments; b[0] = a; b.length = arguments.length || 1; if (this._options.change.apply(a, b) === false) return false }
+            return this._fire("change", a)
+        };
+        return a;
+    }($.oa.ui.controls.base);
+
+    $.oa.ui.controls.VirtualizingListView = function (b) {
+        $.oa._extends(a, b);
+        function a(a) { b.call(this, a) }
+        a.prototype.initializeOptions = function (a) { b.prototype.initializeOptions.call(this, $.extend({ coreCssClass: "virtualizing-list-view", maxRowCount: 8, selectedIndex: -1 }, a)) };
+        a.prototype.initialize = function () {
+            this._bind("click", $.oa.core.delegate(this, this._onClick));
+            this._itemsContainer = $($.oa.ui.dom("ul", "items"));
+            this._bind(this._itemsContainer, "mouseover", $.oa.core.delegate(this, this._onMouseOver));
+            this._bind(this._itemsContainer, "mousemove", $.oa.core.delegate(this, this._onMouseMove));
+            this._bind(this._itemsContainer, $.oa.core.browser.isFirefox() ? "DOMMouseScroll" : "mousewheel", $.oa.core.delegate(this, this._onMouseWheel));
+            this._element.append(this._itemsContainer);
+            this._scrollContainer = $($.oa.ui.dom("div", "scroller"));
+            this._bind(this._scrollContainer, "scroll", $.oa.core.delegate(this, this._onScroll));
+            this._scrollSpacer = $($.oa.ui.dom("div", "content-spacer"));
+            this._scrollContainer.append(this._scrollSpacer);
+            this._element.append(this._scrollContainer);
+            this._dataSource = this._options.dataSource;
+            this._selectedIndex = this._options.selectedIndex;
+            this.update();
+            this._enableMouseOver = true;
+            b.prototype.initialize.call(this)
+        };
+        a.prototype.update = function () {
+            var b, a;
+            b = this._dataSource.getCount();
+            this.visibleRowCount = Math.min(b, this._options.maxRowCount);
+            if (this._selectedIndex >= 0) this._selectedIndex = Math.min(this._selectedIndex, b - 1);
+            this._setVisibleBounds(this._selectedIndex);
+            this._drawItems();
+            a = this._itemsContainer.outerHeight();
+            this._element.height(a);
+            this._setupScrollbar(a)
+        };
+        a.prototype.scrollItemIntoView = function (a) {
+            this._setVisibleBounds(a);
+            this._drawItems();
+            this._updateScrollbar()
+        };
+        a.prototype.selectNext = function (b) {
+            var a = this._dataSource.nextIndex(this._selectedIndex, b ? this.visibleRowCount : 1);
+            if (a >= 0) {
+                this.setSelectedIndex(a);
+                this._fireSelectionChanged();
+                return true
+            }
+            return false
+        };
+        a.prototype.selectPrev = function (b) {
+            var a = this._dataSource.nextIndex(this._selectedIndex, -(b ? this.visibleRowCount : 1));
+            if (a >= 0) {
+                this.setSelectedIndex(a);
+                this._fireSelectionChanged();
+                return true
+            }
+            return false
+        };
+        a.prototype.getSelectedIndex = function () { return this._selectedIndex };
+        a.prototype.setSelectedIndex = function (a, b) { if (this._selectedIndex !== a) { this._selectedIndex = a; !b && this.scrollItemIntoView(a) } };
+        a.prototype._setVisibleBounds = function (a) {
+            a = a || 0;
+            if (a <= this._firstVisible) this._firstVisible = Math.max(0, a);
+            else if (a >= this._firstVisible + this.visibleRowCount) this._firstVisible = Math.max(0, Math.min(a, this._dataSource.getCount() - this.visibleRowCount));
+            this._firstVisible = Math.max(0, Math.min(this._firstVisible, this._dataSource.getCount() - this.visibleRowCount))
+        };
+        a.prototype._createItem = function (b) { var a = this._dataSource.getItemText(b) || ""; return $($.oa.ui.dom("li", this._options.itemCss)).text(a).attr("title", a) };
+        a.prototype._drawItems = function () {
+            var a, b, d, e = this._options.createItem || this._createItem, c;
+            this._itemsContainer.empty();
+            b = this._firstVisible;
+            d = Math.min(b + this.visibleRowCount, this._dataSource.getCount());
+            for (a = b; a < d; a++) {
+                c = e.call(this, a);
+                c.data("index", a);
+                this._itemsContainer.append(c)
+            }
+            this._updateItemStyles();
+            this._enableMouseOver = false
+        };
+        a.prototype._updateItemStyles = function () {
+            var b = this._firstVisible, a = this._selectedIndex;
+            this._itemsContainer.children("li").each(function (c) { $(this).toggleClass("selected", c + b === a) })
+        };
+        a.prototype._setupScrollbar = function (c) {
+            var b = this._dataSource.getCount(),
+            a = this.visibleRowCount < b;
+            this._element.toggleClass("scroll", a);
+            if (a) {
+                this._rowHeight = (c || this._itemsContainer.outerHeight()) / this.visibleRowCount;
+                this._scrollSpacer.height(this._rowHeight * b);
+                this._updateScrollbar()
+            }
+        };
+        a.prototype._updateScrollbar = function () {
+            try {
+                this._ignoreScrollEvent = true;
+                this._scrollContainer.scrollTop(this._rowHeight * this._firstVisible)
+            } finally { this._ignoreScrollEvent = false }
+        };
+        a.prototype._onScroll = function () {
+            var a = this._dataSource.getCount();
+            if (!this._ignoreScrollEvent) {
+                this._firstVisible = Math.max(0, Math.min(Math.floor(this._scrollContainer.scrollTop() / this._rowHeight), a - this.visibleRowCount));
+                this._drawItems()
+            }
+            return false
+        };
+        a.prototype._onMouseMove = function (b) {
+            var a = b.screenX + "-" + b.screenY;
+            if (!this._prevMousePos || this._prevMousePos !== a) {
+                this._prevMousePos = a;
+                this._enableMouseOver = true
+            }
+        };
+        a.prototype._onMouseOver = function (c) {
+            var b = $(c.target), a;
+            if (this._enableMouseOver) {
+                this._enableMouseOver = false;
+                a = b.closest("li");
+                if (a.length) {
+                    this._selectedIndex = a.data("index");
+                    this._updateItemStyles()
+                }
+            }
+        };
+        a.prototype._onMouseWheel = function (b) {
+            var a;
+            a = o.getWheelDelta(b);
+            if (a !== 0) {
+                this._firstVisible = Math.max(0, Math.min(this._firstVisible + (a > 0 ? -1 : 1), this._dataSource.getCount() - this.visibleRowCount));
+                this.scrollItemIntoView(this._firstVisible);
+                return false
+            }
+        };
+        a.prototype._onClick = function (d) {
+            var c = $(d.target), a, b;
+            a = c.closest("li");
+            if (a.length) {
+                b = a.data("index");
+                if (this._options.itemClick)
+                    if (this._options.itemClick.call(this, d, b, c, a) === false) return false;
+                this.setSelectedIndex(b);
+                this._updateItemStyles();
+                this._fireSelectionChanged(true)
+            }
+        };
+        a.prototype._fireSelectionChanged = function (a) {
+            this._options.selectionChange && this._options.selectionChange.call(this, this._selectedIndex, a)
+        };
+        a._typeName = "oa.virtualizingListView";
+        return a
+    }($.oa.ui.controls.webcontrol);
+
+    $.oa.initClassPrototype($.oa.ui.controls.VirtualizingListView,
+	{ _itemsContainer: null, _scrollContainer: null, _scrollSpacer: null, _dataSource: null, visibleRowCount: 1, _firstVisible: 0, _selectedIndex: -1, _ignoreScrollEvent: false, _rowHeight: 20, _enableMouseOver: true, _prevMousePos: null });
+
+    $.oa.ui.controls.dialog = function (g) {
+        $.oa._extends(e, g);
+        function e(b) { g.call(this, b); }
+        e._typeName = "oa.ui.controls.dialog";
+        e._dialogActionInProgress = false;
+        e.create = function (d, a) {
+            var b;
+            if ($("#" + $.oa.ui.formatID(a.dlgid))[0] !== undefined) { b = $("#" + a.dlgid); }
+            else { b = a && a.content || $("<div />").attr("id", a.dlgid); }
+            a && a.contentText && b.text(a.contentText);
+            return $.oa.ui.controls.base.enhance(d, b, a)
+        };
+        e.show = function (a, b) { return this.create(a, $.extend({ autoOpen: true }, b)) };
+        e.prototype.initializeOptions = function (a) {
+            g.prototype.initializeOptions.call(this,
+            $.extend({
+                coreCssClass: "dialog",
+                position: "center",
+                widthPct: .8, heightPct: .8,
+                modal: true,
+                draggable: true,
+                resizable: true,
+                autoOpen: false,
+                dynamicSize: true,
+                disposeOnClose: false
+            }, a))
+        };
+        e.prototype.initialize = function () {
+            g.prototype.initialize.call(this);
+            var h = this, i = $(window), c;
+            c = $.extend({}, this._options);
+            this._options.attachResize && this._bind("dialogresizestop", $.oa.core.delegate(this, this.onDialogResize));
+            this._options.resizable && this._bind("dialogresize", $.oa.core.delegate(this, this._onDialogResizing));
+            c.title = this.getTitle();
+            c.close = function (a) { h._options.close && h._options.close.call(this, a); h.onClose(a) };
+            c.open = function (a) { h._options.open && h._options.open.call(this, a); h.onOpen(a) };
+            if (c.dynamicSize) { c.width = i.width() * c.widthPct; c.height = i.height() * c.heightPct; n.attachEvent("window-resize", this._resizeDelegate); this._bind("dialogclose", function () { n.fire("dialog-close", h); n.detachEvent("window-resize", h._resizeDelegate) }) }
+            if (c.height && !isNaN(c.height)) c.height = Math.min(c.height, i.height());
+            if (c.width && !isNaN(c.width)) c.width = Math.min(1200, c.width, i.width());
+            this._element.dialog(c);
+            this._element.keydown(function (c) { var b, d, a; if (c.keyCode === $.ui.keyCode.ENTER) { a = $(c.target); if (!c.shiftKey && a.is("input[type='text']")) if (h._options.defaultButton && h._options.buttons) { b = h._options.buttons[h._options.defaultButton]; if (b) { d = $("#" + b.id).button("option"); !d.disabled && b.click.apply(this, [c]) } return false } if (!a.is("textarea") && !a.is("a") && !a.hasClass("propagate-keydown-event")) return false } });
+            this._element.dialog("option", "closeText", "Close");
+            e._dialogActionInProgress = false;
+        };
+        e.prototype.onLoadCompleted = function (a) { g.prototype.onLoadCompleted.call(this, a); this.setInitialFocus(); };
+        e.prototype.setInitialFocus = function () { var a = this._options.initialFocusSelector || ":visible:tabbable"; this._element.find(a).first().focus() };
+        e.prototype.setFormFocusDelayed = function (a) { b.assertParamIsObject(a, "$field"); f.delay(this, 300, function () { a.eq(0).focus().select() }) };
+        e.prototype.setTitle = function (a) { this._title = a; this._updateTitle() };
+        e.prototype.getTitle = function () { return this._title || this._options.title || this._element.attr("title") || "" };
+        e.prototype.getDialogResult = function () { return this._dialogResult };
+        e.prototype.setDialogResult = function (a) { this._dialogResult = a };
+        e.prototype.show = function () { this._element.dialog("open") };
+        e.prototype.onOpen = function () {
+            var a;
+            if (!this._options || this._options.hasProgressElement !== false) {
+                a = $("<div />").addClass("ui-dialog-titlebar-progress-container").appendTo(this._element.parent().find(".ui-dialog-titlebar"));
+                this._progressElement = $("<div />").addClass("ui-dialog-titlebar-progress-element").appendTo(a);
+                $.oa.globalProgressIndicator.registerProgressElement(this._progressElement);
+            }
+        };
+        e.prototype.onClose = function () {
+            var a;
+            this._progressElement && $.oa.globalProgressIndicator.unRegisterProgressElement(this._progressElement);
+            this._options.disposeOnClose && this.dispose();
+            a = $(".ui-dialog").slice(-1);
+            a.length && a.focus();
+        };
+        e.prototype.close = function () { this._element && this._element.dialog("close") };
+        e.prototype.onDialogResize = function () { };
+        e.prototype._updateTitle = function () { this._initialized && this._element && this._element.dialog("option", "title", f.StringUtils.htmlEncode(this.getTitle())) };
+        e.prototype._onWindowResize = function () { var b = $(window), a = this._options; this._element.dialog("option", { width: b.width() * a.widthPct, height: b.height() * a.heightPct }); this._element.dialog("option", { position: a.position }) };
+        e.prototype._onDialogResizing = function (e, a) { var d = $(window), b, c; if (!a || !a.position || !a.size) return; b = Math.min(a.size.height, d.height() - a.position.top); c = Math.min(a.size.width, d.width() - a.position.left); (b !== a.size.height || c !== a.size.width) && this._element.dialog("option", { width: c, height: b }) };
+        return e
+    }($.oa.ui.controls.webcontrol);
+
+    $.oa.ui.controls.modaldialog = function (e) {
+        $.oa._extends(c, e);
+        function c(a) { e.call(this, a); var b; b = this }
+        c._typeName = "oa.ui.controls.modaldialog";
+        c.EVENT_BUTTON_STATUS_CHANGE = "buttonStatusChange";
+        c.prototype.initializeOptions = function (b) {
+            e.prototype.initializeOptions.call(this,
+            $.extend({
+                coreCssClass: "dialog modal-dialog",
+                modal: true,
+                dynamicSize: false,
+                width: 500,
+                height: "auto",
+                defaultButton: "ok",
+                oagray: false,
+                buttons: {
+                    ok: { id: "ok", text: b && b.okText || "OK", click: $.oa.core.delegate(this, this.onOkClick), disabled: "disabled" },
+                    cancel: { id: "cancel", text: b && b.cancelText || "Cancel", click: $.oa.core.delegate(this, this.onCancelClick) }
+                }
+            }, b))
+        };
+        c.prototype.initialize = function () {
+            this._bind(c.EVENT_BUTTON_STATUS_CHANGE, $.oa.core.delegate(this, this.onButtonStatusChange));
+            this._bind("resultReady", $.oa.core.delegate(this, this.onResultReady));
+            e.prototype.initialize.call(this);
+            if (this._options.oagray) this._element.parent().addClass("oa-popup-gray");
+            if (oaApp) oaApp.loadCss('CommonUserControls/_static/css/popup/oagray.css');
+        };
+        c.prototype.updateOkButton = function (a) { this._element && this._element.trigger(c.EVENT_BUTTON_STATUS_CHANGE, { enabled: a === true }) };
+        c.prototype.processResult = function (c) { var a = this._options.okCallback; if (c) { if ($.isFunction(a)) { a.call(this, c); } this.close() } };
+        c.prototype.onOkClick = function () { this.processResult(this.getDialogResult()) };
+        c.prototype.onResultReady = function (b, a) { this.processResult(a) };
+        c.prototype.onCancelClick = function () { $.isFunction(this._options.cancelCallback) && this._options.cancelCallback(); this.close() };
+        c.prototype.onButtonStatusChange = function (b, a) { this._element.siblings(".ui-dialog-buttonpane").find("#" + (a.button || "ok")).button("option", "disabled", a.enabled ? "" : "disabled") };
+        return c
+    }($.oa.ui.controls.dialog);
+
+    $.oa.ui.controls.confirmationdialog = function (c) {
+        $.oa._extends(a, c);
+        function a(a) { c.call(this, a) }
+        a.prototype.initializeOptions = function (a) { c.prototype.initializeOptions.call(this, $.extend({ width: 400, height: 200, resizable: false, cssClass: "confirmation-dialog" }, a)) };
+        a.prototype.initialize = function () {
+            c.prototype.initialize.call(this);
+            this.$errorContainer = $($.oa.ui.dom("div")).addClass("confirmation-dialog-error").prependTo(this._element).hide();
+            this.updateOkButton(true)
+        };
+        a.prototype._onSuccess = function () {
+            this._fire("resultReady", true);
+            var a = this._options.successCallback;
+            if ($.isFunction(a)) { a.apply(this, arguments); }
+        };
+        a.prototype._onError = function (a) { this.$errorContainer.text(a.message).show() };
+        a.prototype.onOkClick = function (a) { this.updateOkButton(false); c.prototype.onOkClick.call(this, a) };
+        return a
+    }($.oa.ui.controls.modaldialog);
+
+    $.oa.ui.controls.dateSelector = function (g) {
+        $.oa._extends(e, g);
+        function e(b) { g.call(this, b); }
+        e._typeName = "oa.ui.controls.dateSelector";
+        e.prototype.initializeOptions = function (a) {
+            g.prototype.initializeOptions.call(this,
+            $.extend({
+                text: '',
+                sep: "&nbsp;",
+                dt: new Date(),
+                popupAbove: false,
+                initDate: true,
+                required: true,
+                bootstrap: false,
+                disabled: false,
+                showclearicon: false,
+                iconpath: '/images/calendar.gif',
+                iconclass: '',
+                dayCSS: 'textbox',
+                monthCSS: 'textbox',
+                yearCSS: 'textbox',
+                periodCSS: 'textbox',
+                yrRange: '',
+                showTime: false,
+                useBootstrap: false,
+            }, a))
+        };
+        e.prototype.initialize = function () {
+            var q = this;
+            g.prototype.initialize.call(this);
+            var index = this._options.index, prefix = this._options.prefix, text = this._options.text;
+            var _td1 = this._element;
+
+            if (this._options.bootstrap) {
+                _buildElementsBootstrap(q);
+            }
+            else {
+                _buildElements(q)
+            }
+
+            this._ctl = $([]).add(this._D).add(this._M).add(this._Y).add(this._H).add(this._m).add(this._T);
+            this._ctl.keydown(function (a) { return $.oa.dateKeyDown(a, this); }).keyup(function (a) { return $.oa.dateAutoTab(a, this); });
+            this._ctl.on('paste', function (e) { return false; }).on('drop', function (e) { return false; }).on('focus', function () { $(this).select(); });
+            if (!this._options.showTime) {
+                if (this._options.initDate) this.SetDate(this._options.dt);
+            } else {
+                if (this._options.initDate) this.SetDateTime(this._options.dt);
+            }
+        }
+
+        function _buildElements(q) {
+            g.prototype.initialize.call(q);
+            var index = q._options.index, prefix = q._options.prefix, text = q._options.text;
+            var _td1 = q._element;
+            if (text !== '') $($.oa.ui.dom("span")).html(text).appendTo(_td1);
+            q._M = $("<input />").attr("type", "text").attr("id", prefix + "M_" + index).attr("name", prefix + "M_" + index).attr("maxlength", "2").prop('required', q._options.required).css("width", "17px").addClass(q._options.dayCSS).appendTo(_td1);
+            if (q._options.disabled) q._M.attr("disabled", true);
+            q.GetSeparator().appendTo(_td1);
+            q._D = $("<input />").attr("type", "text").attr("id", prefix + "D_" + index).attr("name", prefix + "D_" + index).attr("maxlength", "2").prop('required', q._options.required).css("width", "17px").addClass(q._options.monthCSS).appendTo(_td1);
+            if (q._options.disabled) q._D.attr("disabled", true);
+            q.GetSeparator().appendTo(_td1);
+            q._Y = $("<input />").attr("type", "text").attr("id", prefix + "Y_" + index).attr("name", prefix + "Y_" + index).attr("maxlength", "4").prop('required', q._options.required).css("width", "32px").addClass(q._options.yearCSS).appendTo(_td1);
+            if (q._options.disabled) q._Y.attr("disabled", true);
+
+            if (!q._options.disabled && q._options.iconclass.length === 0) {
+                $($.oa.ui.dom("img")).attr('src', q._options.iconpath).appendTo(_td1).click(function (a) {
+                    $.oa.datepicker('[id$=' + prefix + 'M_' + index + ']', '[id$=' + prefix + 'D_' + index + ']', '[id$=' + prefix + 'Y_' + index + ']', q._options.popupAbove, q._options.yrRange);
+                });
+            }
+            if (!q._options.disabled && q._options.iconclass.length > 0) {
+                $($.oa.ui.dom("span")).attr('class', q._options.iconclass).appendTo(_td1).click(function (a) {
+                    $.oa.datepicker('[id$=' + prefix + 'M_' + index + ']', '[id$=' + prefix + 'D_' + index + ']', '[id$=' + prefix + 'Y_' + index + ']', q._options.popupAbove, q._options.yrRange);
+                });
+            }
+            if (!q._options.disabled && q._options.showclearicon) {
+                $($.oa.ui.dom("span")).html("&nbsp;").appendTo(_td1);
+
+                var $elem = $($.oa.ui.dom("img")).attr('src', '/images/delete_x.png');
+                if (q._options.cleariconclass) {
+                    $elem = $($.oa.ui.dom("span")).attr('class', q._options.cleariconclass);
+                }
+
+                $elem.attr('title', 'Clear Date').appendTo(_td1).click(function (a) {
+                    $('#' + prefix + 'M_' + index).val('').removeClass('ui-state-error');
+                    $('#' + prefix + 'D_' + index).val('').removeClass('ui-state-error');
+                    $('#' + prefix + 'Y_' + index).val('').removeClass('ui-state-error');
+                    if (showtime) {
+                        $('#' + prefix + 'H_' + index).val('').removeClass('ui-state-error');
+                        $('#' + prefix + 'm_' + index).val('').removeClass('ui-state-error');
+                        $('#' + prefix + 'T_' + index).val('').removeClass('ui-state-error');
+                    }
+                });
+            };
+
+            if (q._options.showTime) {
+                q.GetSeparator(true).appendTo(_td1);
+                q.GetSeparator(true).appendTo(_td1);
+                q._H = $("<input />").attr("type", "text").attr("id", prefix + "H_" + index).attr("name", prefix + "H_" + index).attr("maxlength", "2").prop('required', q._options.required).css("width", "17px").addClass(q._options.monthCSS).appendTo(_td1);
+                q.GetSeparator(true).appendTo(_td1);
+                $("<span />").text(':').appendTo(_td1);
+                q.GetSeparator(true).appendTo(_td1);
+                q._m = $("<input />").attr("type", "text").attr("id", prefix + "m_" + index).attr("name", prefix + "m_" + index).attr("maxlength", "2").prop('required', q._options.required).css("width", "17px").addClass(q._options.monthCSS).appendTo(_td1);
+                q.GetSeparator(true).appendTo(_td1);
+                q._T = $("<select />").attr("type", "text").attr("id", prefix + "T_" + index).attr("name", prefix + "T_" + index).attr("maxlength", "2").prop('required', q._options.required).css("width", "45px").addClass(q._options.periodCSS).appendTo(_td1);
+                $(q._T).append("<option val='AM'>AM</option>");
+                $(q._T).append("<option val='PM'>PM</option>");
+            } else {
+                q._H = $("<input />").attr("type", "text").attr("id", prefix + "H_" + index).attr("name", prefix + "H_" + index).attr("maxlength", "2").css("display", "none").addClass("textbox");
+                q._m = $("<input />").attr("type", "text").attr("id", prefix + "m_" + index).attr("name", prefix + "m_" + index).attr("maxlength", "2").css("display", "none").addClass("textbox");
+                q._T = $("<select />").attr("type", "text").attr("id", prefix + "T_" + index).attr("name", prefix + "T_" + index).attr("maxlength", "2").css("display", "none").addClass("textbox");
+            }
+
+            $($.oa.ui.dom("span")).html("&nbsp;").appendTo(_td1)
+        }
+        function _buildElementsBootstrap(q) {
+            g.prototype.initialize.call(q);
+            var text = q._options.text, _td1 = q._element;
+            if (text !== '') $($.oa.ui.dom("span")).html(text).appendTo(_td1);
+            var dateContainer = $("<div>").addClass("col-md-4 margin-1");
+            q._M = _buildInput(q, "M_", "2", "day", dateContainer);
+            if (q._options.disabled) q._M.attr("disabled", true);
+            q._D = _buildInput(q, "D_", "2", "month", dateContainer);
+            if (q._options.disabled) q._D.attr("disabled", true);
+            q._Y = _buildInput(q, "Y_", "4", "year", dateContainer);
+            if (q._options.disabled) q._Y.attr("disabled", true);
+
+            if (!q._options.disabled && q._options.iconclass.length === 0) {
+                $("<img>").addClass("margin-l").attr('src', q._options.iconpath).appendTo(dateContainer)
+                .click(function (a) {
+                    var index = q._options.index, prefix = q._options.prefix, text = q._options.text, css = '';
+                    $.oa.datepicker('[id$=' + prefix + 'M_' + index + ']', '[id$=' + prefix + 'D_' + index + ']', '[id$=' + prefix + 'Y_' + index + ']', q._options.popupAbove, q._options.yrRange);
+                });
+            }
+            if (!q._options.disabled && q._options.iconclass.length > 0) {
+                $("<span>").addClass("margin-l").attr('class', q._options.iconclass).appendTo(dateContainer)
+                .click(function (a) {
+                    var index = q._options.index, prefix = q._options.prefix, text = q._options.text, css = '';
+                    $.oa.datepicker('[id$=' + prefix + 'M_' + index + ']', '[id$=' + prefix + 'D_' + index + ']', '[id$=' + prefix + 'Y_' + index + ']', q._options.popupAbove, q._options.yrRange);
+                });
+            }
+            if (!q._options.disabled && q._options.showclearicon) {
+                $($.oa.ui.dom("span")).html("&nbsp;").appendTo(_td1);
+
+                var $elem = $($.oa.ui.dom("img")).attr('src', '/images/delete_x.png');
+                if (q._options.cleariconclass) {
+                    $elem = $($.oa.ui.dom("span")).attr('class', q._options.cleariconclass);
+                }
+
+                $elem.attr('title', 'Clear Date').appendTo(_td1).click(function (a) {
+                    $('#' + prefix + 'M_' + index).val('').removeClass('ui-state-error');
+                    $('#' + prefix + 'D_' + index).val('').removeClass('ui-state-error');
+                    $('#' + prefix + 'Y_' + index).val('').removeClass('ui-state-error');
+                    if (showtime) {
+                        $('#' + prefix + 'H_' + index).val('').removeClass('ui-state-error');
+                        $('#' + prefix + 'm_' + index).val('').removeClass('ui-state-error');
+                        $('#' + prefix + 'T_' + index).val('').removeClass('ui-state-error');
+                    }
+                });
+            };
+
+            dateContainer.appendTo(_td1);
+
+            if (q._options.showTime) {
+                var timeContainer = $("<div>").addClass("col-md-2 margin-1r");
+                q._H = _buildInput(q, "H_", "2", "month", timeContainer);
+                q._m = _buildInput(q, "m_", "2", "month", timeContainer);
+                timeContainer.appendTo(_td1);
+
+                var periodContainer = $("<div>").addClass("col-md-2");
+                q._T = _buildSelect(q, "T_", "2", "period", periodContainer);
+                $(q._T).append("<option val='AM'>AM</option>");
+                $(q._T).append("<option val='PM'>PM</option>");
+                periodContainer.appendTo(_td1);
+            } else {
+                var index = q._options.index, prefix = q._options.prefix;
+                var timeContainer = $("<div>").addClass("col-md-3 margin-1r");
+                q._H = $("<input />").attr("type", "text").attr("id", prefix + "H_" + index).attr("name", prefix + "H_" + index).attr("maxlength", "2").css("display", "none").addClass("textbox");
+                q._H.appendTo(timeContainer);
+                q._m = $("<input />").attr("type", "text").attr("id", prefix + "m_" + index).attr("name", prefix + "m_" + index).attr("maxlength", "2").css("display", "none").addClass("textbox");
+                q._m.appendTo(timeContainer);
+                timeContainer.appendTo(_td1);
+                var periodContainer = $("<div>").addClass("col-md-1");
+                q._T = $("<select />").attr("type", "text").attr("id", prefix + "T_" + index).attr("name", prefix + "T_" + index).attr("maxlength", "2").css("display", "none").addClass("textbox");
+                q._T.appendTo(periodContainer);
+                periodContainer.appendTo(_td1);
+            }
+
+            function _buildInput(q, field, maxLength, cssType, target) {
+                var index = q._options.index, prefix = q._options.prefix, text = q._options.text, css = '';
+                switch (cssType) {
+                    case "day":
+                        css = q._options.dayCSS;
+                        break;
+                    case "month":
+                        css = q._options.monthCSS;
+                        break;
+                    case "year":
+                        css = q._options.yearCSS;
+                        break;
+                    case "period":
+                        css = q._options.periodCSS;
+                        break;
+                }
+
+                return $("<input />")
+                    .attr("type", "text")
+                    .attr("id", prefix + field + index)
+                    .attr("name", prefix + field + index)
+                    .attr("maxlength", maxLength)
+                    .prop('required', q._options.required)
+                    .addClass(css)
+                    .appendTo(target);
+            }
+            function _buildSelect(q, field, maxLength, cssType, target) {
+                var index = q._options.index, prefix = q._options.prefix, text = q._options.text, css = '';
+                switch (cssType) {
+                    case "month":
+                        css = q._options.monthCSS;
+                        break;
+                    case "year":
+                        css = q._options.yearCSS;
+                        break;
+                    case "period":
+                        css = q._options.periodCSS;
+                        break;
+                }
+
+                return $("<select />")
+                    .attr("type", "text")
+                    .attr("id", prefix + field + index)
+                    .attr("name", prefix + field + index)
+                    .attr("maxlength", maxLength)
+                    .prop('required', q._options.required)
+                    .addClass(css)
+                    .appendTo(target);
+            }
+        }
+
+        e.prototype.GetSeparator = function (isTime) {
+            // isTime is an optional parameter.  If a separator is declared when this control is initialized, then that separator will be used
+            // If isTime is passed in as true then no separator should be used, so a non-breaking space is used.  Otherwise the separator is used.
+            isTime = isTime || false;
+            if (isTime) {
+                return $($.oa.ui.dom("span")).html("&nbsp;");
+            } else {
+                return $($.oa.ui.dom("span")).html(this._options.sep);
+            }
+        }
+        e.prototype.clear = function () { this._ctl.removeClass('ui-state-error'); }
+        e.prototype.setError = function () { this._ctl.addClass('ui-state-error'); }
+        e.prototype.validateDate = function () {
+            var q = this, d = true, dd = q._D.val(), mm = q._M.val(), yy = q._Y.val();
+            q.clear();
+            if (q._options.required) {
+                if (dd.length <= 0) {
+                    q._D.addClass('ui-state-error');
+                    d = false;
+                }
+                if (mm.length <= 0) {
+                    q._M.addClass('ui-state-error');
+                    d = false;
+                }
+                if (yy.length <= 0) {
+                    q._Y.addClass('ui-state-error');
+                    d = false;
+                }
+            }
+            if (dd.length <= 0) {
+            } else if (dd * 1 > 31) {
+                q._D.addClass('ui-state-error');
+                d = false;
+            }
+            if (mm.length <= 0) {
+            } else if (mm * 1 > 12) {
+                q._M.addClass('ui-state-error');
+                d = false;
+            }
+            if (d) {
+                var dt1 = new Date('1/1/1900'), dt2 = new Date('12/31/2100');
+                var dt = new Date(q._M.val() + '/' + q._D.val() + '/' + q._Y.val());
+                if (dt <= dt1 || dt >= dt2) {
+                    q._D.addClass('ui-state-error');
+                    q._M.addClass('ui-state-error');
+                    q._Y.addClass('ui-state-error');
+                    d = false;
+                }
+            }
+            return d;
+        }
+        e.prototype.validateDateTime = function () {
+            var q = this, d = true, dd = q._D.val(), mm = q._M.val(), yy = q._Y.val(), hh = q._H.val(), mi = q._m.val();
+            var countDateItems = 0, countTimeItems = 0;
+            var isRequired = q._options.required;
+            q.clear();
+
+            // count the number of items for Date and Time
+            if (dd.length > 0) {
+                countDateItems = countDateItems + 1;
+            }
+            if (mm.length > 0) {
+                countDateItems = countDateItems + 1;
+            }
+            if (yy.length > 0) {
+                countDateItems = countDateItems + 1;
+            }
+            if (hh.length > 0) {
+                countTimeItems = countTimeItems + 1;
+            }
+            if (mi.length > 0) {
+                countTimeItems = countTimeItems + 1;
+            }
+
+            // Check the values and set/clear error styles for each:
+            // month
+            if ((mm.length <= 0) || (mm * 1 > 12)) {
+                q._M.addClass('ui-state-error');
+                d = false;
+            } else {
+                q._M.removeClass('ui-state-error');
+            }
+            // day
+            if ((dd.length <= 0) || (dd * 1 > 31)) {
+                q._D.addClass('ui-state-error');
+                d = false;
+            } else {
+                q._D.removeClass('ui-state-error');
+            }
+            // year
+            if ((yy.length < 4) || (yy * 1 > 2100)) {
+                q._Y.addClass('ui-state-error');
+                d = false;
+            } else {
+                q._Y.removeClass('ui-state-error');
+            }
+            // hour
+            if ((hh.length <= 0) || (hh * 1 > 12)) {
+                q._H.addClass('ui-state-error');
+                d = false;
+            } else {
+                q._H.removeClass('ui-state-error');
+            }
+            // minute
+            if ((mi.length <= 0) || (mi * 1 > 59)) {
+                q._m.addClass('ui-state-error');
+                d = false;
+            } else {
+                q._m.removeClass('ui-state-error');
+            }
+
+            // If there is a real datetime...
+            if (d) {
+                var dt1 = new Date('1/1/1900 00:00'), dt2 = new Date('12/31/2100 23:59');
+                var dt = new Date(q._M.val() + '/' + q._D.val() + '/' + q._Y.val() + ' ' + q._H.val() + ':' + q._m.val() + ' ' + q._T.val());
+                if (dt <= dt1 || dt >= dt2) {
+                    q._D.addClass('ui-state-error');
+                    q._M.addClass('ui-state-error');
+                    q._Y.addClass('ui-state-error');
+                    q._H.addClass('ui-state-error');
+                    q._m.addClass('ui-state-error');
+                    d = false;
+                }
+            }
+            // if the date is not required AND the user clears the control, then return true and remove error style class
+            if (!isRequired && countDateItems === 0 && countTimeItems === 0) {
+                q._D.removeClass('ui-state-error');
+                q._M.removeClass('ui-state-error');
+                q._Y.removeClass('ui-state-error');
+                q._H.removeClass('ui-state-error');
+                q._m.removeClass('ui-state-error');
+                d = true;
+            }
+            return d;
+        }
+        e.prototype.validate = function (isRequired) {
+            var d = true;
+            this.clear();
+            if (isRequired == true) {
+                if (this._options.showTime) {
+                    d = this.validateDateTime();
+                    if (d) {
+                        var curr = new Date();
+                        var dt = new Date(this._M.val() + '/' + this._D.val() + '/' + this._Y.val() + ' ' + this._H.val() + ':' + this._m.v() + ' ' + parsInt(this._H.val()) > 11 ? "AM" : "PM" );
+                        if (dt > curr) {
+                            this._D.addClass('ui-state-error');
+                            this._M.addClass('ui-state-error');
+                            this._Y.addClass('ui-state-error');
+                            if (this._options.showTime) {
+                                this._H.addClass('ui-state-error');
+                                this._m.addClass('ui-state-error');
+                            }
+                            d = false;
+                        }
+                    }
+                }
+                else {
+                    d = this.validateDate();
+                    if (d) {
+                        var curr = new Date();
+                        var dt = new Date(this._M.val() + '/' + this._D.val() + '/' + this._Y.val());
+                        if (dt > curr) {
+                            this._D.addClass('ui-state-error');
+                            this._M.addClass('ui-state-error');
+                            this._Y.addClass('ui-state-error');
+                            d = false;
+                        }
+                    }
+                }
+            }
+            return d;
+        }
+        e.prototype.validatePast = function () {
+            var d = true, dt = this.GetDateString();
+            this.clear();
+            if (dt != '1/1/1900') {
+                if ((new Date(dt + ' 23:59:59')) < (new Date())) {
+                    this.setError();
+                    d = false;
+                }
+            }
+            return d;
+        }
+        e.prototype.validateFuture = function () {
+            var d = true, dt = this.GetDateString();
+            this.clear();
+            if (dt != '1/1/1900') {
+                if ((new Date(dt)) > (new Date())) {
+                    this.setError();
+                    d = false;
+                }
+            }
+            return d;
+        }
+        e.prototype.GetDateString = function (s) {
+            s = s || '/';
+            var dd1, mm1, yy1;
+            dd1 = this._D.val();
+            mm1 = this._M.val();
+            yy1 = this._Y.val();
+            if (this._D.is(':hidden')) { dd1 = "01"; }
+            if (dd1.length <= 0) { dd1 = "01"; }
+            if (mm1.length <= 0) { mm1 = "01"; }
+            if (yy1.length <= 0) { yy1 = "1900"; }
+            var dt = new Date(mm1 + '/' + dd1 + '/' + yy1);
+            return dt.getMonth() + 1 + s + dt.getDate() + s + dt.getFullYear();
+        }
+        e.prototype.GetDateTimeString = function (s) {
+            s = s || '/';
+            var dd1, mm1, yy1;
+            dd1 = this._D.val();
+            mm1 = this._M.val();
+            yy1 = this._Y.val();
+            hh1 = this._H.val();
+            mi1 = this._m.val();
+            tt1 = this._T.val();
+            if (this._D.is(':hidden')) { dd1 = "01"; }
+            if (dd1.length <= 0) { dd1 = "01"; }
+            if (mm1.length <= 0) { mm1 = "01"; }
+            if (yy1.length <= 0) { yy1 = "1900"; }
+            if (hh1.length <= 0) { hh1 = "12"; }
+            if (hh1 > 23) { hh1 = hh1 % 24; }
+            if (mi1.length <= 0) { mi1 = "00"; }
+            if (mi1 > 60) { mi1 = mi1 % 60; }
+            var dt = new Date(mm1 + '/' + dd1 + '/' + yy1 + ' ' + hh1 + ':' + mi1 + ' ' + tt1);
+            var _sb = [];
+            _sb.push(dt.getMonth() + 1 + s + dt.getDate() + s + dt.getFullYear() + ' ');
+            _sb.push((dt.getHours() % 12 == 0 ? "12" : dt.getHours() % 12) + ':');
+            _sb.push(dt.getMinutes() < 10 ? '0' + dt.getMinutes() + ' ' : dt.getMinutes() + ' ');
+            _sb.push(dt.getHours() < 12 ? "AM" : dt.getHours() == 0 ? "AM" : "PM");
+
+            return _sb.join('');
+        }
+        e.prototype.SetDate = function (dt) {
+            if (Object.prototype.toString.call(dt) !== "[object Date]") dt = new Date(dt);
+            if (!isNaN(dt.getTime())) {
+                this._D.val(dt.getDate());
+                this._M.val(dt.getMonth() + 1);
+                this._Y.val(dt.getFullYear());
+            }
+        }
+        e.prototype.SetDateTime = function (dt) {
+            if (Object.prototype.toString.call(dt) !== "[object Date]") dt = new Date(dt);
+            if (!isNaN(dt.getTime())) {
+                this._D.val(dt.getDate());
+                this._M.val(dt.getMonth() + 1);
+                this._Y.val(dt.getFullYear());
+                this._H.val(dt.getHours() % 12 == 0 ? "12" : (dt.getHours() % 12 < 10 ? "0" + dt.getHours() % 12 : dt.getHours() % 12));
+                this._m.val(dt.getMinutes() < 10 ? "0" + dt.getMinutes() : dt.getMinutes());
+                this._T.val(dt.getHours() < 12 ? "AM" : "PM");
+            }
+        }
+        e.prototype.SetDateVisibility = function (v) {
+            if (v) { this._D.show(); this._D.next().show(); }
+            else { this._D.hide(); this._D.next().hide(); this._D.val('1') }
+        }
+        e.prototype.ClearDate = function () {
+            this._D.val('');
+            this._M.val('');
+            this._Y.val('');
+            this._H.val('');
+            this._m.val('');
+            this._T.val('');
+        }
+        return e
+    }($.oa.ui.controls.webcontrol);
+
+    $.oa.ui.controls.phone = function (g) {
+        $.oa._extends(e, g);
+        function e(b) { g.call(this, b); }
+        e._typeName = "oa.ui.controls.phone";
+        e.prototype.initializeOptions = function (a) {
+            g.prototype.initializeOptions.call(this,
+            $.extend({
+                sep: "-",
+                dt: null,
+                index: 0,
+                disabled: false,
+                required: false,
+                style: 1,
+                addext: false
+            }, a))
+        };
+        e.prototype.initialize = function () {
+            var q = this;
+            g.prototype.initialize.call(this);
+            var index = this._options.index, prefix = this._options.prefix;
+            var _td1 = this._element;
+            if (this._options.style === 2) $($.oa.ui.dom("span")).html("(").appendTo(_td1);
+            this._t1 = $("<input />").attr("type", "text").attr("id", prefix + "p1_" + index).attr("name", prefix + "p1_" + index).attr("maxlength", "3").prop('required', q._options.required).css("width", "20px").appendTo(_td1);
+            if (this._options.disabled) this._t1.attr("disabled", true);
+            if (this._options.style === 2) $($.oa.ui.dom("span")).html(") ").appendTo(_td1); else this.GetSeparator().appendTo(_td1);
+            this._t2 = $("<input />").attr("type", "text").attr("id", prefix + "p2_" + index).attr("name", prefix + "p2_" + index).attr("maxlength", "3").prop('required', q._options.required).css("width", "20px").appendTo(_td1);
+            if (this._options.disabled) this._t2.attr("disabled", true);
+            this.GetSeparator().appendTo(_td1);
+            this._t3 = $("<input />").attr("type", "text").attr("id", prefix + "p3_" + index).attr("name", prefix + "p3_" + index).attr("maxlength", "4").prop('required', q._options.required).css("width", "30px").appendTo(_td1);
+            this._t4 = {};
+            if (this._options.addext) {
+                $($.oa.ui.dom("span")).html(" Ex: ").attr("id", prefix + "_ext").appendTo(_td1);
+                this._t4 = $("<input />").attr("type", "text").attr("id", prefix + "p4_" + index).attr("name", prefix + "p4_" + index).attr("keyblock", "num").attr("maxlength", "10").css("width", "30px").appendTo(_td1);
+            }
+
+            if (this._options.disabled) this._t3.attr("disabled", true);
+            this._ctl = $([]).add(this._t1).add(this._t2).add(this._t3);
+            this._ctl.keydown(function (a) { return $.oa.phoneKeyDown(a, this); }).keyup(function (a) { return $.oa.phoneAutoTab(a, this); });
+            this._ctl.on('paste', function (e) { return false; }).on('drop', function (e) { return false; }).on('focus', function () { $(this).select(); });
+            this.set(this._options.dt);
+        }
+        e.prototype.GetSeparator = function () { return $($.oa.ui.dom("span")).html(this._options.sep); }
+        e.prototype.clear = function () { this._ctl.removeClass('ui-state-error'); }
+        e.prototype.validateNumber = function () {
+            var d = true, n = this.val();
+            this.clear();
+            if (n.length <= 0) return d;
+            if (this._t1.val().length < 3) {
+                this._t1.addClass('ui-state-error');
+                d = false;
+            }
+            if (this._t2.val().length < 3) {
+                this._t2.addClass('ui-state-error');
+                d = false;
+            }
+            if (this._t3.val().length < 4) {
+                this._t3.addClass('ui-state-error');
+                d = false;
+            }
+            return d;
+        }
+        e.prototype.validate = function (isRequired) {
+            var d = this.validateNumber(), n = this.val();
+            if (d) {
+                if (isRequired == true) {
+                    if (n.length < 10) {
+                        this._t1.addClass('ui-state-error');
+                        this._t2.addClass('ui-state-error');
+                        this._t3.addClass('ui-state-error');
+                        d = false;
+                    }
+                }
+            }
+            return d;
+        }
+        e.prototype.val = function (a) { return a === true ? this._t1.val() + '-' + this._t2.val() + '-' + this._t3.val() : this._t1.val() + this._t2.val() + this._t3.val(); }
+        e.prototype.ext = function () { return this._t4.val(); }
+        e.prototype.set = function (dt) {
+            this._t1.val("");
+            this._t2.val("");
+            this._t3.val("");
+            if (dt != null) {
+                var nr = dt.split('-');
+                if (nr.length > 0) {
+                    this._t1.val(nr[0].substring(0, 3));
+                }
+                if (nr.length > 1) {
+                    this._t2.val(nr[1].substring(0, 3));
+                } else this._t2.val(nr[0].substring(3, 3));
+                if (nr.length > 2) {
+                    this._t3.val(nr[2].substring(0, 4));
+                } else this._t3.val(nr[0].substring(6, 4));
+            }
+        }
+        e.prototype.setext = function (dt) {
+            this._t4.val(dt);
+        }
+        return e
+    }($.oa.ui.controls.webcontrol);
+
+    $.oa.ui.controls.BaseComboBehavior = function () {
+        function b(c, b) { this.combo = c; this._options = b || {}; this._onForceHideDropPopupDelegate = $.oa.core.delegate(this, this.onForceHideDropPopup); }
+        b.prototype.initialize = function () { this._options.source && this.setSource(this._options.source); };
+        b.prototype.dispose = function () { this.hideDropPopup() };
+        b.prototype.isDropVisible = function () { return this._dropPopup };
+        b.prototype.setMode = function (a) { this._options.mode = a };
+        b.prototype.canType = function () { return true };
+        b.prototype.getDataSource = function () { return this._dataSource };
+        b.prototype.getDropOptions = function () {
+            return $.extend({
+                combo: this.combo,
+                anchor: this.combo.getElement(),
+                host: this.combo.getElement(),
+                width: this.getDropWidth(),
+                dropElementAlign: "left-top",
+                dropBaseAlign: "left-bottom",
+                dataSource: this._dataSource
+            }, this._options.dropOptions)
+        };
+        b.prototype.getDropWidth = function () { return this.combo.getElement().outerWidth() - 2 };
+        b.prototype.showDropPopup = function () {
+            var b = this._options.dropControlType, a;
+            this._dropPopup && this.hideDropPopup();
+            if (b) {
+                a = this.getDropOptions();
+                a.width = this.getDropWidth();
+                this._attachGlobalEvents();
+                this._dropPopup = $.oa.ui.controls.webcontrol.createIn(b, a.host || $(document.body), a);
+                this._options.dropShow && this._options.dropShow(this._dropPopup);
+                return true
+            }
+            return false
+        };
+        b.prototype.hideDropPopup = function () {
+            if (this._dropPopup) {
+                this._detachGlobalEvents();
+                if (!this._options.dropHide || this._options.dropHide(this._dropPopup)) {
+                    this._dropPopup.dispose();
+                    this._dropPopup = null;
+                    return true
+                }
+                this._dropPopup = null
+            }
+            return false
+        };
+        b.prototype.toggleDropDown = function () {
+            if (this._dropPopup) this.hideDropPopup();
+            else this.showDropPopup()
+        };
+        b.prototype.isDropPopupOpen = function () {
+            return Boolean(this._dropPopup)
+        };
+        b.prototype.setSource = function (a) { this._dataSource && this._dataSource.setSource(a); };
+        b.prototype.getSelectedIndex = function () { return -1 };
+        b.prototype.setSelectedIndex = function () { };
+        b.prototype.getText = function () { return this.combo.getInputText() };
+        b.prototype.setText = function (a, b) { typeof a !== "undefined" && this.combo.setInputText(a, b) };
+        b.prototype.upKey = function () { };
+        b.prototype.downKey = function (a) { if (a.altKey) if (this.showDropPopup()) return false };
+        b.prototype.pageUpKey = function () { };
+        b.prototype.pageDownKey = function () { };
+        b.prototype.leftKey = function () { };
+        b.prototype.rightKey = function () { };
+        b.prototype.keyDown = function () { };
+        b.prototype.keyPress = function () { };
+        b.prototype.keyUp = function () { };
+        b.prototype.onForceHideDropPopup = function () { this.hideDropPopup() };
+        b.prototype._attachGlobalEvents = function () {
+            this.combo._bind(this.combo.getElement().parents(), "scroll", this._onForceHideDropPopupDelegate);
+            n.attachEvent("dialog-move", this._onForceHideDropPopupDelegate)
+        };
+        b.prototype._detachGlobalEvents = function () {
+            this.combo._unbind(this.combo.getElement().parents(), "scroll", this._onForceHideDropPopupDelegate);
+            n.detachEvent("dialog-move", this._onForceHideDropPopupDelegate)
+        };
+        return b
+    }();
+
+    $.oa.ui.controls.Combo = function (c) {
+        $.oa._extends(b, c);
+        function b(a) { c.call(this, a); }
+        b.registerBehavior = function (a, b) { Q[a] = b };
+        b.attachBehavior = function (b, c) {
+            var a = Q[b._options.type];
+            if (b._options.type) a = Q[b._options.type];
+            else a = v;
+            return a ? new a(b, c) : null
+        };
+        b._typeName = "oa.ui.controls.Combo";
+        b.prototype.initializeOptions = function (a) {
+            c.prototype.initializeOptions.call(this, $.extend({
+                allowEdit: true,
+                type: "list",
+                treeLevel: 1,
+                mode: "drop",
+                dropWidth: "dynamic",
+                dropCount: 8,
+                invalidCss: "invalid",
+                disabledCss: "disabled",
+                dropButtonHoverCss: "hover",
+                inputCss: undefined,
+                coreCssClass: "combo"
+            }, a))
+        };
+        b.prototype._dispose = function () {
+            if (this._behavior) {
+                $.isFunction(this._behavior.dispose) && this._behavior.dispose();
+                this._behavior = null;
+            }
+            c.prototype._dispose.call(this)
+        };
+        b.prototype._createIn = function (a) {
+            c.prototype._createIn.call(this, a);
+            this._input = $($.oa.ui.dom("input")).attr("type", "text");
+            this._options.id && this._input.attr("id", this._options.id + "_txt");
+            if (typeof this._options.value !== "undefined") {
+                this._input.val(this._options.value);
+                this._currentText = this.getInputText();
+            }
+            this._decorate();
+        };
+        b.prototype._enhance = function (a) { this._createElement(); this._input = a; a.after(this.getElement()); this._decorate(); this._currentText = this.getInputText() };
+        b.prototype.initialize = function () {
+            this._ensureBehavior();
+            c.prototype.initialize.call(this)
+        };
+        b.prototype.getBehavior = function () { return this._behavior };
+        b.prototype.getText = function () { return this._behavior.getText() };
+        b.prototype.setText = function (b, a) { return this._behavior.setText(b, a) };
+        b.prototype.getInput = function () { return this._input };
+        b.prototype.getInputText = function () { return this._input.val() };
+        b.prototype.setInputText = function (a, b) { this._input.val(a); this._input.attr("title", a); if (b) this.fireChangeIfNecessary(a); else this._currentText = a };
+        b.prototype.getSelectedIndex = function () { return this._behavior.getSelectedIndex() };
+        b.prototype.setSelectedIndex = function (a, b) { this._behavior.setSelectedIndex(a, b) };
+        b.prototype.fireChangeIfNecessary = function (a) {
+            if (typeof a === "undefined") a = this.getText();
+            if (this._currentText !== a) { this._currentText = a; this._input.attr("title", a); return this._fireChange() }
+        };
+        b.prototype.toggleDropDown = function () {
+            this._behavior.toggleDropDown();
+            this._input.focus();
+            this._fire("dropDownToggled", {
+                isDropVisible: this._behavior.isDropVisible(),
+                target: this.getElement()
+            })
+        };
+        b.prototype.showDropPopup = function () { this._behavior.showDropPopup(); this._input.focus() };
+        b.prototype.hideDropPopup = function () { return this._behavior.hideDropPopup() };
+        b.prototype.isDropPopupOpen = function () { return this._behavior.isDropPopupOpen() };
+        b.prototype.blockBlur = function () { this._blockBlur = true; this.delayExecute("blockBlur", 200, true, function () { this.cancelBlockBlur() }) };
+        b.prototype.cancelBlockBlur = function () { this._blockBlur = false; this.cancelDelayedFunction("blockBlur") };
+        b.prototype._onInputKeyDown = function (a) {
+            this._options.onKeyDown && this._options.onKeyDown.call(this, a);
+            if (this._behavior.keyDown(a) === false) return false;
+            switch (a.keyCode) {
+                case 33:
+                    return this._options.enabled ? this._behavior.pageUpKey(a) : false;
+                case 38:
+                    return this._options.enabled ? this._behavior.upKey(a) : false;
+                case 34:
+                    return this._options.enabled ? this._behavior.pageDownKey(a) : false;
+                case 40:
+                    return this._options.enabled ? this._behavior.downKey(a) : false;
+                case 37:
+                    return this._options.enabled ? this._behavior.leftKey(a) : false;
+                case 39:
+                    return this._options.enabled ? this._behavior.rightKey(a) : false;
+                case 9:
+                    this.cancelBlockBlur();
+                    break;
+                case 13:
+                case 27:
+                    this.fireChangeIfNecessary();
+                    if (this.hideDropPopup()) return false;
+                    break;
+                default:
+                    if (!this._behavior.canType()) return false
+            }
+        };
+        b.prototype.setTextSelection = function (c) {
+            var b, a = this._input[0];
+            if (a.setSelectionRange) a.setSelectionRange(c, a.value.length);
+            else if (a.createTextRange) { b = a.createTextRange(); b.moveStart("character", c); b.select() }
+        };
+        b.prototype.setSource = function (a) { this._behavior.setSource(a) };
+        b.prototype.getEnabled = function () { return this._options.enabled === true };
+        b.prototype.setEnabled = function (a) { this._options.enabled = a === true; this._updateStyles() };
+        b.prototype.getMode = function () { return this._options.mode };
+        b.prototype.setMode = function (a) { this._options.mode = a; this._behavior.setMode(a); this._updateStyles() };
+        b.prototype.setType = function (a) { if (this._options.type !== a) { this.hideDropPopup(); this.getElement().removeClass(this._options.type); this._options.type = a; this._ensureBehavior(); this._updateStyles() } };
+        b.prototype.setInvalid = function (a) { this.getElement().toggleClass(this._options.invalidCss, a) };
+        b.prototype._ensureBehavior = function () {
+            if (this._behavior) { $.isFunction(this._behavior.dispose) && this._behavior.dispose(); this._behavior = null }
+            this._behavior = b.attachBehavior(this, this._options);
+            if (!this._behavior) throw Error.create($.oa.core.string.format("Unsupported combo behavior '{0}'.", this._options.type));
+            this._behavior.initialize()
+        };
+        b.prototype._decorate = function () {
+            var g = this, c = this._options, d = this.getElement(), b = this._input, f;
+            d.val = function () { return !arguments.length ? g.getText() : g.setText(arguments[0], false) };
+            b.attr("autocomplete", "off");
+            this._bind("mousedown", $.oa.core.delegate(this, this._onMouseDown));
+            this._bind(b, "keydown", $.oa.core.delegate(this, this._onInputKeyDown));
+            this._bind(b, "keypress", $.oa.core.delegate(this, this._onInputKeyPress));
+            this._bind(b, "keyup", $.oa.core.delegate(this, this._onInputKeyUp));
+            this._bind(b, "focus", $.oa.core.delegate(this, this._onInputFocus));
+            this._bind(b, "blur", $.oa.core.delegate(this, this._onInputBlur));
+            this._bind(b, "click", $.oa.core.delegate(this, this._onInputClick));
+            if (!c.allowEdit) { b.attr("readonly", true); d.addClass("no-edit") }
+            c.inputCss && b.addClass(c.inputCss);
+            b.bind("change input", function () { return g.fireChangeIfNecessary() });
+            c.noDropButton && d.addClass("no-background");
+            f = $($.oa.ui.dom("div", "wrap"));
+            f.append(b);
+            this._options.label && this._options.id && f.append($($.oa.ui.dom("label", "hidden")).append(this._options.label).attr("For", b.attr("id")));
+            if (c.iconCss) { $($.oa.ui.dom("div", "preWrapIcon")).addClass(c.iconCss).appendTo(d); f.addClass("withIcon") }
+            d.append(f);
+            this.$dropButton = $($.oa.ui.dom("div", "drop"));
+            this._bind(this.$dropButton, "mouseenter", function () { $(this).addClass(c.dropButtonHoverCss) });
+            this._bind(this.$dropButton, "mouseleave", function () { $(this).removeClass(c.dropButtonHoverCss) });
+            this._bind(this.$dropButton, "click", $.oa.core.delegate(this, this._onDropButtonClick));
+            d.append(this.$dropButton);
+            this._updateStyles()
+        };
+        b.prototype._updateStyles = function () {
+            var c = this.getElement(), d = this._input, a, b;
+            c.addClass(this._options.type);
+            a = this._options.enabled;
+            if (a && this._options.allowEdit) d.removeAttr("readonly");
+            else d.attr("readonly", true);
+            d.toggleClass(this._options.disabledCss, !a);
+            b = a && this._options.mode === "drop";
+            c.toggleClass("drop", b && !this._options.noDropButton);
+            c.toggleClass("text", !b)
+        };
+        b.prototype._onDropButtonClick = function () { this.toggleDropDown(); return false };
+        b.prototype._onInputClick = function () { !this._options.allowEdit && this._options.enabled && this.toggleDropDown(); return false };
+        b.prototype._onInputFocus = function () { !this._blockBlur && this._input.select(); $.isFunction(this._options.focus) && this._options.focus.apply(this, arguments) };
+        b.prototype._onInputBlur = function () {
+            if (!this._disposed) {
+                this.fireChangeIfNecessary();
+                if (this._blockBlur) {
+                    this._input.focus(10);
+                    this._blockBlur = false
+                } else this.hideDropPopup();
+                $.isFunction(this._options.blur) && this._options.blur.apply(this, arguments)
+            }
+        };
+        b.prototype._onMouseDown = function () { this.blockBlur() };
+        b.prototype._onInputKeyPress = function (a) { return this._behavior.keyPress(a) };
+        b.prototype._onInputKeyUp = function (b) { var a = this._behavior.keyUp(b); this.fireChangeIfNecessary(); return a };
+        b._typeName = "oa.combo";
+        return b
+    }($.oa.ui.controls.webcontrol);
+
+    $.oa.ui.controls.BaseComboDropPopup = function (c) {
+        $.oa._extends(b, c);
+        function b(a) { c.call(this, a); this.combo = this._options.combo; }
+        b.prototype.initializeOptions = function (a) {
+            c.prototype.initializeOptions.call(this, $.extend({ coreCssClass: "combo-drop-popup" }, a))
+        };
+        b.prototype.initialize = function () {
+            this._bind("mousedown", $.oa.core.delegate(this, this._onMouseDown));
+            this.setPosition();
+            c.prototype.initialize.call(this)
+        };
+        b.prototype.setPosition = function () {
+            $.oa.ui.Positioning.position(this.getElement(), this._options.anchor, { elementAlign: this._options.dropElementAlign, baseAlign: this._options.dropBaseAlign });
+        };
+        b.prototype._onMouseDown = function () { this.combo.blockBlur(); };
+        return b
+    }($.oa.ui.controls.webcontrol);
+
+    function db(c, a) { var b = $.extend({}, c); a && $.each(a, function (c, a) { delete b[a] }); return b }
+    $.oa.ui.controls.ComboListDropPopup = function (b) {
+        $.oa._extends(a, b);
+        function a(a) { b.call(this, a); }
+        a.prototype.initializeOptions = function (a) { b.prototype.initializeOptions.call(this, $.extend({ itemCss: "" }, a)) };
+        a.prototype.initialize = function () {
+            this.dataSource = this._options.dataSource;
+            this.virtualizingListView = $.oa.ui.controls.base.enhance($.oa.ui.controls.VirtualizingListView, this.getElement(), $.extend(db(this._options, ["coreCssClass"]), {
+                maxRowCount: this._options.dropCount
+            }));
+            b.prototype.initialize.call(this)
+        };
+        a.prototype.selectPrev = function (a) { return this.virtualizingListView.selectPrev(a) };
+        a.prototype.selectNext = function (a) { return this.virtualizingListView.selectNext(a) };
+        a.prototype.getSelectedIndex = function () { return this.virtualizingListView.getSelectedIndex() };
+        a.prototype.getSelectedValue = function () { return this.dataSource.getItemText(this.virtualizingListView.getSelectedIndex()) };
+        a.prototype.setSelectedValue = function (a) { var b = a ? this.dataSource.getItemIndex(a) : -1; this.virtualizingListView.setSelectedIndex(b) };
+        return a
+    }($.oa.ui.controls.BaseComboDropPopup);
+
+    $.oa.ui.controls.ComboListBehavior = function (e) {
+        $.oa._extends(d, e);
+        function d(b, a) { e.call(this, b, $.extend({ dropControlType: $.oa.ui.controls.ComboListDropPopup }, a)); }
+        d.prototype.initialize = function () { this._dataSource = this._createDataSource(); e.prototype.initialize.call(this) };
+        d.prototype.setSource = function (a) { e.prototype.setSource.call(this, a); this._maxItemLength = null };
+        d.prototype.getDropOptions = function () {
+            return $.extend(e.prototype.getDropOptions.call(this), {
+                selectedIndex: this._dataSource.getItemIndex(this.combo.getText()),
+                selectionChange: $.oa.core.delegate(this, this._dropSelectionChanged)
+            })
+        };
+        d.prototype.getMaxItemLength = function () {
+            var a, e, d, b = 0, c = this._dataSource;
+            if (this._maxItemLength === null) {
+                d = c.getCount(true);
+                for (a = 0; a < d; a++) {
+                    e = c.getItemText(a, true, true);
+                    b = Math.max(e.length, b)
+                }
+                this._maxItemLength = b
+            }
+            return this._maxItemLength
+        };
+        d.prototype.getDropWidth = function () {
+            var b, a;
+            b = e.prototype.getDropWidth.call(this);
+            a = this.getMaxItemLength() * $.oa.ui.Measurement.getUnitEx();
+            a *= 1.2;
+            return Math.max(b, a)
+        };
+        d.prototype.getSelectedIndex = function (a) { return this._dataSource.getItemIndex(a || this.getText(), false) };
+        d.prototype.setSelectedIndex = function (a, b) { this._setSelectedIndex(a, b) };
+        d.prototype.setText = function (b, a) { var c; if (a) c = b !== this.getText(); e.prototype.setText.call(this, b, a); if (a && c) this._options.indexChanged && this._options.indexChanged.call(this, this.getSelectedIndex(b)) };
+        d.prototype.upKey = function (a) { if (this._options.mode !== "text") return e.prototype.upKey.call(this, a) === false ? false : this.selectPrev() };
+        d.prototype.downKey = function (a) { if (this._options.mode !== "text") return e.prototype.downKey.call(this, a) === false ? false : this.selectNext() };
+        d.prototype.pageUpKey = function (a) { if (this._options.mode !== "text") return e.prototype.pageUpKey.call(this, a) === false ? false : this.selectPrev(true) };
+        d.prototype.pageDownKey = function (a) { if (this._options.mode !== "text") return e.prototype.pageDownKey.call(this, a) === false ? false : this.selectNext(true) };
+        d.prototype.keyDown = function (a) { if (this._options.mode !== "text") if (a.keyCode === 229) this._enableAutoFill = false; else if (a.ctrlKey && (a.keyCode === 89 || a.keyCode === 90)) return false };
+        d.prototype.keyPress = function () { if (this._options.mode !== "text") { if (typeof this._options.autoComplete === "undefined") this._enableAutoFill = true; else this._enableAutoFill = this._options.autoComplete; return true } };
+        d.prototype.keyUp = function (b) { var a; if (this._options.mode !== "text") { a = b.keyCode || b.charCode; if (this._enableAutoFill) { (a >= 47 || a === 32) && this._tryAutoFill(); this._enableAutoFill = false } return true } };
+        d.prototype.selectPrev = function (b) {
+            var a;
+            if (this._dropPopup) { if (this._dropPopup.selectPrev(b)) return false } else if (!b) {
+                a = this._dataSource.nextIndex(this.getSelectedIndex(), -1, true);
+                if (a >= 0) { this._setSelectedIndex(a, true); return false }
+            }
+        };
+        d.prototype.selectNext = function (b) {
+            var a;
+            if (this._dropPopup) { if (this._dropPopup.selectNext(b)) return false } else if (!b) {
+                a = this._dataSource.nextIndex(this.getSelectedIndex(), 1, true);
+                if (a >= 0) { this._setSelectedIndex(a, true); return false }
+            }
+        };
+        d.prototype._createDataSource = function () { return new $.oa.ui.controls.ListDataSource(this._options) };
+        d.prototype._dropSelectionChanged = function (c, b) { var a = this._dropPopup.getSelectedValue(); this.setText(a, true); b && this.hideDropPopup() };
+        d.prototype._setSelectedIndex = function (a, b) { this.setText(this._dataSource.getItemText(a, true), b) };
+        d.prototype._tryAutoFill = function () {
+            var d, c, a;
+            c = this.combo.getText();
+            d = this._dataSource.getItemIndex(c, true, true);
+            if (d >= 0) a = this._dataSource.getItemText(d, true);
+            if (a) {
+                this.combo.setText(a, true);
+                this.combo.setTextSelection(c.length)
+            }
+            this._dropPopup && this._dropPopup.setSelectedValue(a);
+        };
+        return d
+    }($.oa.ui.controls.BaseComboBehavior);
+
+    $.oa.initClassPrototype($.oa.ui.controls.ComboListBehavior, { _enableAutoFill: false, _maxItemLength: null });
+
+    $.oa.ui.controls.Combo.registerBehavior("list", $.oa.ui.controls.ComboListBehavior);
+
+    (function (a) { a._map = []; a.None = 0; a.Info = 1; a.Warning = 2; a.Error = 3 })($.oa.ui.controls.messageAreaType || ($.oa.ui.controls.messageAreaType = {}));
+    var msgType = $.oa.ui.controls.messageAreaType;
+
+    $.oa.ui.controls.messageArea = function (b) {
+        $.oa._extends(a, b);
+        function a(a) { b.call(this, a) }
+        a.EVENT_DISPLAY_COMPLETE = "event-display-complete"; a.EVENT_DISPLAY_CLEARED = "event-display-cleared";
+        a.prototype.initializeOptions = function (a) { b.prototype.initializeOptions.call(this, $.extend({ closeable: true, expanded: false }, a)) };
+        a.prototype.initialize = function () {
+            var b, c = this; this._element.addClass("message-area-control");
+            b = $($.oa.ui.dom("div")).appendTo(this._element).addClass("message-header");
+            this._errorHeader = $($.oa.ui.dom("span")).appendTo(b);
+            this._showErrorLink = $($.oa.ui.dom("a")).appendTo(b).addClass("linkAction show-details-action").attr("href", "#").click(function () { c._toggle(); return false });
+            $($.oa.ui.dom("div")).appendTo(this._element).addClass("close-action ui-icon ui-icon-closethick").click($.oa.core.delegate(this, this.clear));
+            this._errorContent = $($.oa.ui.dom("div")).appendTo(this._element).addClass("error-content");
+            this._element.hide();
+            this._messageType = msgType.None;
+            this._options.message && this.setMessage(this._options.message);
+        };
+        a.prototype.setMessage = function (a, c) {
+            if (typeof a === "string") a = { header: a };
+            if (!a.type) a.type = c || msgType.Error;
+            this._setDisplayMessage(a)
+        };
+        a.prototype.setError = function (a, c) {
+            if (typeof a === "string") a = { header: a };
+            a.type = msgType.Error;
+            if (!a.click && $.isFunction(c)) a.click = c; this.setMessage(a)
+        };
+        a.prototype.clear = function () { this._clear(true) };
+        a.prototype._setDisplayMessage = function (a) {
+            var d = this, c;
+            if (this._options.closeable) this._element.addClass("closeable"); else this._element.removeClass("closeable");
+            this._clear(false); this._messageType = a.type;
+            this._errorHeader.html(a.header);
+            if (a.content) {
+                if (a.content.jquery) this._errorContent.append(a.content);
+                else this._errorContent.html(a.content);
+                this._setErrorDetailsVisibility(this._options.expanded);
+                this._showErrorLink.show()
+            }
+            else { this._errorContent.hide(); this._showErrorLink.hide() }
+            this._element.show();
+            switch (this._messageType) {
+                case msgType.Info: this._element.addClass("ui-state-highlight2"); break;
+                case msgType.Warning: this._element.addClass("ui-state-warning"); break;
+                case msgType.Error: this._element.addClass("ui-state-error"); break;
+                default: break;
+            }
+            if (a.click) {
+                c = function () { a.click(); d.clear() };
+                this._errorHeader.addClass("clickable");
+                this._errorHeader.click(c);
+                this._errorHeader.keydown(function (a) { if (a.keyCode === i.KeyCode.ENTER) { c(); return false } })
+            }
+            this._raiseDisplayComplete();
+        };
+        a.prototype._toggle = function () { if (this._errorContent.is(":visible")) this._setErrorDetailsVisibility(false); else this._setErrorDetailsVisibility(true); this._raiseDisplayComplete() };
+        a.prototype._setErrorDetailsVisibility = function (a) { if (a) { this._showErrorLink.text("Hide details"); this._errorContent.show() } else { this._showErrorLink.text("Show details"); this._errorContent.hide() } };
+        a.prototype._clear = function (a) {
+            var c = this;
+            if (this._errorHeader.text().length === 0) return;
+            switch (this._messageType) {
+                case msgType.Info: this._element.removeClass("ui-state-highlight2"); break;
+                case msgType.Warning: this._element.removeClass("ui-state-warning"); break;
+                case msgType.Error: this._element.removeClass("ui-state-error")
+            }
+            this._messageType = msgType.None;
+            this._errorHeader.text("");
+            this._errorContent.text("");
+            this._errorHeader.unbind("click");
+            this._errorHeader.removeClass("clickable");
+            this._element.hide();
+            a && this._raiseDisplayComplete();
+            //this._fire(c.EVENT_DISPLAY_CLEARED);
+        };
+        a.prototype._raiseDisplayComplete = function () { this._fire(a.EVENT_DISPLAY_COMPLETE) };
+        return a;
+    }($.oa.ui.controls.webcontrol);
+
+    $.oa.ui.controls.alertdialog = function (d) {
+        $.oa._extends(b, d);
+        function b(a) { d.call(this, a) }
+        b.prototype.initializeOptions = function (b) {
+            d.prototype.initializeOptions.call(this, $.extend({ height: b.height || 150, width: b.width || 400, resizable: false, title: b.title || "Alert" }, b))
+        };
+        b.prototype.initialize = function () {
+            this._options.buttons = { ok: { id: "ok", text: b && b.okText || "Close", click: $.oa.core.delegate(this, this._onCancelAction) } };
+            this._element.css("text-align", "left");
+            this._element.html(this._options.message);
+            d.prototype.initialize.call(this);
+            this.updateOkButton(true);
+        };
+        b.prototype._onCancelAction = function () { this._element.dialog("close"); };
+        return b
+    }($.oa.ui.controls.modaldialog);
+
+    $.extend($.oa.ui.controls, {
+
+    });
+}
+)(jQuery);

@@ -1,0 +1,157 @@
+﻿/*
+* Ndc code widget
+*/
+
+$.widget('oa.ndcCode', {
+    options: {},
+    _create: function () {
+        this._on(this.element, {
+            keypress: "_onKeypress",
+            paste: "_onPaste",
+            blur: "_onBlur"
+        });
+    },
+    _onKeypress: function (event) {
+        if (!/^[0-9\-]+$/.test(event.key)) {
+            event.preventDefault();
+        }
+    },
+    _onPaste: function (event) {
+        setTimeout(function() {
+            if (this.element.val() !== this.element.val().replace(/[^0-9-]/g, "")) {
+                this.element.val(this.element.val().replace(/[^0-9-]/g, ""));
+            }
+        }.bind(this), 0);
+    },
+    _onBlur: function (event) {
+        setTimeout(function () {
+            this.validate();
+        }.bind(this), 0);
+    },
+    _format: function() {
+        if (/\d{11}/.test(this.element.val())) {
+            var slicedNdc = [this.element.val().slice(0, 5), this.element.val().slice(5, 9), this.element.val().slice(9, 11)];
+            this.element.val(slicedNdc.join('-'));
+        }
+
+        if (/^(?=[0-9 -]{12})(\d{4,5}\-\d{3,4}\-\d{1,2})$/.test(this.element.val())) {
+            var sections = this.element.val().split('-');
+            var slicedCode = sections
+                .map(function(section, index) {
+
+                    if (index === 0 && section.length === 4) {
+                        return this._padStart(section, section.length + 1, '0');
+                    }
+                    if (index === 1 && section.length === 3) {
+                        return this._padStart(section, section.length + 1, '0');
+                    }
+                    if (index === 2 && section.length === 1) {
+                        return this._padStart(section, section.length + 1, '0');
+                    }
+                    return section;
+                }.bind(this));
+               
+            this.element.val(slicedCode.join('-'));
+        }
+    },
+    _padStart: function(string, targetLength, padString) {
+        targetLength = targetLength >> 0; //truncate if number or convert non-number to 0;
+        padString = String((typeof padString !== 'undefined' ? padString : ' '));
+        if (string.length > targetLength) {
+            return String(string);
+        }
+        else {
+            targetLength = targetLength - string.length;
+            if (targetLength > padString.length) {
+                padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+            }
+            return padString.slice(0, targetLength) + String(string);
+        }
+    },
+    validate: function () {
+        this._format();
+        this.clearValidation();
+        var invalid = false;
+        var errors = [];
+        if (!this.element.val()) {
+            invalid = true;
+            errors.push({ text: 'Code is a required field.' });
+        }
+
+        if (this.element.val() && !/^(\d{11})$|^(?=[0-9 -]{12})(\d{4,5}\-\d{3,4}\-\d{1,2})$/.test(this.element.val())) {
+            invalid = true;
+            errors.push({ text: 'Code format is invalid.' });
+        }
+
+        if (invalid) {
+            this.element.parent('div').addClass('has-danger');
+        }
+        this._trigger('onValidate', this, [errors]);
+        return errors;
+    },
+    clearValidation: function() {
+        this.element.parent('div').removeClass('has-danger');
+        this._trigger('onValidate', this, [[]]);
+    }
+
+});
+
+
+/*
+* Ndc Number Widget
+*/
+
+$.widget('oa.ndcNumber', {
+    options: {
+        decimalPlaces: 2,
+        nonDecimalPlaces: 7,
+        errorMessage: 'Please enter a valid quantity.'
+    },
+    _create: function () {
+        this.options.regex = new RegExp('^\\d{0,' + this.options.nonDecimalPlaces + '}\\.[0-9]{0,' + this.options.decimalPlaces + '}$|^\\.[0-9]{1,' + this.options.decimalPlaces + '}$|^\\d{0,' + this.options.nonDecimalPlaces + '}?$|^\\.$');
+        this._on(this.element, {
+            keypress: "_onKeypress",
+            blur: "_onBlur"
+        });
+    },
+    _onKeypress: function (event) {
+        var character = String.fromCharCode(event.keyCode);
+        var start = this.element.prop('selectionStart');
+        var end = this.element.prop('selectionEnd');
+        var val = this._replaceAt(this.element.val(), start, end - start);
+        var newValue = this._insert(val, start, character);
+        if (!this.options.regex.test(newValue)) {
+            event.preventDefault();
+            return false;            
+        }
+    },
+    _onBlur: function (event) {
+        this.validate();
+    },
+    _replaceAt: function(str, index, charcount) {
+        return str.substr(0, index) + str.substr(index + charcount);
+    },
+    _insert: function(str, index, value) {
+        return str.substr(0, index) + value + str.substr(index);
+    },
+    validate: function () {
+        this.clearValidation();
+        var invalid = false;
+        var errors = [];
+
+        if (this.element.val() && !/^[0-9]+(\d{0,}\.[0-9]{0,3})$|^\.[0-9]{1,3}$|^\d+?$/.test(this.element.val())) {
+            invalid = true;
+            errors.push({ text: this.options.errorMessage });
+        }
+
+        if (invalid) {
+            this.element.parent('div').addClass('has-danger');
+        }
+        this._trigger('onValidate', this, [errors]);
+        return errors;
+    },
+    clearValidation: function () {
+        this.element.parent('div').removeClass('has-danger');
+        this._trigger('onValidate', this, [[]]);
+    }
+});

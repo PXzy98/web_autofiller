@@ -1,0 +1,215 @@
+var webapi = (function () {
+    //Private members
+    var _ = {
+        headers: [],
+        urlparameters: [],
+        bodyparameters: [],
+        apiType: {
+            OfficeAlly: 1,
+            Audit: 2,
+            AutoComplete: 3,
+            CCDA: 4,
+            Dashboard: 5,
+            Encounters: 6,
+            IntakePro: 7,
+            Internal: 8,
+            PatientAlly: 9,
+            PatientApi: 10,
+            Payment: 11,
+            Settings: 12,
+            Statistics: 13,
+            DirectEnrollmentHandler: 14,
+            Session: 15,
+            eRx: 16,
+            Communication: 17,
+            megamenuapi: 18,
+            updox: 19,
+            sftp: 20,
+            Enrollments: 21,
+            Documents: 22,
+            Logging: 23,
+            XAD: 25,
+            Agreements: 27,
+            Advertisements: 30,
+            Accounting: 31,
+            Invoice: 35,
+            Studies: 37,
+            UserManagement: 38,
+            VirtualVisits: 40,
+            TextAndPay: 42
+        }
+    };
+    //Public member
+    var w = {
+        reset: function () {
+            _.headers = [];
+            _.urlparameters = [];
+            _.bodyparameters = [];
+            w.tokens.oa.useToken = true;
+            w.bodysinglevalue = false;
+            w.body = null;
+            w.processData = true;
+            w.contentType = null;
+            w.type = 1;
+        },
+        tokens: (function () {
+            var t = {
+                oa: (function () {
+                    var a = {
+                        useToken: true
+                    };
+                    return a;
+                }()),
+                useToken: function () {
+                    if ([_.apiType.OfficeAlly, _.apiType.Audit, _.apiType.AutoComplete, _.apiType.CCDA, _.apiType.Dashboard, _.apiType.Encounters, _.apiType.eRx, _.apiType.IntakePro, _.apiType.Internal, _.apiType.PatientAlly, _.apiType.PatientApi, _.apiType.Payment, _.apiType.Settings, _.apiType.Statistics, _.apiType.XAD, _.apiType.Agreements, _.apiType.Accounting, _.apiType.Studies, _.apiType.UserManagement, _.apiType.TextAndPay, _.apiType.VirtualVisits, _.apiType.Advertisements].indexOf(w.type) !== -1 && w.tokens.oa.useToken === true) {
+                        return true;
+                    } else return false;
+                }
+            };
+            return t;
+        }()),
+        type: 1, //WebAPI Type (1: OfficeAlly, 2: PatientAlly)
+        url: '',
+        async: false,
+        processData: true,
+        contentType: null,
+        addHeader: function (key, value) {
+            _.headers.push({ k: key, val: value });
+        },
+        addurlparameter: function (key, value) {
+            _.urlparameters.push({ k: key, val: value });
+        },
+        //Flag whether the body parameter is a single value
+        bodysinglevalue: false,
+        addbodyparameter: function (key, value) {
+            _.bodyparameters.push({ k: key, val: value });
+        },
+        body: null,
+        dataOnly: true,
+        //Ajax Functions
+        get: function (cbSuccess) {
+            ajaxCall('GET', cbSuccess, this.dataOnly);
+        },
+        post: function (cbSuccess) {
+            ajaxCall('POST', cbSuccess, this.dataOnly);
+        },
+        put: function (cbSuccess) {
+            ajaxCall('PUT', cbSuccess, this.dataOnly);
+        },
+        del: function (cbSuccess) {
+            ajaxCall('DELETE', cbSuccess, this.dataOnly);
+        },
+        postattachment: function (cbSuccess) {
+            webapi.processData = false;
+            webapi.contentType = false;
+            ajaxCall('POST', cbSuccess, this.dataOnly);
+        }
+    };
+
+    //Private functions
+    //-----------------
+    //Ajax
+    function ajaxCall(methodType, cbSuccess, dataOnly) {
+        var d = {
+            url: w.url,
+            urlparam: buildUrlParameters(),
+            data: getbody(),
+            method: methodType,
+            contenttype: w.contentType,
+            headers: buildHeaders(),
+            type: w.type,
+            usetoken: w.tokens.useToken()
+        };
+        $.ajax({
+            headers: { 'X-OA-AUTH-TOKEN': $.oa.core.getAntiForgeryTokenValue() },
+            url: webapi.urlbase.oawebapi + "?method=" + methodType + "&url=" + w.url,
+            type: 'POST',
+            async: w.async,
+            data: JSON.stringify(d)
+        }).done(function (d) {
+            var data = isValidJSON(d.dt);
+            if (dataOnly)
+                cbSuccess(data);
+            else
+                cbSuccess(data, d.Message, d.Status);
+        }).fail(function (jqxhr, textStatus) {
+            log(jqxhr);
+        });
+    }
+    //Builders
+    function getbody() {
+        if (w.body != null) {
+            if (w.processData) {
+                return JSON.stringify(w.body);
+            } else {
+                return w.body;
+            }
+        } else
+            return buildBodyParameters();
+    }
+    function buildHeaders() {
+        //Custom Headers
+        if (_.headers.length === 0) return [];
+        else {
+            var s = '{';
+            for (i = 0; i < _.headers.length; i++) {
+                s += '"' + _.headers[i].k + '":"' + _.headers[i].val + '"';
+                if (i != _.headers.length - 1) {
+                    s += ",";
+                }
+            }
+            s += "}";
+            return JSON.parse(s);
+        }
+    }
+    function buildUrlParameters() {
+        //Custom Headers
+        if (_.urlparameters.length === 0) return [];
+        else {
+            var s = '{';
+            for (i = 0; i < _.urlparameters.length; i++) {
+                s += '"' + _.urlparameters[i].k + '":"' + _.urlparameters[i].val + '"';
+                if (i != _.urlparameters.length - 1) {
+                    s += ",";
+                }
+            }
+            s += "}";
+            return JSON.parse(s);
+        }
+    }
+    function buildBodyParameters() {
+        if (_.bodyparameters.length == 0) return [];
+        else {
+            if (webapi.bodysinglevalue) {
+                return _.bodyparameters[0].val;
+            }
+            else {
+                var s = '{';
+                for (i = 0; i < _.bodyparameters.length; i++) {
+                    s += '"' + _.bodyparameters[i].k + '":"' + _.bodyparameters[i].val + '"';
+                    if (i != _.bodyparameters.length - 1) {
+                        s += ',';
+                    }
+                }
+                s += '}';
+                return s;
+            }
+        }
+    }
+    //Loading Function
+    function log(o) {
+        if (console) {
+            console.log(o);
+        }
+    }
+    // Test if data is valid JSON
+    function isValidJSON(data) {
+        try {
+            return JSON.parse(data);
+        } catch (e) {
+            return data;
+        }
+    }
+
+    return w;
+}());

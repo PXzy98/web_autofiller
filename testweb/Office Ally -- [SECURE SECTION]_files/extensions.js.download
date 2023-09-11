@@ -1,0 +1,23 @@
+﻿String.format = String.prototype.format = function () {
+    var arrFormatParams = [];
+    var strFormat = "";
+    //calling context is a string.  I.E.  "a{0}c".format("b")
+    if (typeof this.constructor() == "string") {
+        arrFormatParams = arguments;
+        //calling context itself IS the format string
+        strFormat = this;
+    }
+    //calling context is the String object.  I.E. String.format("a{0}c", "b")
+    else {
+        //first parameter is format string
+        arrFormatParams = Array.prototype.slice.call(arguments, 1);
+        strFormat = arguments[0];
+    }
+
+    //replace format placeholders with the value in the value array whose
+    //  index matches the placeholder number
+    return strFormat.replace(/{(\d+)}/g, function (match, paramIndex) {
+        if (parseInt(paramIndex) >= arrFormatParams.length) throw new Error("Format parameter index is greater than the number of parameters supplied.");
+        return arrFormatParams[paramIndex];
+    });
+}

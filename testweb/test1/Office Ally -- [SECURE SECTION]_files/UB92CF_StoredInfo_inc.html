@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)https://www.officeally.com/oa/Claims/UB92CF_StoredInfo_inc.aspx -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>
+	Office Ally -- Secure Master
+</title>
+    <link rel="stylesheet" href="./Default.css">    
+    <!-- The jQuery UI theme that will be used by the grid -->
+    <link rel="stylesheet" type="text/css" media="screen" href="./jquery-ui-1.10.4.custom.min(1).css">
+    <link rel="stylesheet" type="text/css" media="screen" href="./jquery-ui.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="./dropdown.vertical.rtl.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="./default.ultimate.css">
+    <!-- The jQuery UI theme extension jqGrid needs -->
+    <link rel="stylesheet" type="text/css" media="screen" href="./ui.jqgrid.css">
+    <link href="./Opensans.css" rel="stylesheet" type="text/css">
+    <link href="./font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- Startup javascript here -->
+    <!--[if lte IE 9]>
+    <script type="text/javascript" src="/oa/CommonUserControls/Scripts/jquery/jquery-1.11.3.min.js"></script>
+    <![endif]-->
+    <!--[if (gt IE 9) | (!IE)]><!-->
+    <script type="text/javascript" src="./jquery-2.1.4.min.js.下载"></script>
+    <!-- <![endif]-->
+	<script type="text/javascript" src="./jquery-ui-1.10.3.min.js.下载"></script>
+    <script type="text/javascript" src="./JavaScriptResourceHandler.axd"></script>
+    <!-- load jqgrid resource files -->
+    <script type="text/javascript" src="./grid.locale-en.js.下载"></script>
+    <script type="text/javascript" src="./jqgrid.min.js.下载"></script>
+    <script type="text/javascript" src="./vue.min.js.下载"></script>
+    
+    <link rel="stylesheet" href="./UB92Form.css">
+    <link rel="stylesheet" href="./oagray(1).css" type="text/css">
+    <style>
+        .infobox {
+            font-size: 11px;
+            font-weight: normal;
+            border: 1px #AAAAAA solid;
+            padding-left: 5px;
+            padding-right: 5px;
+            background-color: #F3F3F3;
+        }
+
+        .infobox2 {
+            font-size: 11px;
+            font-weight: normal;
+            border: 1px #AAAAAA solid;
+            padding-left: 5px;
+            padding-right: 5px;
+            background-color: #DDDEE8;
+        }
+
+        .frameheader {
+            font-size: 11px;
+            color: #555555;
+            font-weight: bold;
+        }
+
+        div.pageheader {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        td.pageheader {
+            font-size: 14px;
+            color: #1a1b23;
+            font-weight: bold;
+        }
+
+        .note {
+            font-size: 11px;
+        }
+
+        .button {
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #999999;
+            cursor: pointer;
+            color: #555555;
+            background-color: #DDDEE8;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .background-color-lgray {
+            background-color: #F3F3F3;
+        }
+
+        .textboxdisabled {
+            font-size: 9px;
+            border: 1px solid #999999;
+            background-color: #CCCCCC;
+        }
+    </style>
+</head>
+<body bgcolor="#ffffff">
+<script type="text/javascript">
+    $(function() {
+        (function() {
+            oaApp.basePath = '/oa';
+            oaApp.getVersionArg = function() {
+                return '5.4.26';
+            };
+        })();
+    });
+</script>
+<form name="aspnetForm" method="post" action="https://www.officeally.com/oa/Claims/UB92CF_StoredInfo_inc.aspx" id="aspnetForm">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKLTE3NjMzNDQ5Mw9kFgJmD2QWBGYPZBYEAgIPZBYIZg8VBgMvb2EDL29hAy9vYQMvb2EDL29hAy9vYWQCAQ8VAQMvb2FkAgIPFQUDL29hAy9vYQMvb2FjPHNjcmlwdCB0eXBlPSd0ZXh0L2phdmFzY3JpcHQnIHNyYz0nL29hL0phdmFTY3JpcHRSZXNvdXJjZUhhbmRsZXIuYXhkP3M9bWFzdGVyMiZ2PTUuNC4yNic+PC9zY3JpcHQ+Ay9vYWQCAw8VAQMvb2FkAgMPZBYCZg8VAQMvb2FkAgEPZBYEAgEPFgIeBFRleHQF3gE8aW5wdXQgbmFtZT0iX19SZXF1ZXN0VmVyaWZpY2F0aW9uVG9rZW4iIHR5cGU9ImhpZGRlbiIgdmFsdWU9IkZZWGFkNFNhdFlhRUFsa1JZeFF3LUhJT2kzQzhjTDF0Z3E0RUhzTkF3WE1OaUplcndCMHlVSUxIVnFRVmJiWjNiemJGNm90YUJSS0tzeUZHd2lEY3AxTWgydkhfYnlMMENVWl9KYUhnVzJISWV6Sm1mSU93cE5neHFkVGgyX0s3SlpQUEhlX3FyRG5va2lNSVFfX0p1a0EzaE5nMSIgLz5kAgMPZBYQAgcPEGQPFgYCAQICAgMCBAIFAgYWBhAFEEFnZVdlbGwgTmV3IFlvcmsFBTE3NjY1ZxAFFkNlbnRlckxpZ2h0IEhlYWx0aGNhcmUFBTEzODA1ZxAFJENlbnRlcnMgUGxhbiBmb3IgSGVhbHRoeSBMaXZpbmcsIExMQwUFMTg0NzBnEAUNRXh0ZW5kZWQgTUxUQwUFMTgzMTRnEAUUSW50ZWdyYSBNYW5hZ2VkIENhcmUFBTE3NjY0ZxAFDlZpbGxhZ2VDYXJlTUFYBQUxNzc0NWdkZAIJDxBkDxYGAgECAgIDAgQCBQIGFgYQBRxDYXJlYmVzdCBTb2NpYWwgRGF5IENhcmUgSW5jBQcxMDI1OTU2ZxAFHUNBUkVGSVJTVCBTT0NJQUwgREFZIENBUkUgSU5DBQcxMDI1Njc5ZxAFJUNyb3duIEdhcmRlbiBBZHVsdCBEYXljYXJlIENlbnRlciBJbmMFBzEwMjI3NDFnEAUeRmx1c2hpbmcgU29jaWFsIEFkdWx0IENhcmUgSW5jBQcxMDI0ODU2ZxAFH0hlYWx0aGZpcnN0IFNvY2lhbCBEYXkgQ2FyZSBJbmMFBzEwMjQyNTZnEAUYTWVycnkgQWR1bHQgRGF5IENhcmUgSW5jBQcxMDIyNzQ2Z2RkAgsPEGQPFh8CAQICAgMCBAIFAgYCBwIIAgkCCgILAgwCDQIOAg8CEAIRAhICEwIUAhUCFgIXAhgCGQIaAhsCHAIdAh4CHxYfEAUYQWdlV2VsbCBTNTEwNSAxOCBEYXlzIDg1BQUxMzIwNmcQBRdBZ2VXZWxsIFM1MTA1IDggRGF5cyA4NQUFMTMyMDhnEAUcQ2VudGVyIFBsYW4gUzUxMDUgMTVEYXlzIDEwMAUFMTQxMjFnEAUbQ2VudGVyIFBsYW4gUzUxMDUgNERheXMgMTAwBQUxMjE2MmcQBRtDZW50ZXIgUGxhbiBTNTEwNSA4RGF5cyAxMDAFBTE0MTIwZxAFHENlbnRlcmxpZ2h0IFM1MTA1IDEyRGF5cyAxMDAFBTEzNTM2ZxAFG0NlbnRlcmxpZ2h0IFM1MTA1IDhEYXlzIDEwMAUFMTQxMjJnEAUeQ2VudGVybGluZSBUMjAwMyAgMzAgMTJEYXlzIDMwBQUxMjE2NWcQBR1DZW50ZXJsaW5lIFQyMDAzICAzMCA4RGF5cyAzMAUFMTM1MzdnEAUYRXh0ZW5kZWQgUzUxMDUgMThEYXlzIDcwBQUxMzIwN2cQBRdFeHRlbmRlZCBTNTEwNSA4RGF5cyA3MAUFMTM1MTNnEAUZRXh0ZW5kZWQgVDIwMDIgMTIgRGF5cyAyMAUFMTM1MTBnEAUXRXh0ZW5kZWQgVDIwMDIgNERheXMgMjAFBTEzNTEyZxAFGEV4dGVuZGVkIFQyMDAyIDggRGF5cyAyMAUFMTM1MTFnEAUYSW50ZWdyYSBBMDEwMCAxMCBEYXlzIDI1BQUxMjE3NGcQBRhJbnRlZ3JhIEEwMTAwIDIwIERheXMgMjUFBTEyMTczZxAFF0ludGVncmEgTWVhbCAxOCBEYXlzIDIwBQUxMjU5MWcQBRhJbnRlZ3JhIFM1MTA1IDEyIERheXMgNjAFBTEyMTY5ZxAFGEludGVncmEgUzUxMDUgMTggRGF5cyA2MAUFMTIxNjhnEAUXSW50ZWdyYSBTNTEwNSA4IERheXMgNjAFBTEyMTcwZxAFFUludGVncmEgVGVsIDE4RGF5cyAyNQUFMTI1MThnEAUWVmlsbGFnZSBNZWFsIDE4RGF5cyAyMAUFMTI1MTVnEAUVVmlsbGFnZSBUZWwgMThEYXlzIDQwBQUxMjUxN2cQBRxWaWxsZWdlQ2FyZSBTNTEwNSAxMCBEYXlzIDc1BQUxMzUxNWcQBRtWaWxsZWdlQ2FyZSBTNTEwNSAxMkRheXMgNzcFBTEzNDI1ZxAFG1ZpbGxlZ2VDYXJlIFM1MTA1IDE4RGF5cyA3NwUFMTM0MjZnEAUcVmlsbGVnZUNhcmUgUzUxMDUgMjAgRGF5cyA3NQUFMTIxNjFnEAUbVmlsbGVnZUNhcmUgUzUxMDUgNCBEYXlzIDc1BQUxMjE2M2cQBRpWaWxsZWdlQ2FyZSBTNTEwNSA4RGF5cyA3NwUFMTM0MjNnEAUcVmlsbGVnZUNhcmUgVDIwMDMgMTAgRGF5cyAyNQUFMTIxNjdnEAUcVmlsbGVnZUNhcmUgVDIwMDMgMjAgRGF5cyAyNQUFMTIxNjZnZGQCDQ8QZA8WBgIBAgICAwIEAgUCBhYGEAU2Q2FyZWJlc3QgU29jaWFsIERheSBDYXJlIEluYywgQ2FyZWJlc3QgU29jaWFsIERheSBDYXJlBQcxMTU4MTYwZxAFOENBUkVGSVJTVCBTT0NJQUwgREFZIENBUkUgSU5DLCBDQVJFRklSU1QgU09DSUFMIERBWSBDQVJFBQcxMTU2MTgzZxAFPkNyb3duIEdhcmRlbiBBZHVsdCBEYXljYXJlIENlbnRlciBJLCBDcm93biBHYXJkZW4gQWR1bHQgRGF5Y2FyBQcxMTQ5MDg2ZxAFOUZsdXNoaW5nIFNvY2lhbCBBZHVsdCBDYXJlIEluYywgRmx1c2hpbmcgU29jaWFsIEFkdWx0IENhcgUHMTE0ODY0MWcQBTpIZWFsdGhmaXJzdCBTb2NpYWwgRGF5IENhcmUgSW5jLCBIZWFsdGhmaXJzdCBTb2NpYWwgRGF5IENhBQcxMTM5NzI1ZxAFMk1lcnJ5IEFkdWx0IERheSBDYXJlIEluYywgTWVycnkgQWR1bHQgRGF5IENhcmUgSW5jBQcxMTE3OTk2Z2RkAg8PEGQPFgYCAQICAgMCBAIFAgYWBhAFNkNhcmViZXN0IFNvY2lhbCBEYXkgQ2FyZSBJbmMsIENhcmViZXN0IFNvY2lhbCBEYXkgQ2FyZQUHMTE1ODE2MGcQBThDQVJFRklSU1QgU09DSUFMIERBWSBDQVJFIElOQywgQ0FSRUZJUlNUIFNPQ0lBTCBEQVkgQ0FSRQUHMTE1NjE4M2cQBT5Dcm93biBHYXJkZW4gQWR1bHQgRGF5Y2FyZSBDZW50ZXIgSSwgQ3Jvd24gR2FyZGVuIEFkdWx0IERheWNhcgUHMTE0OTA4NmcQBTlGbHVzaGluZyBTb2NpYWwgQWR1bHQgQ2FyZSBJbmMsIEZsdXNoaW5nIFNvY2lhbCBBZHVsdCBDYXIFBzExNDg2NDFnEAU6SGVhbHRoZmlyc3QgU29jaWFsIERheSBDYXJlIEluYywgSGVhbHRoZmlyc3QgU29jaWFsIERheSBDYQUHMTEzOTcyNWcQBTJNZXJyeSBBZHVsdCBEYXkgQ2FyZSBJbmMsIE1lcnJ5IEFkdWx0IERheSBDYXJlIEluYwUHMTExNzk5NmdkZAIRDxBkDxYGAgECAgIDAgQCBQIGFgYQBTZDYXJlYmVzdCBTb2NpYWwgRGF5IENhcmUgSW5jLCBDYXJlYmVzdCBTb2NpYWwgRGF5IENhcmUFBzExNTgxNjBnEAU4Q0FSRUZJUlNUIFNPQ0lBTCBEQVkgQ0FSRSBJTkMsIENBUkVGSVJTVCBTT0NJQUwgREFZIENBUkUFBzExNTYxODNnEAU+Q3Jvd24gR2FyZGVuIEFkdWx0IERheWNhcmUgQ2VudGVyIEksIENyb3duIEdhcmRlbiBBZHVsdCBEYXljYXIFBzExNDkwODZnEAU5Rmx1c2hpbmcgU29jaWFsIEFkdWx0IENhcmUgSW5jLCBGbHVzaGluZyBTb2NpYWwgQWR1bHQgQ2FyBQcxMTQ4NjQxZxAFOkhlYWx0aGZpcnN0IFNvY2lhbCBEYXkgQ2FyZSBJbmMsIEhlYWx0aGZpcnN0IFNvY2lhbCBEYXkgQ2EFBzExMzk3MjVnEAUyTWVycnkgQWR1bHQgRGF5IENhcmUgSW5jLCBNZXJyeSBBZHVsdCBEYXkgQ2FyZSBJbmMFBzExMTc5OTZnZGQCEw8QZA8WBgIBAgICAwIEAgUCBhYGEAU2Q2FyZWJlc3QgU29jaWFsIERheSBDYXJlIEluYywgQ2FyZWJlc3QgU29jaWFsIERheSBDYXJlBQcxMTU4MTYwZxAFOENBUkVGSVJTVCBTT0NJQUwgREFZIENBUkUg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">
+</div>
+
+
+<script type="text/javascript">
+//<![CDATA[
+
+            var oldvalue = null;
+            var isvalidkey = false;
+
+            function dateControlKeyCheck(evt, sender) {
+                evt = (evt) ? evt : event;
+                var charCode = (evt.charCode) ? evt.charCode : ((evt.keyCode) ? evt.keyCode : ((evt.which) ? evt.which : 0));
+                if (charCode == 9 || charCode == 37 || charCode == 39)  {
+                    isvalidkey = false;
+                    return true;
+                }    
+                if ($(sender).attr('part') == 'year' && charCode == 8 && !$(sender).val().length) {
+                    var prev = $(sender).prevAll('span [part="dayspan"]');                    
+                    if (prev.length && prev.css('display') != 'none') prev.children('input').focus();                                            
+                    else $(sender).prevAll('input').focus();
+                    isvalidkey = false;
+                    return false;
+                }
+                if ($(sender).attr('part') == 'day' && charCode == 8 && !$(sender).val().length) {                    
+                    $(sender).parent().prev('input').focus();
+                    isvalidkey = false;
+                    return false;
+                }
+                if (((charCode >= 48 && charCode <= 57) || (charCode >= 96 && charCode <= 105) || charCode == 8 || charCode == 9 || charCode == 37 || charCode == 39 || charCode == 46) && !evt.shiftKey && !evt.altKey && !evt.metaKey) {     
+                    isvalidkey = true;
+                    return true;
+                }
+                isvalidkey = false;
+                return false;
+            }
+
+            function dateControlAutoTab(evt, sender) {
+                if (isvalidkey) {
+                    evt = (evt) ? evt : event;
+                    var charCode = (evt.charCode) ? evt.charCode : ((evt.keyCode) ? evt.keyCode : ((evt.which) ? evt.which : 0));
+                    var val = $(sender).val();
+                    var part = $(sender).attr('part');
+                    if ((part == 'month') && val.length == 2) {
+                        var next = $(sender).next();
+                        if (next && next.is('span [part="dayspan"]')) {
+                            if (next.css('display') == 'none') next.nextAll('input').focus();
+                            else next.children('input').focus();
+                        }   
+                        else next.nextAll('input').focus();                        
+                    }
+                    if (part == 'day' && val.length == 2) {
+                        $(sender).parent().nextAll('input').focus();
+                    }   
+                    return true;
+                }
+                return false;
+            }
+        
+            function DateControl_OpenCalendar(MonthID, DayID, YearID, popupAbove, yearRangeStart, yearRangeEnd, OnDatePickerClose, popupLeft, popupCenter) {
+                    try {
+                        //pick which text to make the calendar appear next to, priority is year first, then day then month
+                        var $MonthID = $('#' + MonthID);
+                        var $DayID = (DayID != '') ? $('#' + DayID) : '';
+                        var $YearID = $('#' + YearID);
+                        var $insertAfter = $(($YearID || $DayID || $MonthID) || []);
+
+                        var offset = $YearID.offset();
+                        var top = popupAbove ? offset.top - 160 : offset.top;
+                        top = popupCenter ? offset.top - 80 : top;
+                        var left = offset.left + 35; //add offset
+                        if (popupLeft) {
+                            left = offset.left - 140;
+                            top = popupAbove ? offset.top - 20 : offset.top + 20;
+                        }
+
+                        //if there is not at least one textbox to return the value to, then we can't do anything
+                            if ($insertAfter.length > 0) {
+                                var $hdn;
+                                //reuse previously initialized datepicker?
+                                if ($insertAfter.next('.isDatePicker').get(0)) { $hdn = $insertAfter.next('.isDatePicker'); }
+                                else {
+                                    //create new datepicker
+                                    $hdn = $("<input class='isDatePicker' type='hidden'></input>")
+                                    .datepicker({
+                                        changeMonth: true,
+                                        changeYear: true,
+                                        showAnim: 'fadeIn',
+                                        duration: 'fast',
+                                        yearRange: yearRangeStart + ':+' + yearRangeEnd,
+                                        dateFormat: 'mm/dd/yy',
+                                        showOn: 'focus',
+                                        beforeShow: function () {                                            
+                                            setTimeout(function () {                                        
+                                                $('#ui-datepicker-div').css({ 'top': top, 'bottom': '', 'left': left, 'z-index' : 999999 });                                                
+                                            }, 1);
+                                        },
+                                        onClose: function (date, inst) {
+                                            if (date && date != '') {
+                                                if ($DayID == '') {
+                                                    $MonthID.val(inst.selectedMonth + 1);
+                                                    $YearID.val(inst.selectedYear);
+                                                } else {
+                                                    if ($MonthID) $MonthID.val(inst.selectedMonth + 1); /*month value starts at 0 (jan = 0) */
+                                                    if ($DayID) $DayID.val(inst.selectedDay);
+                                                    if ($YearID) $YearID.val(inst.selectedYear);
+                                                }
+                                            }
+
+                                               if (OnDatePickerClose == 'updatelineitemdos') {
+                                                    UpdateLineItemDOS();
+                                               }
+                                        }
+                                    })
+                                    .insertAfter($insertAfter);
+                                }
+                                //make calendar appear
+                                $hdn.val(getdatepickervalue($MonthID, $DayID, $YearID)).focus();
+                                $hdn.datepicker('show');
+                            }
+                        }
+                        catch(err) {
+
+                        }
+                    }
+
+                    function getdatepickervalue(MonthID, DayID, YearID) {
+                        var d = new Date();
+                        return (MonthID ? MonthID.val() : d.getMonth()) + '/' + (DayID != '' ? DayID.val() : d.getDate()) + '/' + (YearID ? YearID.val() : d.getFullYear());
+                    }
+                
+            function DateControl(monthBox, dayBox, yearBox, monthOnly) {
+	            this.monthBox = monthBox;
+	            this.dayBox = dayBox;
+	            this.yearBox = yearBox;	
+                this.monthOnly = monthOnly;                
+            }
+            
+            DateControl.prototype.getDate = function() {
+                var date;                
+                if (!this.monthOnly) 
+	                date = this.getMonth() + '/' + this.getDay() + '/' + this.getYear();
+                else
+                    date = this.getMonth() + '/1/' + this.getYear();
+                if (this.IsValidDate())
+                    return date;
+                else return '';	            
+            }
+
+            DateControl.prototype.setDate = function(date) {
+                if (date.indexOf('/') != -1) {
+                    date = date.split('/');                    
+                    if (date.length == 3) {                        
+                        document.getElementById(this.monthBox).value = date[0];
+                        document.getElementById(this.dayBox).value = date[1];
+                        document.getElementById(this.yearBox).value = date[2];                    
+                    }
+                }
+                else return null;
+            }
+                           
+            DateControl.prototype.getDay = function() {
+                if (this.monthOnly) return null;
+	            else return document.getElementById(this.dayBox).value;            
+            }                    
+            
+            DateControl.prototype.getMonth = function() {
+	            return document.getElementById(this.monthBox).value;            
+            }   
+    
+            DateControl.prototype.getYear = function() {
+	            return document.getElementById(this.yearBox).value;            
+            }   
+
+            DateControl.prototype.setDay = function(day) {
+                if (this.monthOnly) return null;
+	            else document.getElementById(this.dayBox).value = day;
+            }
+            
+            DateControl.prototype.setMonth = function(month) {
+	            document.getElementById(this.monthBox).value = month;       
+            }   
+    
+            DateControl.prototype.setYear = function(year) {
+	            document.getElementById(this.yearBox).value = year;
+            }
+
+            DateControl.prototype.IsValidDate = function() {
+            	var month = document.getElementById(this.monthBox).value;
+                var day; 
+                if (!this.monthOnly) day = document.getElementById(this.dayBox).value;
+                else day = 1;
+                var year = document.getElementById(this.yearBox).value;
+                if (isNaN(day) || isNaN(month) || isNaN(year)) return false;
+                if (month < 1 || month > 12 || day < 1 || day > 31)
+		            return false;
+	            if (day == 31 && (month == 4 || month == 6 || month==9 || month == 11))
+		            return false;
+	            if (month == 2 && (day > 29 || (day == 29 && !(!(year % 4) && ((year % 100) || !(year % 400))))))
+		            return false;
+	            if (year < 1800 || year > 2150)
+		            return false;
+		
+	            return true;            
+            }
+    
+            DateControl.prototype.setRequiredBorder = function() {
+                document.getElementById(this.monthBox).style.border = '1px solid red';
+                var dayBox = document.getElementById(this.dayBox);
+                if (this.dayBox) dayBox.style.border = '1px solid red';
+                document.getElementById(this.yearBox).style.border = '1px solid red';
+            }
+
+            DateControl.prototype.removeRequiredBorder = function() {
+                document.getElementById(this.monthBox).style.border = '';
+                var dayBox = document.getElementById(this.dayBox);
+                if (dayBox) dayBox.style.border = '';
+                document.getElementById(this.yearBox).style.border = '';
+            }
+
+            DateControl.prototype.disable = function() {
+                var monthBox = document.getElementById(this.monthBox);
+                var yearBox = document.getElementById(this.yearBox);
+                monthBox.disabled = true;
+                monthBox.readOnly = true;
+                yearBox.disabled = true;
+                yearBox.readOnly = true;
+                var dayBox = document.getElementById(this.dayBox);
+                if (dayBox) { 
+                    dayBox.disabled = true;
+                    dayBox.readOnly = true;
+                }
+                var id = this.monthBox.substring(0, this.monthBox.indexOf('_'));                
+                var calendar = document.getElementById(id + '_Calendar');
+                if (calendar) calendar.style.display = 'none';
+            }
+
+            DateControl.prototype.enable = function() {
+                var monthBox = document.getElementById(this.monthBox);
+                var yearBox = document.getElementById(this.yearBox);
+                monthBox.disabled = false;
+                monthBox.readOnly = false;
+                yearBox.disabled = false;
+                yearBox.readOnly = false;
+                var dayBox = document.getElementById(this.dayBox);
+                if (dayBox) { 
+                    dayBox.disabled = false;
+                    dayBox.readOnly = false;
+                }
+                $(this.yearBox).nextAll('img').removeAttr('disabled');
+                var id = this.monthBox.substring(0, this.monthBox.indexOf('_'));                
+                var calendar = document.getElementById(id + '_Calendar');
+                if (calendar) calendar.style.display = '';
+            }
+            var ctl00_phFolderContent_PatDOB = new DateControl('ctl00_phFolderContent_PatDOB_Month', 'ctl00_phFolderContent_PatDOB_Day', 'ctl00_phFolderContent_PatDOB_Year', false);
+			//]]>
+</script>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="82722976">
+</div>
+    <input name="__RequestVerificationToken" type="hidden" value="FYXad4SatYaEAlkRYxQw-HIOi3C8cL1tgq4EHsNAwXMNiJerwB0yUILHVqQVbbZ3bzbF6otaBRKKsyFGwiDcp1Mh2vH_byL0CUZ_JaHgW2HIezJmfIOwpNgxqdTh2_K7JZPPHe_qrDnokiMIQ__JukA3hNg1">
+    
+    <input type="hidden" name="txtPageAction" value="" id="txtPageAction">
+    <input type="hidden" name="txtPayerId" value="" id="txtPayerId">
+    <input type="hidden" name="txtPatientId" value="" id="txtPatientId">
+    <input type="hidden" name="txtProviderId" value="" id="txtProviderId">
+    <input type="hidden" name="txtTemplateId" value="" id="txtTemplateId">
+    <input type="hidden" name="txtAttendingPhysicianId" value="" id="txtAttendingPhysicianId">
+    <input type="hidden" name="txtOtherAttendingPhysicianId" value="" id="txtOtherAttendingPhysicianId">
+    <input type="hidden" name="txtOperatingPhysicianId" value="" id="txtOperatingPhysicianId">
+    <input type="hidden" name="txtReferringPhysicianId" value="" id="txtReferringPhysicianId">
+    <input type="hidden" name="MaxDisplayLine" value="22" id="MaxDisplayLine">
+    <table id="tblStoredInformation" style="width: 650px; padding: 0; border-spacing: 0px">
+        <tbody><tr>
+            <td class="pageheader">Institutional (UB) Manage Stored Info
+            </td>
+        </tr>
+    </tbody></table>
+
+    <hr style="width: 650px; float: left">
+    <br>
+
+    <table style="border: 0px; border-spacing: 0px; width: 650px; background-color: #e6eafb; padding: 10px;">
+        <tbody><tr>
+            <td class="text">
+                <span id="ctl00_phFolderContent_strReturnMessage" style="color: #CC0000; font-weight: bold"></span>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="align-content: center;">
+                <fieldset style="background-color: #ffffff;">
+                    <legend class="frameheader">&nbsp;Stored Information&nbsp;</legend>
+                    <table style="width: 600px; border-spacing: 2px; padding: 2px;">
+
+                        <tbody><tr>
+                            <td colspan="5" style="height: 8px;"></td>
+                        </tr>
+                        <tr class="background-color-lgray">
+                            <td class="infobox" style="vertical-align: middle;">Stored Patients
+                            </td>
+                            <td class="infobox" style="vertical-align: middle; align-content: center">
+                                <input name="ctl00$phFolderContent$txtbxPatientId" type="text" id="ctl00_phFolderContent_txtbxPatientId" placeholder="Start typing a patient&#39;s name..." title="Start typing a patient&#39;s name..." style="width: 225px;" class="ui-autocomplete-input" autocomplete="off"><span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
+                                <input type="hidden" name="ctl00$phFolderContent$PatientId" id="ctl00_phFolderContent_PatientId" value="-1">
+                            </td>
+                            <td class="cursor-pointer infobox" style="text-align: center; background: rgb(243, 243, 243);" onclick="GoToPage(&#39;editpatient&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Edit</td>
+                            <td class="cursor-pointer infobox" style="text-align: center; background: rgb(243, 243, 243);" onclick="GoToPage(&#39;deletepatient&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Delete</td>
+                            <td class="cursor-pointer infobox" style="text-align: center; background: rgb(243, 243, 243);" onclick="GoToPage(&#39;addpatient&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Add</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                        </tr>
+
+                        <tr style="background-color: #e6eafb;">
+                            <td class="infobox2" style="vertical-align: middle;">Stored Payers <small>(optional)</small>
+                            </td>
+                            <td class="infobox2" valign="center" align="center">
+                                <select name="ctl00$phFolderContent$PayerId" id="ctl00_phFolderContent_PayerId" style="width: 100%">
+	<option value="-1">-- Select Payer --</option>
+	<option value="17665">AgeWell New York</option>
+	<option value="13805">CenterLight Healthcare</option>
+	<option value="18470">Centers Plan for Healthy Living, LLC</option>
+	<option value="18314">Extended MLTC</option>
+	<option value="17664">Integra Managed Care</option>
+	<option value="17745">VillageCareMAX</option>
+
+</select>
+                            </td>
+                            <td class="cursor-pointer infobox2" style="text-align: center" onclick="GoToPage(&#39;editpayer&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#DDDEE8&#39;;">Edit</td>
+                            <td class="cursor-pointer infobox2" style="text-align: center" onclick="GoToPage(&#39;deletepayer&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#DDDEE8&#39;;">Delete</td>
+                            <td class="cursor-pointer infobox2" style="text-align: center" onclick="GoToPage(&#39;addpayer&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#DDDEE8&#39;;">Add</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                        </tr>
+
+                        <tr style="background-color: #F3F3F3;">
+                            <td class="infobox" style="vertical-align: middle;">Stored Billing Providers
+                            </td>
+                            <td class="infobox" valign="center" align="center">
+                                <select name="ctl00$phFolderContent$ProviderId" id="ctl00_phFolderContent_ProviderId" style="width: 100%">
+	<option value="-1">-- Select Billing Provider --</option>
+	<option value="1025956">Carebest Social Day Care Inc</option>
+	<option value="1025679">CAREFIRST SOCIAL DAY CARE INC</option>
+	<option value="1022741">Crown Garden Adult Daycare Center Inc</option>
+	<option value="1024856">Flushing Social Adult Care Inc</option>
+	<option value="1024256">Healthfirst Social Day Care Inc</option>
+	<option value="1022746">Merry Adult Day Care Inc</option>
+
+</select>
+                            </td>
+                            <td class="cursor-pointer infobox" style="text-align: center" onclick="GoToPage(&#39;editprovider&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Edit</td>
+                            <td class="cursor-pointer infobox" style="text-align: center" onclick="GoToPage(&#39;deleteprovider&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Delete</td>
+                            <td class="cursor-pointer infobox" style="text-align: center;" onclick="GoToPage(&#39;addprovider&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Add</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                        </tr>
+
+                        <tr style="background-color: #DDDEE8;">
+                            <td class="infobox2" style="vertical-align: middle; width: 200px;">Stored Templates
+                            </td>
+                            <td class="infobox2" valign="center" align="center">
+                                <select name="ctl00$phFolderContent$TemplateId" id="ctl00_phFolderContent_TemplateId" style="width: 100%">
+	<option value="-1">-- Select Template --</option>
+	<option value="13206">AgeWell S5105 18 Days 85</option>
+	<option value="13208">AgeWell S5105 8 Days 85</option>
+	<option value="14121">Center Plan S5105 15Days 100</option>
+	<option value="12162">Center Plan S5105 4Days 100</option>
+	<option value="14120">Center Plan S5105 8Days 100</option>
+	<option value="13536">Centerlight S5105 12Days 100</option>
+	<option value="14122">Centerlight S5105 8Days 100</option>
+	<option value="12165">Centerline T2003  30 12Days 30</option>
+	<option value="13537">Centerline T2003  30 8Days 30</option>
+	<option value="13207">Extended S5105 18Days 70</option>
+	<option value="13513">Extended S5105 8Days 70</option>
+	<option value="13510">Extended T2002 12 Days 20</option>
+	<option value="13512">Extended T2002 4Days 20</option>
+	<option value="13511">Extended T2002 8 Days 20</option>
+	<option value="12174">Integra A0100 10 Days 25</option>
+	<option value="12173">Integra A0100 20 Days 25</option>
+	<option value="12591">Integra Meal 18 Days 20</option>
+	<option value="12169">Integra S5105 12 Days 60</option>
+	<option value="12168">Integra S5105 18 Days 60</option>
+	<option value="12170">Integra S5105 8 Days 60</option>
+	<option value="12518">Integra Tel 18Days 25</option>
+	<option value="12515">Village Meal 18Days 20</option>
+	<option value="12517">Village Tel 18Days 40</option>
+	<option value="13515">VillegeCare S5105 10 Days 75</option>
+	<option value="13425">VillegeCare S5105 12Days 77</option>
+	<option value="13426">VillegeCare S5105 18Days 77</option>
+	<option value="12161">VillegeCare S5105 20 Days 75</option>
+	<option value="12163">VillegeCare S5105 4 Days 75</option>
+	<option value="13423">VillegeCare S5105 8Days 77</option>
+	<option value="12167">VillegeCare T2003 10 Days 25</option>
+	<option value="12166">VillegeCare T2003 20 Days 25</option>
+
+</select>
+                            </td>
+                            <td class="cursor-pointer infobox2" style="text-align: center" onclick="GoToPage(&#39;edittemplate&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#DDDEE8&#39;;">Edit</td>
+                            <td class="cursor-pointer infobox2" style="text-align: center" onclick="GoToPage(&#39;deletetemplate&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#DDDEE8&#39;;">Delete</td>
+                            <td class="cursor-pointer infobox2" style="text-align: center" onclick="GoToPage(&#39;addtemplate&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#DDDEE8&#39;;">Add</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                        </tr>
+                        <tr style="background-color: #F3F3F3;">
+                            <td class="infobox" style="vertical-align: middle; white-space: nowrap;">
+                                <table border="0" cellspacing="0" cellpadding="0" id="Table1">
+                                    <tbody><tr>
+                                        <td align="left" class="textbold" nowrap="">Stored Physicians</td>
+                                        <td align="right" width="5%" class="textbold" nowrap="">
+                                            <small>more</small>&nbsp;
+                                                <a href="javascript:ExpandCollapsePhysicians()">
+                                                    <img name="imgUpDownArrow" id="imgUpDownArrow" src="./down.gif" height="12" width="12" style="cursor: pointer" border="0">
+                                                </a>
+                                        </td>
+                                    </tr>
+                                </tbody></table>
+                            </td>
+                            <td class="infobox" valign="center" align="center">
+                                <select name="ctl00$phFolderContent$AttendingPhysicianId" id="ctl00_phFolderContent_AttendingPhysicianId" style="width: 100%">
+	<option value="-1">-- Select Attending Physician --</option>
+	<option value="1158160">Carebest Social Day Care Inc, Carebest Social Day Care</option>
+	<option value="1156183">CAREFIRST SOCIAL DAY CARE INC, CAREFIRST SOCIAL DAY CARE</option>
+	<option value="1149086">Crown Garden Adult Daycare Center I, Crown Garden Adult Daycar</option>
+	<option value="1148641">Flushing Social Adult Care Inc, Flushing Social Adult Car</option>
+	<option value="1139725">Healthfirst Social Day Care Inc, Healthfirst Social Day Ca</option>
+	<option value="1117996">Merry Adult Day Care Inc, Merry Adult Day Care Inc</option>
+
+</select>
+                            </td>
+                            <td class="cursor-pointer infobox" style="text-align: center" onclick="GoToPage(&#39;editphysician&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Edit</td>
+                            <td class="cursor-pointer infobox" style="text-align: center" onclick="GoToPage(&#39;deletephysician&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Delete</td>
+                            <td class="cursor-pointer infobox" style="text-align: center" onclick="GoToPage(&#39;addphysician&#39;);" onmouseover="this.style.background=&#39;#FEFEFE&#39;;" onmouseout="this.style.background=&#39;#F3F3F3&#39;;">Add</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                        </tr>
+
+                        <tr id="divPhysician1a" class="background-color-lgray" style="display: none;">
+                            <td class="infobox" style="vertical-align: middle; width: 200px;">Other Attending Physician
+                            </td>
+                            <td class="infobox" valign="center" align="center">
+                                <select name="ctl00$phFolderContent$OtherAttendingPhysicianId" id="ctl00_phFolderContent_OtherAttendingPhysicianId" style="width: 100%">
+	<option value="-1">-- Select Other Attending Physician --</option>
+	<option value="1158160">Carebest Social Day Care Inc, Carebest Social Day Care</option>
+	<option value="1156183">CAREFIRST SOCIAL DAY CARE INC, CAREFIRST SOCIAL DAY CARE</option>
+	<option value="1149086">Crown Garden Adult Daycare Center I, Crown Garden Adult Daycar</option>
+	<option value="1148641">Flushing Social Adult Care Inc, Flushing Social Adult Car</option>
+	<option value="1139725">Healthfirst Social Day Care Inc, Healthfirst Social Day Ca</option>
+	<option value="1117996">Merry Adult Day Care Inc, Merry Adult Day Care Inc</option>
+
+</select>
+                            </td>
+                            <td class="background-color-lgray" colspan="3"></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                        </tr>
+
+                        <tr id="divPhysician2a" class="background-color-lgray" style="display: none">
+                            <td class="infobox" style="vertical-align: middle; width: 200px">Operating Physician
+                            </td>
+                            <td class="infobox" valign="center" align="center">
+                                <select name="ctl00$phFolderContent$OperatingPhysicianId" id="ctl00_phFolderContent_OperatingPhysicianId" style="width: 100%">
+	<option value="-1">-- Select Operating Physician --</option>
+	<option value="1158160">Carebest Social Day Care Inc, Carebest Social Day Care</option>
+	<option value="1156183">CAREFIRST SOCIAL DAY CARE INC, CAREFIRST SOCIAL DAY CARE</option>
+	<option value="1149086">Crown Garden Adult Daycare Center I, Crown Garden Adult Daycar</option>
+	<option value="1148641">Flushing Social Adult Care Inc, Flushing Social Adult Car</option>
+	<option value="1139725">Healthfirst Social Day Care Inc, Healthfirst Social Day Ca</option>
+	<option value="1117996">Merry Adult Day Care Inc, Merry Adult Day Care Inc</option>
+
+</select>
+                            </td>
+                            <td class="background-color-lgray" colspan="3"></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                        </tr>
+
+                        <tr id="divPhysician3a" style="background-color: #F3F3F3; display: none;">
+                            <td class="infobox" style="vertical-align: middle; width: 200px;">Referring Physician
+                            </td>
+                            <td class="infobox" valign="center" align="center">
+                                <select name="ctl00$phFolderContent$ReferringPhysicianId" id="ctl00_phFolderContent_ReferringPhysicianId" style="width: 100%">
+	<option value="-1">-- Select Referring Physician --</option>
+	<option value="1158160">Carebest Social Day Care Inc, Carebest Social Day Care</option>
+	<option value="1156183">CAREFIRST SOCIAL DAY CARE INC, CAREFIRST SOCIAL DAY CARE</option>
+	<option value="1149086">Crown Garden Adult Daycare Center I, Crown Garden Adult Daycar</option>
+	<option value="1148641">Flushing Social Adult Care Inc, Flushing Social Adult Car</option>
+	<option value="1139725">Healthfirst Social Day Care Inc, Healthfirst Social Day Ca</option>
+	<option value="1117996">Merry Adult Day Care Inc, Merry Adult Day Care Inc</option>
+
+</select>
+                            </td>
+                            <td class="background-color-lgray" colspan="3"></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" class="note">To create a new claim using your stored information, please select from each of the categories then click <b>"Create New Claim"</b>. If Payer is selected from the Payer drop down list, this Payer information will overwrite Payer information in the selected Patient.
+                            </td>
+                            <td colspan="3" style="text-align: right;">
+                                <input type="button" value="Create New Claim" name="btnCreate" class="button" id="btnCreateClaim" onclick="CreateNewClaim();" onmouseover="this.style.background=&#39;#F3F3F3&#39;;" onmouseout="this.style.background = &#39;#DDDEE8&#39;;">
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5" style="height: 8px;"></td>
+                        </tr>
+
+                    </tbody></table>
+                </fieldset>
+
+            </td>
+        </tr>
+
+    </tbody></table>
+
+    <br>
+    <br>
+
+    
+    
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+</form>
+        
+<script type="text/javascript" src="./oa.webapi.js.下载"></script>
+<script>
+    var approot = '/oa/';
+    var webapiBaseUrl = 'https://intapi.officeally.com/OA/';
+    var isie89 = true; //This will make all calls go through the TokenApi aspx page below.
+    $.extend(webapi, {
+        urlbase: {
+            oawebapi: '/oa/CommonUserControls/Ajax/WebAPI/Api.aspx'
+        }
+    });
+</script>
+    
+    
+    <script type="text/javascript">
+        var SSL_PATH = 'https://www.officeally.com/';
+        var PayerId = "ctl00_phFolderContent_PayerId";
+        var txtbxPatientId = "ctl00_phFolderContent_txtbxPatientId";
+        var PatientId = "ctl00_phFolderContent_PatientId";
+        var ProviderId = "ctl00_phFolderContent_ProviderId";
+        var TemplateId = "ctl00_phFolderContent_TemplateId";
+        var AttendingPhysicianId = "ctl00_phFolderContent_AttendingPhysicianId";
+        var OtherAttendingPhysicianId = "ctl00_phFolderContent_OtherAttendingPhysicianId";
+        var OperatingPhysicianId = "ctl00_phFolderContent_OperatingPhysicianId";
+        var ReferringPhysicianId = "ctl00_phFolderContent_ReferringPhysicianId";
+        var strClaimPath = "?GOTO=UB92OnlineEntry&TaskAction=UB92Claim&ClaimId=-1";
+        var TemplateLineItemRows = "ctl00_phFolderContent_TemplateLineItemRows";
+
+        var txtPayerId = $("#txtPayerId");
+        var txtPatientId = $("#txtPatientId");
+        var txtProviderId = $("#txtProviderId");
+        var txtTemplateId = $("#txtTemplateId");
+        var txtAttendingPhysicianId = $("#txtAttendingPhysicianId");
+        var txtOtherAttendingPhysicianId = $("#txtOtherAttendingPhysicianId");
+        var txtOperatingPhysicianId = $("#txtOperatingPhysicianId");
+        var txtReferringPhysicianId = $("#txtReferringPhysicianId");
+
+        var PatientForm = "ctl00_phFolderContent_PatientForm";
+        var PatientObjects = {
+            PatFirstName: "ctl00_phFolderContent_PatFirstName",
+            PatMiddleName: "ctl00_phFolderContent_PatMiddleName",
+            PatLastName: "ctl00_phFolderContent_PatLastName",
+            PatStrAddr: "ctl00_phFolderContent_PatStrAddr",
+            PatCity: "ctl00_phFolderContent_PatCity",
+            PatState: "ctl00_phFolderContent_PatState",
+            PatZip: "ctl00_phFolderContent_PatZip",
+            PatDOB: "ctl00_phFolderContent_PatDOB",
+            PatGender: "ctl00_phFolderContent_PatGender",
+            PatPayerName: "ctl00_phFolderContent_PatPayerName",
+            PatPayerStreetAddr: "ctl00_phFolderContent_PatPayerStreetAddr",
+            PatPayerCity: "ctl00_phFolderContent_PatPayerCity",
+            PatPayerState: "ctl00_phFolderContent_PatPayerState",
+            PatPayerZip: "ctl00_phFolderContent_PatPayerZip",
+            SubFirstName: "ctl00_phFolderContent_SubFirstName",
+            SubMiddleName: "ctl00_phFolderContent_SubMiddleName",
+            SubLastName: "ctl00_phFolderContent_SubLastName",
+            SubStreetAddr: "ctl00_phFolderContent_SubStreetAddr",
+            SubCity: "ctl00_phFolderContent_SubCity",
+            SubState: "ctl00_phFolderContent_SubState",
+            SubZip: "ctl00_phFolderContent_SubZip",
+            SubMaritalStat: "ctl00_phFolderContent_SubMaritalStat",
+            SubID: "ctl00_phFolderContent_SubID",
+            PatRelation: "ctl00_phFolderContent_PatRelation",
+            SubGroupName: "ctl00_phFolderContent_SubGroupName",
+            SubGroupNum: "ctl00_phFolderContent_SubGroupNum",
+            SubEmployStat: "ctl00_phFolderContent_SubEmployStat",
+            SubEmployerName: "ctl00_phFolderContent_SubEmployerName",
+            SubEmployerStreetAddr: "ctl00_phFolderContent_SubEmployerStreetAddr",
+            SubEmployerCityStateZip: "ctl00_phFolderContent_SubEmployerCityStateZip",
+            COBPayerName1: "ctl00_phFolderContent_COBPayerName1",
+            COBSubFirstName1: "ctl00_phFolderContent_COBSubFirstName1",
+            COBSubMiddleName1: "ctl00_phFolderContent_COBSubMiddleName1",
+            COBSubLastName1: "ctl00_phFolderContent_COBSubLastName1",
+            COBSubID1: "ctl00_phFolderContent_COBSubID1",
+            COBGroupName1: "ctl00_phFolderContent_COBGroupName1",
+            COBGroupNum1: "ctl00_phFolderContent_COBGroupNum1",
+            COBPatRelation1: "ctl00_phFolderContent_COBPatRelation1",
+            COBSubEmployStat1: "ctl00_phFolderContent_COBSubEmployStat1",
+            COBSubEmployerName1: "ctl00_phFolderContent_COBSubEmployerName1",
+            COBSubEmployerStreetAddr1: "ctl00_phFolderContent_COBSubEmployerStreetAddr1",
+            COBSubEmployerCityStateZip1: "ctl00_phFolderContent_COBSubEmployerCityStateZip1",
+            COBPayerName2: "ctl00_phFolderContent_COBPayerName2",
+            COBSubFirstName2: "ctl00_phFolderContent_COBSubFirstName2",
+            COBSubMiddleName2: "ctl00_phFolderContent_COBSubMiddleName2",
+            COBSubLastName2: "ctl00_phFolderContent_COBSubLastName2",
+            COBSubID2: "ctl00_phFolderContent_COBSubID2",
+            COBGroupName2: "ctl00_phFolderContent_COBGroupName2",
+            COBGroupNum2: "ctl00_phFolderContent_COBGroupNum2",
+            COBPatRelation2: "ctl00_phFolderContent_COBPatRelation2",
+            COBSubEmployStat2: "ctl00_phFolderContent_COBSubEmployStat2",
+            COBSubEmployerName2: "ctl00_phFolderContent_COBSubEmployerName2",
+            COBSubEmployerStreetAddr2: "ctl00_phFolderContent_COBSubEmployerStreetAddr2",
+            COBSubEmployerCityStateZip2: "ctl00_phFolderContent_COBSubEmployerCityStateZip2",
+        }
+
+        var PayerForm = "ctl00_phFolderContent_PayerForm";
+        var PayerObjects = {
+            PayerName: "ctl00_phFolderContent_PayerName",
+            PayerStreetAddr: "ctl00_phFolderContent_PayerStreetAddr",
+            PayerCity: "ctl00_phFolderContent_PayerCity",
+            PayerState: "ctl00_phFolderContent_PayerState",
+            PayerZip: "ctl00_phFolderContent_PayerZip"
+        };
+
+        var ProviderForm = "ctl00_phFolderContent_ProviderForm";
+        var ProviderObjects = {
+            ProvGroupName: "ctl00_phFolderContent_ProvGroupName",
+            ProvFirstName: "ctl00_phFolderContent_ProvFirstName",
+            ProvMiddleName: "ctl00_phFolderContent_ProvMiddleName",
+            ProvLastName: "ctl00_phFolderContent_ProvLastName",
+            ProvStreetAddr: "ctl00_phFolderContent_ProvStreetAddr",
+            ProvCity: "ctl00_phFolderContent_ProvCity",
+            ProvState: "ctl00_phFolderContent_ProvState",
+            ProvZip: "ctl00_phFolderContent_ProvZip",
+            ProvTaxId: "ctl00_phFolderContent_ProvTaxId",
+            ProvNPI: "ctl00_phFolderContent_ProvNPI"
+        };
+
+        var TemplateForm = "ctl00_phFolderContent_TemplateForm";
+        var TemplateObjects = {
+            TmpltName: "ctl00_phFolderContent_TmpltName"
+        };
+
+        var PhysicianForm = "ctl00_phFolderContent_PhysicianForm";
+        var PhysicianObjects = {
+            PhysFirstName: "ctl00_phFolderContent_PhysFirstName",
+            PhysLastName: "ctl00_phFolderContent_PhysLastName",
+            PhysNPI: "ctl00_phFolderContent_PhysNPI"
+        }
+    </script>
+    <script type="text/javascript" src="./UB92_StoredInfo.js.下载"></script>
+    <script type="text/javascript" src="./jquery-1.9.1.min.js(2).下载"></script>
+    <script type="text/javascript" src="./jquery-ui.1.9.2.min.js(2).下载"></script>
+    <script type="text/javascript" src="./oa.base.js(1).下载"></script>
+    <script type="text/javascript" src="./oa.ajax.js(1).下载"></script>
+    <script type="text/javascript" src="./oa.core.js(1).下载"></script>
+    <script type="text/javascript" src="./oa.attentiondialogbox.js(1).下载"></script>
+
+
+
+<ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="z-index: 1; display: none;"></ul></body></html>

@@ -1,0 +1,40 @@
+﻿@font-face {
+    font-family: 'ModernEra';
+    src: url('/CommonUserControls/_static/css/fonts/ModernEra/ModernEra-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.0625em;
+}
+@font-face {
+    font-family: 'ModernEra';
+    src: url('/CommonUserControls/_static/css/fonts/ModernEra/ModernEra-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-size: 1.0625em;
+}
+body, input, p, div, th, td {font-family: ModernEra, sans-serif !important;}
+html, body { height: 100%; }
+body {padding:0;margin:0;font-size:10pt;text-decoration:none;position: relative;}
+input, button, textarea, select, td {font-size: 100%;}
+a:link, a:visited{ font-style:normal; text-decoration:none;color: #0000ff;}
+a:hover{ text-decoration:underline;}
+p {font-size: 8pt; font-style: normal; font-weight: normal; }
+
+.BannerTitle,.Banner,.BannerNoPadding{margin: 0px 15px 2px 15px;border: 1px solid #888;}
+.BannerTitle,.BannerTitleText,.BannerNoPadding{font-size: 11px;font-weight: bold;text-decoration: none;zoom:1;}
+.BannerTitle{padding: 3px 10px 3px 10px; background-color: #5e5e67; color: #ffffff;}
+.Banner{background: #e6eafb;padding: 10px;}
+.BannerNoPadding{background: #EEE;padding: 0px 0px 0px 0px;}
+.LeftPadding{padding:2px 15px 0 15px;}
+
+.text, .textbold, .textbox, .button {font-size: 11px;}
+.textbold {font-weight: bold;}
+.textbox {border: 1px solid #999999;}
+.button {font-weight: bold; border: 1px solid #999999;padding-top: 0px;padding-bottom: 0px; cursor: pointer;
+    color:#000000;
+}
+.button[disabled] { opacity:.5; cursor:default; }
+.arrow-up, .arrow-down  {cursor: pointer; display: -moz-inline-box; display: inline-block; line-height: 0; position: relative; vertical-align: middle; width: 0; height: 0;}
+.arrow-up, .arrow-down  {border-left: 4px solid transparent; border-right: 4px solid transparent;}
+.arrow-up {border-bottom: 8px solid black;}
+.arrow-down {border-top: 8px solid black;}

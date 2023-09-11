@@ -1,0 +1,399 @@
+@font-face {
+    font-family: 'ModernEra';
+    src: url('/CommonUserControls/_static/css/fonts/ModernEra/ModernEra-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.0625em;
+}
+
+@font-face {
+    font-family: 'ModernEra';
+    src: url('/CommonUserControls/_static/css/fonts/ModernEra/ModernEra-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-size: 1.0625em;
+}
+
+html, body, input, button, select, textarea, a {
+    font-family: ModernEra, sans-serif;
+}
+
+    A:link {
+        FONT-STYLE: normal;
+        TEXT-DECORATION: none
+    }
+
+    A:visited {
+        FONT-STYLE: normal;
+        TEXT-DECORATION: none
+    }
+
+    A:hover {
+        TEXT-DECORATION: underline
+    }
+
+UL {
+    COLOR: #000000;
+    FONT-SIZE: 10pt;
+    FONT-STYLE: normal;
+    FONT-WEIGHT: lighter;
+    LIST-STYLE: outside;
+    TEXT-DECORATION: none
+}
+
+P {
+    FONT-SIZE: 8pt;
+    FONT-STYLE: normal;
+    FONT-WEIGHT: normal;
+    TEXT-DECORATION: none
+}
+
+B {
+    FONT-STYLE: normal;
+    FONT-WEIGHT: bold;
+    TEXT-DECORATION: none
+}
+
+H2 {
+    FONT-SIZE: 10pt
+}
+
+BLOCKQUOTE {
+    FONT-SIZE: 8pt;
+    TEXT-DECORATION: none
+}
+
+BODY {
+    FONT-SIZE: 10pt;
+    TEXT-DECORATION: none
+}
+
+TD {
+    FONT-SIZE: 9pt;
+    TEXT-DECORATION: none
+}
+
+.calendar {
+    FONT-SIZE: 8pt;
+    TEXT-DECORATION: none
+}
+
+.underline {
+    TEXT-DECORATION: underline
+}
+
+.sub_quote {
+    COLOR: black;
+    FONT-SIZE: 8pt;
+    FONT-STYLE: italic
+}
+
+/*left nav css*/
+#leftNav {
+    background-color: white;
+}
+
+#leftMenu {
+    background-color: white;
+    color: #0C0459;
+}
+
+.sideBarLink {
+    color: #0C0459;
+    font-weight: bold;
+    font-size: 11px;
+    TEXT-DECORATION: none;
+}
+
+.menuGroupPadding {
+    padding-top: 12px;
+    padding-bottom: 0px;
+}
+
+.menugroup {
+    font-size: 15px;
+    font-weight: bold;
+    color: #0C0459;
+    border-top: 1px solid #DADDE5;
+    padding-top: 8px;
+}
+
+.header {
+    COLOR: #ffffff;
+    FONT-SIZE: 8pt;
+    TEXT-DECORATION: none
+}
+
+.footer {
+    COLOR: #ffffff;
+    FONT-SIZE: 10pt;
+    FONT-WEIGHT: bold;
+    TEXT-DECORATION: none
+}
+
+.medBWht {
+    COLOR: #ffffff;
+    FONT-SIZE: 10pt;
+    FONT-WEIGHT: bold;
+    TEXT-DECORATION: none
+}
+
+.medWht {
+    COLOR: #ffffff;
+    FONT-SIZE: 10pt;
+    TEXT-DECORATION: none
+}
+
+.smBWht {
+    COLOR: #ffffff;
+    FONT-SIZE: 8pt;
+    FONT-WEIGHT: bold;
+    TEXT-DECORATION: none
+}
+
+.lrgBWht {
+    COLOR: #ffffff;
+    FONT-SIZE: 20pt;
+    FONT-WEIGHT: bold;
+    TEXT-DECORATION: none
+}
+
+.smBBlk {
+    COLOR: #000000;
+    FONT-SIZE: 8pt;
+    FONT-WEIGHT: bold;
+    TEXT-DECORATION: none
+}
+
+.medBlk {
+    COLOR: #000000;
+    FONT-SIZE: 10pt;
+    TEXT-DECORATION: none
+}
+
+.smBlk {
+    COLOR: #000000;
+    FONT-SIZE: 8pt;
+    TEXT-DECORATION: none
+}
+
+.smINP {
+    FONT-SIZE: 8pt
+}
+
+.patientLookUpResults {
+    COLOR: #000000;
+    FONT-SIZE: 8pt;
+    TEXT-DECORATION: none
+}
+
+.subMenuTitle {
+    COLOR: #0C0459;
+    FONT-WEIGHT: bold;
+    TEXT-DECORATION: none
+}
+
+.gray {
+    COLOR: gray
+}
+
+.blue {
+    COLOR: blue
+}
+
+.oaSmRed {
+    COLOR: #000000;
+    FONT-SIZE: 8pt;
+    FONT-STYLE: normal;
+    TEXT-DECORATION: none
+}
+
+.oaMedRed {
+    COLOR: #000000;
+    FONT-SIZE: 10pt;
+    FONT-STYLE: normal;
+    TEXT-DECORATION: none
+}
+
+.oaLrgRed {
+    COLOR: #000000;
+    FONT-SIZE: 11pt;
+    FONT-STYLE: normal;
+    TEXT-DECORATION: none
+}
+
+.cRegularText {
+    FONT-SIZE: 10px
+}
+
+.cTextBox {
+    FONT-SIZE: 7pt
+}
+
+.cSmallText {
+    COLOR: red;
+    FONT-SIZE: 7pt
+}
+
+.HCFAFormText {
+    COLOR: black;
+    FONT-SIZE: 7pt
+}
+
+.cButton {
+    FONT-SIZE: 8pt
+}
+
+.cCheckBox {
+    FONT-SIZE: 7pt
+}
+
+.cRadio {
+    FONT-SIZE: 7pt
+}
+
+.cSelectBox {
+    FONT-SIZE: 7pt
+}
+
+.cHCFAFormText {
+    COLOR: black;
+    FONT-SIZE: 8pt
+}
+
+.cHCFAHeader {
+    COLOR: red;
+    FONT-SIZE: 11pt;
+    FONT-WEIGHT: bolder
+}
+
+.cPageSize {
+    WIDTH: 8.11in
+}
+
+div.pageheader {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+td.pageheader {
+    font-size: 14px;
+    color: #1a1b23;
+    font-weight: bold;
+}
+
+.frameheader {
+    font-size: 12px;
+    color: #555555;
+    font-weight: bold;
+}
+
+.text {
+    font-size: 11px;
+}
+
+.textbold {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.textregular {
+    font-size: 12px;
+}
+
+.textregularbold {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.textbox {
+    font-size: 11px;
+    border: 1px solid #999999;
+}
+
+.textboxdisabled {
+    font-size: 9px;
+    border: 1px solid #999999;
+    background-color: #CCCCCC;
+}
+
+.label {
+    font-size: 11px;
+}
+
+.labelbold {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.frameheader {
+    font-size: 11px;
+    color: #555555;
+    font-weight: bold;
+}
+
+.button {
+    font-size: 11px;
+    font-weight: bold;
+    border: 1px solid #999999;
+    cursor: pointer;
+    color: #555555;
+    background-color: #DDDEE8;
+}
+
+.note {
+    font-size: 11px;
+}
+
+.notebold {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.infobox {
+    font-size: 11px;
+    font-weight: normal;
+    border: 1px #AAAAAA solid;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.rowbox {
+    border: 1px #AAAAAA solid;
+    text-align: center;
+}
+
+.menutext {
+    font-size: 12px;
+    color: blue;
+}
+
+
+
+.textcolor {
+    color: #000000;
+}
+
+.backgroundBlue {
+    background: #468bd8;
+}
+
+/* --------------- MainHeaderMenu --------------- */
+#MainHeader {
+    padding: 2px;
+}
+
+#MainHeader .oaLogo {
+    background: url('/CommonUserControls/Images/oa-sc-new-305x70_v2.png');
+    display: block;
+    background-size: 350px 120px;
+    background-repeat: no-repeat;
+    width: 370px;
+    height: 100px;
+    float: left;
+}
+
+span[disabled] {
+    opacity: .5;
+}

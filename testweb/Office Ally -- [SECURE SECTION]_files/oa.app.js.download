@@ -1,0 +1,103 @@
+/*ignore jslint start*/
+(function () {
+    if (!window.console) {
+        window.console = {};
+    }
+    if (!$.isFunction(window.console.log)) {
+        window.console.log = function (e) {
+            alert(e);
+        };
+    }
+    window.oaApp = (function ($) {
+        var pub = {};
+        pub.basePath = '/';
+        pub.onError = function (a) { console.log(a); };
+        pub.getPath = function (url) {
+            var path = oaApp.basePath;
+            if (path != '/')
+                path = path + '/';
+
+            return path + url;
+        };
+        pub.loadCss = function (src, loadParent) {
+            src = oaApp.getPath(src);
+            var forceLoadParent = loadParent || false;
+            if (forceLoadParent) {
+                if (top.$('head link [href*="' + src + '"]').length == 0) {
+                    top.$('head').append('<link rel="stylesheet" type="text/css" href="' + src + '?v=' + oaApp.getVersionArg() + '" />');
+                }
+            } else {
+                if ($('head link [href*="' + src + '"]').length == 0) {
+                    $('head').append('<link rel="stylesheet" type="text/css" href="' + src + '?v=' + oaApp.getVersionArg() + '" />');
+                }
+            }
+
+
+        };
+        pub.loadJs = function (src, func, callback) {
+            if (typeof funct == 'undefined') {
+                oaApp.appendJs(src, callback);
+            }
+        };
+        pub.appendJs = function (src, callback) {
+            $.ajax({
+                url: oaApp.getPath(src) + '?v=' + oaApp.getVersionArg(),
+                dataType: "script",
+                cache: true,
+                async: false,
+                error: oaApp.onError
+            });
+        };
+        pub.loadingBar = function (a) {
+            if (a === 'show') {
+                $("<div />")
+                    .attr("id", "globalOA_divLoader")
+                    .css({ 'text-align': 'center', 'vertical-align': 'middle', 'width': 'auto', 'min-height': '0px', 'max-height': 'none', 'height': 'auto' })
+                    .addClass('ui-dialog-content ui-widget-content')
+                    .append($("<div />").text("Loading..."))
+                    .append($("<img />").attr("alt", "Loading...").attr("src", this.basePath + "/CommonUserControls/images/loading-blue.gif").css({ 'width': '36px', 'height': '36px' }))
+                .appendTo($(top.document.body))
+                .dialog({
+                    modal: true,
+                    autoOpen: false,
+                    resizable: false,
+                    closeOnEscape: false,
+                    minHeight: null,
+                    draggable: false,
+                    dialogClass: 'loadingDialog'
+                }).dialog("open");
+            } else {
+                $(top.document.body).find('#globalOA_divLoader').remove();
+            }
+        };
+        pub.loadingBar.show = function (isIframe, position) {
+            position = position || {}; // example { at: "center center", of: $('#container-id') };           
+            this.basePath = this.basePath || '';
+            isIframe = isIframe || false;
+            $("<div />")
+                .attr("id", "globalOA_divLoader")
+                .css({ 'text-align': 'center', 'vertical-align': 'middle', 'width': 'auto', 'min-height': '0px', 'max-height': 'none', 'height': 'auto' })
+                .addClass('ui-dialog-content ui-widget-content')
+                .append($("<div />").text("Loading..."))
+                .append($("<img />").attr("alt", "Loading...").attr("src", this.basePath + "/CommonUserControls/images/loading-blue.gif").css({ 'width': '36px', 'height': '36px' }))
+                .appendTo($((isIframe) ? document.body : top.document.body))
+                .dialog({
+                    modal: true,
+                    autoOpen: false,
+                    resizable: false,
+                    closeOnEscape: false,
+                    minHeight: null,
+                    draggable: false,
+                    dialogClass: 'loadingDialog',
+                    position: position
+                }).dialog("open");
+        };
+        pub.loadingBar.hide = function (isIframe) {
+            isIframe = isIframe || false;
+            $((isIframe) ? document.body : top.document.body).find('#globalOA_divLoader').remove();
+        };
+
+        return pub;
+    })(jQuery);
+}());
+/*ignore jslint end*/

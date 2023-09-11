@@ -1,0 +1,48 @@
+﻿//----------------------------------------------------------
+// Copyright (C) Office Ally. All rights reserved.
+//----------------------------------------------------------
+(function ($) {
+    $.oa = $.oa || {};
+	var s = false, k = false, x = 0;
+
+    $.extend($.oa, {
+        version: "1.0.0",
+        _extends: function (b, a) { for (var c in a) if (a.hasOwnProperty(c)) b[c] = a[c]; function d() { this.constructor = b } d.prototype = a.prototype; b.prototype = new d },
+        getTypeName: function(a) { var b, c; if (!a.__name) { a.__name = "_type_" + x++; if (s) { b = a.name; if (!b) { c = a.toString(); b = c.substring(9, c.indexOf("(")) } if (b) a.__name += "_" + b } } return a.__name },
+		OnError: function(c, b, d){ if ($.isFunction(b)) b.call(d, c); else $.oa.errorHandler.show(c) },
+		loadErrorHandler: function(xht, st, handler){ $(document.body).html(xht.responseText);},
+		initClassPrototype : function(d, b) {var a, c;for (a in b)if (a !== "__name" && b.hasOwnProperty(a)) {c = b[a];d.prototype[a] = c}
+    }
+    });
+	
+	var y = function () {
+        function a() { this.$error = null; this.visible = false }
+        a.prototype.initialize = function () { var a = this; this.$error = $(".error-section").bind("keydown", function (b) { if (b.keyCode === 27) { a.hideError(); return false } }) };
+        a.prototype.exists = function () { return this.$error.length > 0 };
+        a.prototype.showError = function(c,d,b){var e=this,a,f;function g(e){var a="";if(d)a=d+": ";if(c)a=a+c;f=$("<li>").text(a).appendTo(e);b&&$("<pre>").text(b).appendTo(f)}if(!this.visible){this.visible=true;this.$error.empty();$("<div tabIndex=0 />").addClass("close").text("Close [x]").appendTo(this.$error).click(function(){e.hideError()}).keydown(function(a){if(a.which===13){e.hideError();return false}});a=$("<div>").addClass("message").appendTo(this.$error);$("<h4>").text("Error(s):").appendTo(a);$("<ul>").addClass("error-list").appendTo(a)}g($("ul.error-list",this.$error));this.$error.show().focus()};
+        a.prototype.hideError = function(){$("p",this.$error).remove();this.$error.hide();this.visible=false};
+        a.prototype.show = function (a) { if (this.exists()) this.showError(a.message, a.status, a.stack);}; return a
+    } ();
+
+    $.oa.errorHandler = new y;
+    $.oa.handleError=function(c,b,d){if($.isFunction(b))b.call(d,c);else $.oa.errorHandler.show(c)};
+
+    var t=function(){
+        function a(){this._progressPendingActions=null;this._progressPendingActionsCount=0;this._progressPendingActionsNewId=0;this._pageProgressElements=null;this._pageProgressDelayShowTimeout=null;this._pageProgressMinShowTimeout=null;this._showingProgress=false;var a=this;this._progressPendingActions={};this._pageProgressElements=[];$(function(){var b=$(".pageProgressIndicator");b.length>0&&a._addProgressElement(b)})}
+        a.prototype.getProgressElements=function(){return this._pageProgressElements};
+        a.prototype.registerProgressElement=function(a){this._addProgressElement(a);if(this._showingProgress)a.show();else a.hide()};
+        a.prototype.unRegisterProgressElement=function(b){if(this._pageProgressElements)for(var a=0,a=0;a<this._pageProgressElements.length;a++)if(this._pageProgressElements[a]===b){this._pageProgressElements.splice(a,1);break}};
+        a.prototype._addProgressElement=function(a){this._pageProgressElements.push(a)};
+        a.prototype._showProgressElements=function(){var a=this,b=this._pageProgressElements;if(this._progressPendingActionsCount===0)return;this._showingProgress=true;if(b.length===0)return;$.each(b,function(b,a){a.show()});if(!this._pageProgressMinShowTimeout)this._pageProgressMinShowTimeout=window.setTimeout(function(){a._pageProgressMinShowTimeout=null;a._progressPendingActionsCount===0&&a._hideProgressElements()},250)};
+        a.prototype._hideProgressElements=function(){this._showingProgress=false;$.each(this._pageProgressElements,function(b,a){a.hide()})};
+        a.prototype.actionStarted=function(d,c){var a,b=this;a=++this._progressPendingActionsNewId;this._progressPendingActions[a]=d;if(this._progressPendingActionsCount++===0)if(c===true){if(this._pageProgressDelayShowTimeout){window.clearTimeout(this._pageProgressDelayShowTimeout);this._pageProgressDelayShowTimeout=null}this._showProgressElements()}else if(!this._pageProgressDelayShowTimeout)this._pageProgressDelayShowTimeout=window.setTimeout(function(){b._pageProgressDelayShowTimeout=null;b._showProgressElements()},250);return a};
+        a.prototype.actionCompleted=function(a){delete this._progressPendingActions[a];--this._progressPendingActionsCount===0&&!this._pageProgressMinShowTimeout&&this._hideProgressElements()};
+        a.prototype.getPendingActions=function(){var a=[];$.each(this._progressPendingActions,function(c,b){a.push(c+": "+b)});return a};
+        return a}();
+    $.oa.globalProgressIndicator=new t;
+	
+    $(function(){
+	    $.oa.errorHandler.initialize();
+	});
+}
+)(jQuery);

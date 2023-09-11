@@ -1,0 +1,47 @@
+﻿//----------------------------------------------------------
+// Copyright (C) Office Ally. All rights reserved.
+//----------------------------------------------------------
+(function (a) {
+    var c = a.fn.jquery;
+    //var b = a.ui.version;
+    a.checkVersion = {
+        _isValidVersion: function (d, e, f) { var a, b, c; if (f) { b = d.split("."); c = e.split("."); for (a = 0; a < b.length; a++) if (b[a] > c[a]) return true; else if (b[a] < c[a]) return false; return true } else return d === e }
+        ,jquery: function (a, d) { var b = this._isValidVersion(a, c, d); return b; }
+        //,jqueryUI: function (a, d) { var c = this._isValidVersion(a, b, d); return c; }
+    }
+})(jQuery);
+(function (a) {
+    if (a.checkVersion.jquery("1.9.1") || a.checkVersion.jquery("1.11.3") || a.checkVersion.jquery("2.1.4")) {
+        var matched, browser;
+        a.uaMatch = function( ua ) {
+            ua = ua.toLowerCase();
+	        var match = /(chrome)[ \/]([\w.]+)/.exec( ua ) ||
+		        /(webkit)[ \/]([\w.]+)/.exec( ua ) ||
+		        /(opera)(?:.*version|)[ \/]([\w.]+)/.exec( ua ) ||
+		        /(msie) ([\w.]+)/.exec( ua ) ||
+		        ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec( ua ) ||
+		        [];
+	        return {
+		        browser: match[ 1 ] || "",
+		        version: match[ 2 ] || "0"
+	        };
+        };
+        matched = a.uaMatch( navigator.userAgent );
+        browser = {};
+
+        if ( matched.browser ) {
+	        browser[ matched.browser ] = true;
+	        browser.version = matched.version;
+        }
+
+        // Chrome is Webkit, but Webkit is also Safari.
+        if ( browser.chrome ) {
+	        browser.webkit = true;
+        } else if ( browser.webkit ) {
+	        browser.safari = true;
+        }
+
+        a.browser = browser;
+
+    }
+})(jQuery);

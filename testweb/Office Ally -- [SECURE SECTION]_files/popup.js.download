@@ -1,0 +1,49 @@
+﻿// context object properties:
+//  queryString(string, optional): additional querystring parameters to append to URL when opening popup window
+//  popupName(string): name of popup control to load (excluding the beginning 'uc')
+//  callback(function, optional): a javascript function reference to call when a row has been selected in the popup window.
+//      callback can expect 2 parameters: context and args.  The 'context' parameter contains the same
+//      context object passed to popup.   The 'args' parameter contains a property 'Data', which contains
+//      the return data for the row that was selected.
+//  FieldID(string, optional): a unique identifier that will be prepended to 'Callback' and evaluated as a function.
+//      This acts a sort of gateway for filtering all popup callbacks through.
+function OpenPopup(context) {
+    var qs = (context.queryString ? "&" + context.queryString : "");
+
+    //default callback handler
+    if (!context.callback) {
+        context['callback'] = PopupCallback;
+
+        //PopupCallback requires a FieldID property to eval at runtime in order to handle the callback
+        if (!context.FieldID)
+            context['FieldID'] = context.popupName;
+    }
+
+    var winOptions = "directories=no, location=no, menubar=no, status=no, titlebar=no, toolbar=no";
+
+    //set default width/height to be closer to the average size because ipad doesn't respond to the
+    //  window.resizeTo function call that occurs when the window opens.  This was leaving the window at 
+    //  it's initially declared size until the popup window postback.
+    winOptions = winOptions + ", scrollbars=yes, width=900, height=500, resizable=yes, top=50, left=50";
+    window.document["PopupContext_" + context.popupName] = context;
+    var win = window.open('/oa/SharedFiles/popup/Popup.aspx?name=' + context.popupName + qs, '_blank', winOptions);
+
+    //if server button, cancel postback
+    return false;
+}
+
+//This generic Popup Callback function can be used as a gateway to route all
+//  popup callbacks through.  To use this callback routing function, include a
+//  FieldID property on the context which is a unique identifier for handling
+//  a specific callback.  This function will attempt to call a javascript function
+//  named by the FieldID supplied concatenated with 'Callback'.  
+//
+//  The called function will automatically be passed the return arguments from the
+//  popup Select event.
+//
+//Parameters:
+//  context(object) : popup context object initially passed to OpenPopup(...)
+//  args(object) : arguments returned from the Popup control.  Includes the selected data.
+function PopupCallback(context, args) {
+    eval(context.FieldID + "Callback")(args.Data, context);
+}

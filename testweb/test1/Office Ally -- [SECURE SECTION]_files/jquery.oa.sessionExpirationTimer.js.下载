@@ -1,0 +1,148 @@
+﻿(function ($) {
+    /*************** PRIVATE VARIABLES **************/
+    var pluginName = 'sessionExpirationTimer';
+    var noticeTimeoutId;
+    var popupDuration, /* number in seconds for user to cancel impending session expiration */
+        sessionTime, /* number in minutes of session expiration */
+        logoutUrl, /* the url to redirect when session expires */
+        keepAliveUrl, /* the url to request to keep the session alive when session expiration is cancelled */
+        timeTillPopup; /* number of seconds until the session expiration popup goes up */
+
+
+    /*************** PUBLIC METHODS **************/
+    var methods = {
+        init: function (options) {
+            sessionTime = options.sessionTime; // minutes
+            popupDuration = options.popupDuration; // seconds
+            logoutUrl = options.logoutUrl;
+            keepAliveUrl = options.keepAliveUrl;
+            timeTillPopup = (sessionTime * 60) - popupDuration; //get seconds untill the popup should display
+
+            if (!(sessionTime > 0)) throw 'sessionTime: Parameter value must be greater than 0.';
+            else if (!(popupDuration > 0)) throw 'popupDuration: Parameter value must be greater than 0.';
+            else if (!logoutUrl) throw 'logoutUrl: Parameter is required.';
+
+            reset(timeTillPopup);
+            return this;
+        }
+    };
+
+    $.fn[pluginName] = function (method) {
+        // Method calling logic
+        if (typeof this[method] == 'function') {
+            return this[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (!method || method.constructor === Object) {
+            return methods.init.apply(this, arguments);
+        } else if (window.console && console.error) {
+            console.error('Method ' + method + ' does not exist on sessionExpirationTimer');
+        }
+    };
+
+
+    /**************** PRIVATE METHODS ************/
+
+    /**
+     * Reset popupTimer
+     * @param {} timeToPopup in seconds
+     */
+    function reset(timeToPopup) {
+        clearTimeout(noticeTimeoutId);
+        noticeTimeoutId = setTimeout(function () {
+            checkTimeLeft()
+                .done(function (data) {
+                    if (data.TimeLeft > 1) {
+                        reset(data.TimeLeft * 60);
+                    } else {
+                        startTimeoutCountdown();                     
+                    }
+                })
+                .fail(startTimeoutCountdown);
+        }, parseInt(timeToPopup * 1000));
+    }
+
+    function formatTime(seconds) {
+        if (seconds < 2) {
+            return seconds + " second";
+        }
+        else {
+            return seconds + " seconds";
+        }
+    }
+
+    function expireSession() {
+        top.window.location.href = logoutUrl;
+    }
+
+    function keepAlive() {
+        $.get(keepAliveUrl + '?action=KeepAlive');
+    }
+
+    /**
+     * Check how much time is left in the session timer and reset the popup as needed 
+     */
+    function checkTimeLeft() {
+        // using a rejected promise for service center so the code is the same
+        if (!keepAliveUrl) {
+            var dfd = $.Deferred();
+            dfd.reject();
+            return dfd.promise();
+        } else {
+            return $.get(keepAliveUrl + '?action=CheckTime');
+        }
+    }
+
+    /**
+     * Check if there is time on the sesion
+     */
+    function checkContinueSession(data, countdownIntervalID, $dialog) {
+        if (data.TimeLeft > 1) {
+            $dialog.dialog('close').dialog('destroy').remove();
+        } else {
+            clearInterval(countdownIntervalID);
+            expireSession();
+        }
+    }
+
+    function startTimeoutCountdown() {
+        var countdownSeconds = popupDuration;
+        var countdownIntervalID;
+        var $dialog = $('<div class="twbs"><div class="card-header-dark"><h4 class="card-title-text-white text-center">Session Time Out Warning</h4></div><div class="card-body pt-3 pl-3 pr-3"><h6 class="card-text text-center mb-2">Your session will expire in:</h6><h3 class="text-center"><span id="countdownPlaceHolder">' + formatTime(countdownSeconds) + '</span></h3><hr class="divider"><p class=" float-right m2-4 "><input id="contSession" type="button" class="btn btn-success" value="Continue Session"  /></p></div></div>');
+        var $timeLeft = $('#countdownPlaceHolder', $dialog);
+
+        $dialog = $dialog.dialog({
+            modal: true,
+            dialogClass: 'innactive-logout-dialog',
+            width: '350px',
+            open: function () {
+                $('#contSession').on('click', function () {
+                    if (keepAliveUrl) {
+                        keepAlive();
+                    }
+                    reset(timeTillPopup);
+                    $dialog.dialog('close').dialog('destroy').remove();
+                });
+                countdownIntervalID = setInterval(function () {
+                    if (countdownSeconds > 1) {
+                        $timeLeft.html(formatTime(--countdownSeconds));
+                    } else {
+                        checkTimeLeft()
+                            .done(function(data) {
+                                checkContinueSession(data, countdownIntervalID, $dialog);
+                            })
+                            .fail(function () {
+                                clearInterval(countdownIntervalID);
+                                expireSession();
+                            });
+                    }
+                }, 1000);
+            },
+            close: function () {
+                clearInterval(countdownIntervalID);
+            },
+            autoResize: true,
+            resizable: false,
+            closeOnEscape: false
+        });
+        $dialog.parent().find('.ui-dialog-titlebar-close').remove().end().appendTo($('body'));
+    }
+})(jQuery);

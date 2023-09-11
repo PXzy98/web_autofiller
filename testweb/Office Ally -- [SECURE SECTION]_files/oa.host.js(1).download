@@ -1,0 +1,32 @@
+﻿//----------------------------------------------------------
+// Copyright (C) Office Ally. All rights reserved.
+//----------------------------------------------------------
+(function ($) {
+    $.oa.host = $.oa.host || {};
+    var s = function () {
+        function a() {}
+        a.prototype.fire = function (b, c, a) {
+            return this._fireEvent(b, c, a)
+        };
+        a.prototype._fireEvent = function (c, d, f) {
+            var b, a;
+            if (this._events) {
+                a = this._events._getEvent(c);
+                if (!a || a.length === 0) return undefined;
+                a = e.ArrayUtils.clone(a);
+                for (b = a.length - 1; b >= 0; b--)
+                    if (a[b](d || this, f) === false) return false
+                }
+            };
+            a.prototype.attachEvent = function (a, b) {
+                if (!this._events) this._events = new Sys.EventHandlerList;
+                this._events.addHandler(a, b)
+            };
+            a.prototype.detachEvent = function (a, b) {
+                this._events && this._events.removeHandler(a, b)
+            };
+        return a
+    } ();
+    $.oa.host.notificationService = new s;
+}
+)(jQuery);

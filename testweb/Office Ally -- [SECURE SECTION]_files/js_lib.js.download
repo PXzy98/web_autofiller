@@ -1,0 +1,53 @@
+/*
+* Create by: Thanh T. 9/2007 
+*/
+var LastField = '';
+var FieldTest = false;
+function CheckFieldLength(obj, maxlen, nextfield)
+{
+    if (obj.name != LastField)
+    {
+        if (obj.value.length == 1)
+            FieldTest = true;
+        else
+            FieldTest = false;
+        LastField = obj.name;
+    }
+    else
+    {
+        if (obj.value.length == 1)
+            FieldTest = true;
+    }
+
+    if (FieldTest)
+    {            
+        if (obj.value.length >= maxlen)
+        {
+            FieldTest = false;
+            document.getElementById(nextfield).focus(); 
+        }
+    }
+}
+
+function Popup(FieldID)
+{
+	var winOptions = "directories=no, location=no, menubar=no, status=no, titlebar=no, toolbar=no";
+	winOptions = winOptions + ", scrollbars=yes, width=10, height=10, resizable=yes, top=50, left=500";
+	var newWin = open('/pm/common/Popup.aspx?FieldID=' + FieldID, 'newDoc', winOptions, 1);
+	
+	return false;
+}
+
+function FindPos(objObject)
+{
+    var intTop = 0;
+    var intLeft = 0;
+    var obj = objObject;
+    while (obj.offsetParent)
+    {
+        intTop += obj.offsetTop;
+        intLeft += obj.offsetLeft;
+        obj = obj.offsetParent;
+    }
+	return [intLeft, intTop];
+}

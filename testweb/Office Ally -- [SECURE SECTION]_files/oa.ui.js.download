@@ -1,0 +1,132 @@
+﻿//----------------------------------------------------------
+// Copyright (C) Office Ally. All rights reserved.
+//----------------------------------------------------------
+(function ($) {
+    $.oa.ui = $.oa.ui || {};
+
+    var h = [];
+
+    $.extend($.oa.ui, {
+        getId: function () { var a = 0; return function () { return ++a } } (),
+        dom: function (elem, attrib) { var b = document.createElement(elem); if (attrib) b.className = attrib; return b },
+		htmlEncode: function (v) {return !v ? v : String(v).replace(/&/g, "&amp;").replace(/\"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");},
+		htmlDecode: function (v) {
+            if (v && (v == '&nbsp;' || v == '&#160;' || (v.length === 1 && v.charCodeAt(0) === 160))) { return ""; }
+            return !v ? v : String(v).replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+        },
+        stripHtml : function(v) {
+		    v = String(v);
+		    var regexp = /<("[^"]*"|'[^']*'|[^'">])*>/gi;
+		    if (v) {
+			    v = v.replace(regexp,"");
+			    return (v && v !== '&nbsp;' && v !== '&#160;') ? v.replace(/\"/g,"'") : "";
+		    } 
+			    return v;
+	    },
+		formatID: function (v) {
+            return String(v).replace(/[!"#$%&'()*+,.\/:; <=>?@\[\\\]\^`{|}~]/g, "\\$&");
+        }
+    });
+	function g(a) {return a.jquery ? a : $(a)}
+	
+	(function (a) {
+		a._PROBE_ID = "oa-measurement-probe";
+		a._createProbe = function e(c) {
+            var b = $("<div/>").attr("id", a._PROBE_ID).css("position", "absolute").css("left", "-50000px").css("top", "-50000px").css("width", "9em").css("height", "18ex").css("overflow", "auto").appendTo(c);
+            $("<div></div>").css("width", "3in").css("height", "36ex").appendTo(b);
+            return b
+        }
+		a._getProbe = function i(b) {b = b || $(document.body);var c = b.children("#" + a._PROBE_ID);if (c.length === 0) c = a._createProbe(b);return c}
+		a.getUnitEx = function () {return a._getProbe().height() / 18}
+	})($.oa.ui.Measurement || ($.oa.ui.Measurement = {}));
+	
+	(function (a) {
+		(function (a) {
+            a[a.Default = 0] = "Default";
+            a[a.Top = 1] = "Top";
+            a[a.Middle = 2] = "Middle";
+            a[a.Bottom = 3] = "Bottom"
+        })(a.VerticalScrollBehavior || (a.VerticalScrollBehavior = {}));
+		a.position = function (c, l, b) {
+            b = $.extend({}, b);
+            var n = 0,o = 1,d, k, p, j, r, q, h, i, e, f, z, A, m, u, w, x, s, v, C, B, y, t;
+            c = g(c);
+            l = g(l);
+            if (b.elementAlignmentMarker && b.elementAlignmentMarker.length) e = b.elementAlignmentMarker;
+            if (b.baseAlignmentMarker && b.baseAlignmentMarker.length) f = b.baseAlignmentMarker;
+            u = b.supportScroll === true;
+            c.css("z-index", 2e4);
+            if (u) c[0].style.height = "";
+            k = c.outerWidth();
+            p = c.outerHeight();
+            j = l.offset();
+            r = l.outerWidth();
+            q = l.outerHeight();
+            h = b.elementAlign || "left-top";
+            i = b.baseAlign || "left-bottom";
+            m = b.overflow || "fit-flip";
+            if (b.alignToMarkerHorizontal && f) {
+                j.left = f.offset().left;
+                r = f.outerWidth()
+            }
+            if (b.alignToMarkerVertical && f) {
+                j.top = f.offset().top;
+                q = f.outerHeight()
+            }
+            i = i.split("-");
+            if (i[n] === "right") j.left += r;
+            if (i[o] === "bottom") j.top += q;
+            d = $.extend({}, j);
+            if (b.alignToMarkerHorizontal && e) {
+                z = c.offset().left - e.offset().left;
+                d.left += z;
+                k = e.outerWidth()
+            }
+            if (b.alignToMarkerVertical && e) {
+                A = c.offset().top - e.offset().top;
+                d.top += A;
+                p = e.outerHeight()
+            }
+            h = h.split("-");
+            if (h[n] === "right") d.left -= k;
+            if (h[o] === "bottom") d.top -= p;
+            d.left = Math.round(d.left);
+            d.top = Math.round(d.top);
+            m = m.split("-");
+            x = a["_" + m[o].toLowerCase() + "Vertical"];
+            if (x) {
+                s = x(d, {
+                    baseMeasure: q,
+                    baseAlign: i[o],
+                    elementMeasure: p,
+                    elementAlign: h[o]
+                });
+                d.top = s.top;
+                if (u && s.shrink > 0) {
+                    c.height(c.height() - s.shrink);
+                    k = c.outerWidth()
+                }
+            }
+            w = a["_" + m[n].toLowerCase() + "Horizontal"];
+            t = {
+                baseMeasure: r,
+                baseAlign: i[n],
+                elementMeasure: k,
+                elementAlign: h[n],
+                adjustedWidth: 0
+            };
+            $.isFunction(w) && w(d, t);
+            v = c.offset();
+            C = parseInt(jQuery.css(c[0], "top", true), 10) || 0;
+            B = parseInt(jQuery.css(c[0], "left", true), 10) || 0;
+            y = {
+                top: d.top - v.top + C,
+                left: d.left - v.left + B
+            };
+            if (t.adjustedWidth > 0) y.width = t.adjustedWidth;
+            c.css(y)
+        };
+	})($.oa.ui.Positioning || ($.oa.ui.Positioning = {}));
+	
+}
+)(jQuery);

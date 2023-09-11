@@ -1,0 +1,10 @@
+﻿#accountingPopup {
+    padding: 0;
+}
+.billingStatement .ui-dialog-titlebar {
+    display: none;
+}
+#BillingStatementPopupDiv {
+    display:none;
+    padding:0px;
+}

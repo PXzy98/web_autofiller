@@ -1,0 +1,23 @@
+﻿input[type=text] { padding-left:0; padding-right:0;}
+
+.phone-area,
+.phone-prefix { width:2.25em; }
+.phone-linenum { width:2.75em; }
+.mi { width:1.5em;padding-left:0;padding-right:0; }
+
+.date-month,
+.date-day { width:2em; }
+.date-year { width:3.25em; }
+
+.state { width:2.25em; }
+
+.npi { width:7em; }
+
+.zip-short { width:3em; }
+.zip-long { width:6em; }
+
+select.ndc-unit { width:3.8em;margin:0;padding:0; }
+select.ndc-unit option { margin:0;padding:0; }
+
+select.svc-qual { width:3.8em;margin:0;padding:0; }
+select.svc-qual option{ margin:0;padding:0; }

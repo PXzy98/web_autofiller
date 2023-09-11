@@ -1,0 +1,150 @@
+
+
+//--------------------------------------------- Validation Functions ---------------------------------------------//
+	function isValidOptionalDate(strDate) {
+		if(strDate.length > 2) {
+		
+			var datePat = /^(\d{1,2})(\/|-)(\d{1,2})\2(\d{2}|\d{4})$/;
+			var matchArray = strDate.match(datePat);
+			var datToday = new Date();
+
+			if (matchArray == null)
+				return false;
+
+			// matchArray[0] will be the original entire string, for example, 4-12-02 or 4/12/2002
+			var month	= matchArray[1];		// (\d{1,2}) - 1st parenthesis Set - 4
+			var day		= matchArray[3];		// (\d{1,2}) - 3rd parenthesis Set - 12
+			var year	= matchArray[4];		// (\d{2}|\d{4}) - 5th parenthesis Set - 02 or 2002
+
+			if (month < 1 || month > 12 || day < 1 || day > 31)
+				return false;
+			if (day == 31 && (month == 4 || month == 6 || month==9 || month == 11))
+				return false;
+			if (month == 2 && (day > 29 || (day == 29 && !(!(year % 4) && ((year % 100) || !(year % 400))))))
+			    return false;
+			if (year < 1900)
+			    return false;
+				
+			var datDate = new Date(year, month - 1, day);
+		
+			if(datDate > datToday)
+				return false;
+			     
+			return true;
+		}
+		return true;
+	}
+	
+	function isValidDate(strDate) {
+	    var datePat = /^(\d{1,2})(\/|-)(\d{1,2})\2(\d{2}|\d{4})$/;
+	    var matchArray = strDate.match(datePat);
+	    var datToday = new Date();
+
+	    if (matchArray == null)
+	        return false;
+
+	    // matchArray[0] will be the original entire string, for example, 4-12-02 or 4/12/2002
+	    var month = matchArray[1]; 	// (\d{1,2}) - 1st parenthesis Set - 4
+	    var day = matchArray[3]; 	// (\d{1,2}) - 3rd parenthesis Set - 12
+	    var year = matchArray[4]; 	// (\d{2}|\d{4}) - 5th parenthesis Set - 02 or 2002
+
+	    if (month < 1 || month > 12 || day < 1 || day > 31)
+	        return false;
+	    if (day == 31 && (month == 4 || month == 6 || month == 9 || month == 11))
+	        return false;
+	    if (month == 2 && (day > 29 || (day == 29 && !(!(year % 4) && ((year % 100) || !(year % 400))))))
+	        return false;
+	    if (year < 1900)
+	        return false;
+
+	    var datDate = new Date(year, month - 1, day);
+
+	    if (datDate > datToday || (datToday.getYear() - year) > 130)
+	        return false;
+
+	    return true;
+	}
+
+	function isValidName(strName){
+		var regName = /^[a-zA-Z\-]+\s*[a-zA-Z]?\.?\s+[a-zA-Z\-]+$/;
+		var bolMatch = regName.test(strName);
+		
+		if(!bolMatch){
+			regName = /^[a-zA-Z\-]+\s*,\s*[a-zA-Z\-]+(\s+[a-zA-Z]?\.?)?$/
+			bolMatch = regName.test(strName);
+		}
+		
+		return bolMatch;
+	}
+
+
+	function isValidPhone(strPhone){
+		var regPhone = /^(\d{10})$/;
+		return regPhone.test(strPhone);
+	}
+	
+	/* Returns True if the provided zip code is numeric and consists of either 5 or 9 characters*/
+	function isValidZip(strZIPCode){
+		if((strZIPCode.length == 5 || strZIPCode.length == 9) && isNumeric(strZIPCode))
+				return(true);
+		return(false);
+	}
+			
+	/*Returns True if strNumbers contains all numeric characters*/	
+	function isNumeric(strNumbers){
+		for(i = 0; i < strNumbers.length; i++){
+			if(strNumbers.charAt(i) < '0' || strNumbers.charAt(i) > '9'){
+				return(false);
+				}
+		}
+		return(true);
+	}	
+		
+		
+	function isPostiveWholeNumber(intNum) {
+		if(0 > intNum) {
+			return false;
+		}
+		else {
+			if(Math.round(intNum) != intNum) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		}	
+	}
+	
+	function Trim(s) {
+		if(s) {
+			return s.replace(/^\s*|\s*$/g,"");
+		} else {
+			return "";
+		}
+	}
+
+	
+	function isEmpty(objInput) {
+				
+		strValue = Trim(objInput.value || objInput.val());
+		
+		if(strValue.length < 1) {
+			return true;	
+		} 
+		else {
+			return false;
+		}
+	}
+	
+	function isValidMoney(strMoney) {
+		strMoney = strMoney.replace("$", "");
+		var regMoney = /^\d+(\.\d{2})?$/;
+		return regMoney.test(strMoney)
+	}	
+	
+	function isValidCSZ(strCSZ){
+		var regCSZ = /^[a-zA-Z ]+\s*,?\s*[a-zA-Z]{2}\.?\s*([0-9]{5}|[0-9\- ]{5,10})$/;
+		return regCSZ.test(strCSZ);
+	}
+	
+//----------------------------------------------------------------------------------------------------------------//

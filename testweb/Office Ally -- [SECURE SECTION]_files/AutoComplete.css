@@ -1,0 +1,35 @@
+<style type="text/css">
+.autocomplete {
+	font-family: arial, helvetica, sans-serif; 
+	font-size: 11px;
+    background-color: white;
+    border: 1px solid black;
+    position: absolute;
+    cursor: default;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+.autocomplete_item {
+    padding: 1px;
+    padding-left: 5px;
+    color: black;
+    width: 100%;
+}
+
+.autocomplete_item_odd {
+    padding: 1px;
+    padding-left: 5px;
+    color: black;
+    background-color: #E0E0E0;
+    width: 100%;
+}
+
+.autocomplete_item_highlighted {
+    padding: 1px;
+    padding-left: 5px;
+    color: black;
+    background-color: #A0A0A0;
+    cursor: hand;
+}
+</style> 

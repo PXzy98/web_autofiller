@@ -1,0 +1,99 @@
+﻿//----------------------------------------------------------
+// Copyright (C) Office Ally. All rights reserved.
+//----------------------------------------------------------
+(function ($) {
+    $.oa.core = $.oa.core || {};
+    var m;
+
+    $.extend($.oa.core, {
+        delegate: function (b, c, a) { return function () { if (typeof a === "undefined") return c.apply(b, arguments); else { var e = Array.prototype.slice.call(arguments, 0); if (a instanceof Array) e = e.concat(a); else e.push(a); return c.apply(b, e) } } },
+        getAntiForgeryTokenValue: function () {
+            if (!m) {
+                var c = $("input[name=__RequestVerificationToken]");
+                if (c.length == 0) c = $("input[name=__RequestVerificationToken]", parent.top.document);
+                m = c.val();
+                return m;
+            }
+            else return m;
+        },
+        createAntiForgeryToken: function () {
+            var a, b; a = $("<input />").attr("type", "hidden").attr("name", "__RequestVerificationToken").val($.oa.core.getAntiForgeryTokenValue()); return a
+        },
+        setAntiForgeryToken: function (b) { var a = $(b); if (a.find("input[name=__RequestVerificationToken]").length === 0) return a.append($.oa.core.createAntiForgeryToken()) },
+        QueryString : (function (a) {
+			if (a == "") return {};
+			var b = {};
+			for (var i = 0; i < a.length; ++i) {
+				var p = a[i].split('=');
+				if (p.length != 2) continue;
+				b[p[0].toLowerCase()] = decodeURIComponent(p[1].replace(/\+/g, " "));
+			}
+			return b;
+		})(window.location.search.substr(1).split('&')),
+		delayedFunction: function () {
+			function a(a, e, d, b, c) { this._interval = e; this._name = d; this._func = $.oa.core.delegate(a, b, c); }
+			a.prototype.start = function () { var a = this; if (!this._timeoutHandle) {  this._timeoutHandle = window.setTimeout(function () { delete a._timeoutHandle; try { a._func.call(a) } finally { } }, this._interval) } };
+			a.prototype.reset = function () { this.cancel(); this.start() };
+			a.prototype.cancel = function () { if (this._timeoutHandle) { window.clearTimeout(this._timeoutHandle); delete this._timeoutHandle; } };
+			a.prototype.invokeNow = function () { this.cancel(); this._func() };
+			a.prototype.setDelay = function (a) { this._interval = a };
+			a.prototype.setMethod = function (a, b, c) { this._func = $.oa.core.delegate(a, b, c) };
+			a.prototype.isPending = function () { return this._timeoutHandle ? true : false };
+			return a
+		} (),
+		delay: function (b, e, c, d) { var a = new $.oa.core.delayedFunction(b, e, null, c, d); a.start(); return a }
+
+    });
+	
+	function d(b, d, c) {var a;if (b === null || b === undefined) return "";a = c ? b.toLocaleString() : b.toString();if (d) a = c ? a.toLocaleUpperCase() : a.toUpperCase();return a}
+	(function (a) {
+		a.empty = "";
+        a.newLine = "\r\n";
+        a.tab = "\t";
+		a.htmlEncode = function (b) { var a = document.createElement("div"); a.appendChild(document.createTextNode(b)); return a.innerHTML };
+		a.nl2br = function (b) { return a.htmlEncode(b).replace(/(\r\n|\n|\r)/gm, "<br/>") };
+		a.format = function () { for (var b = [], a = 0; a < arguments.length - 1; a++) b[a] = arguments[a + 1]; return String.format.apply(String, Array.prototype.slice.call(arguments, 0)) };
+		a.defaultComparer = function (c, e) {if (c === e) return 0;var a = d(c, false, false),b = d(e, false, false);return a === b ? 0 : a > b ? 1 : -1};
+		a.ignoreCaseComparer = function (c, e) {if (c === e) return 0;var a = d(c, true, false),b = d(e, true, false);return a === b ? 0 : a > b ? 1 : -1};
+		a.localeComparer = function k(a, b) {if (a === b) return 0;var c = d(a, false, true),e = d(b, false, true);return c.localeCompare(e)};
+		a.localeIgnoreCaseComparer = function (a, b) {if (a === b) return 0; var c = d(a, true, true),e = d(b, true, true);return c.localeCompare(e)};
+		a.startsWith = function (d, c, b) {b = b || a.defaultComparer;return b(c, d.substr(0, c.length)) === 0};
+		
+	})($.oa.core.string || ($.oa.core.string = {}));
+    
+	
+	$.oa.core.utilities = $.oa.core.utilities || {};
+	$.extend($.oa.core.utilities, {
+        parseMSJSON: function (b,a){return JSON.parse(b,a)},
+        stringifyMSJSON: function (a){return JSON.stringify(a)},
+		PhoneFormat: function(b,a){
+			var s = a.separator;
+			var t = b.replace(/(\d{3})(\d{3})(\d{4})/, '$1' + s + '$2' + s + '$3');
+			return t;
+		}
+    });
+	
+	(function (a) {
+		a.isFirefox = function () {
+            var a = window.navigator.userAgent.toLowerCase();
+            return $.browser.mozilla && a.indexOf("trident") === -1
+        };
+		a.msie = navigator.appName === 'Microsoft Internet Explorer';
+		a.msiever = function () {
+            var rv = -1;
+            var ua = navigator.userAgent;
+            var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+            if (re.exec(ua) != null) {
+                rv = parseFloat(RegExp.$1);
+            }
+            return rv;
+        };
+		a.isIE = function () {
+            var a = window.navigator.userAgent.toLowerCase();
+            return $.browser.msie ? Number($.browser.version) : a.indexOf("trident") !== -1 ? 11 : 0
+        };
+		a.isLessThanOrEqualToIE9 = function () {var b = a.isIE();return b > 0 && b <= 9};
+		a.isLessThanOrEqualToIE8 = function () {var b = a.isIE();return b > 0 && b <= 8};
+	})($.oa.core.browser || ($.oa.core.browser = {}));	
+}
+)(jQuery);

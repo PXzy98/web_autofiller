@@ -1,0 +1,711 @@
+﻿$(document).ready(function () {
+    for (i = 1; i <= 22; i++) {
+        var RevCd = "<input class='cText' style='width: 50px;' name='tmpltRevCode" + i + "' maxlength='48' type='text'>";
+        var Description = "<input class='cText' style='left;width: 150px;' name='tmpltDescription" + i + "' maxlength='80' type'text'>";
+        var HCPCSRates = "<input class='cText' style='width: 90px' name='tmpltRate" + i + "' maxlength='80' type='text'>";
+        var ServDate = "<input class='textboxdisabled' name='tmpltFromDateMonth" + i + "' style='width: 15px;' maxlength='2' disabled> / <input class='textboxdisabled' name='tmpltFromDateDay" + i + "' style='width: 15px;' maxlength='2' disabled> / <input class='textboxdisabled' name='tmpltFromDateYear" + i + "' style='width: 30px;' maxlength='4' disabled>";
+        var ServUnits = "<input class='cText' style='width: 30px' name='tmpltUnits" + i + "' maxlength='15' type='text'>";
+        var TotalCharges = "<input class='cText' style='width: 75px' name='tmpltTotalCharge" + i + "' maxlength='18' type='text'>";
+        var NonCoveredCharges = "<input class='cText' style='width: 75px' name='tmpltNonCoveredAmount" + i + "' maxlength='18' type='text'>";
+        var NDCCodeChargeUnitsMeas = "<input class='cText' style='width: 75px' name='tmpltNDCCode" + i + "' maxlength='50' type='text'> / <input class='cText' style='width: 50px' name='tmpltNDCCharge" + i + "' maxlength='10' type='text'> / <input class='cText' style='width: 30px' name='tmpltNDCUnits" + i + "' maxlength='9' type='text'> / <input class='cText' style='width: 30px' name='tmpltNDCMeasure" + i + "' maxlength='' type='text'> ";
+        var row = "<tr style='text-align: center;'>   <td class='cBorderTopRight'>" + RevCd + "</td>   <td class='cBorderTopRight'>" + Description + "</td>   <td class='cBorderTopRight'>" + HCPCSRates + "</td>   <td class='cBorderTopRight'>" + ServDate + "</td>   <td class='cBorderTopRight'>" + ServUnits + "</td>   <td class='cBorderTopRight'>" + TotalCharges + "</td>   <td class='cBorderTopRight'>" + NonCoveredCharges + "</td>   <td class='cBorderTop'>" + NDCCodeChargeUnitsMeas + "</td>   </tr>";
+        $("#tblLineItems").append(row);
+    }
+    var row = "<tr><td colspan='5' class='cBorderTop' style='text-align: right;'><strong>TOTAL CHARGES </strong><img src='/oa/images/arrow.gif'></td><td class='cBorderTop' style='text-align: center;'><input class='cText' style='width: 75px' name='tmpltTotalCharge" + i + "' maxlength='18' type='text'></td><td class='cBorderTop' colspan='2' style='text-align: center;'></td></tr>";
+    $("#tblLineItems").append(row);
+
+    reloadUI();
+
+    $("#" + txtbxPatientId).autocomplete({
+        minLength: 2,
+        delay: 300,
+        source: function (req, res) {
+            var trimmedtxt = $("#" + txtbxPatientId).val().trim();
+            if (trimmedtxt < 2) {
+                var results = [];
+                results.push({
+                    value: -1,
+                    label: 'No results found'
+                });
+                return res(results);
+            }
+            webapi.reset();
+            webapi.url = 'v1/patients/storedpatients/autocomplete';
+            webapi.addurlparameter('query', $("#" + txtbxPatientId).val().trim());
+            webapi.get(function (data) {
+                if (data.length < 1) {
+                    data.push({
+                        value: -1,
+                        label: 'No results found'
+                    });
+                }
+                res(data);
+            });
+        },
+        select: function (event, ui) {
+            event.preventDefault();
+            $("#" + txtbxPatientId).val(ui.item.label);
+            $("#" + PatientId).val(ui.item.value);
+        },
+        change: function (event, ui) {
+            if (!ui.item) {
+                $(event.target).val("");
+            }
+        }
+    }).data("ui-autocomplete")._renderItem = function (ul, item) {
+        if(item.value == -1){
+            return $('<li class="ui-state-disabled">'+item.label+'</li>').appendTo(ul);
+        }else{
+            return $("<li>")
+            .append("<a>" + item.label + "</a>")
+            .appendTo(ul);
+        }
+    };
+});
+
+function reloadUI() {
+    var data = $("#" + TemplateLineItemRows).val();
+    if (data !== undefined) {
+        data = JSON.parse(data);
+        for (i = 0; i < data.length; i++) {
+            $("input[name=tmpltRevCode" + data[i].LineSequenceNum + "]").val(data[i].RevCode);
+            $("input[name=tmpltDescription" + data[i].LineSequenceNum + "]").val(data[i].Description);
+            $("input[name=tmpltRate" + data[i].LineSequenceNum + "]").val(data[i].Rate);
+            $("input[name=tmpltUnits" + data[i].LineSequenceNum + "]").val(data[i].Units);
+            $("input[name=tmpltTotalCharge" + data[i].LineSequenceNum + "]").val(data[i].TotalCharge);
+            $("input[name=tmpltNonCoveredAmount" + data[i].LineSequenceNum + "]").val(data[i].NonCoveredAmount);
+            $("input[name=tmpltNDCCode" + data[i].LineSequenceNum + "]").val(data[i].NDCcode);
+            $("input[name=tmpltNDCCharge" + data[i].LineSequenceNum + "]").val(data[i].NDCcharge);
+            $("input[name=tmpltNDCUnits" + data[i].LineSequenceNum + "]").val(data[i].NDCunits);
+            $("input[name=tmpltNDCMeasure" + data[i].LineSequenceNum + "]").val(data[i].NDCmeasure);
+        }
+    }
+}
+
+function GoToPage(strAction) {
+    UpdateFormInfo();
+
+    var strPayerId = $("#" + PayerId).val();
+    var strPatientId = $("#" + PatientId).val();
+    var strProviderId = $("#" + ProviderId).val();
+    var strTemplateId = $("#" + TemplateId).val();
+    var strPhysicianId = $("#" + AttendingPhysicianId).val();
+
+
+    switch (strAction) {
+        case "editpayer":
+            if (strPayerId == -1) {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Payer to edit.'
+                    , function () { $("#" + PayerId).focus(); }
+                    , $("#" + PayerId)
+                );
+            }
+            break;
+
+        case "deletepayer":
+            if (strPayerId == -1) {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Payer to delete.'
+                    , function () { $("#" + PayerId).focus(); }
+                    , $("#" + PayerId)
+                );
+            } else {
+                var msg = "Are you sure you want to delete Payer '" + $('#' + PayerId + ' option:selected').text() + "'?";
+                return $.oa.confirm(
+                    'Confirm Delete'
+                    , msg
+                    , function () { Submit(strAction); }
+                    , function () { return false; }
+                    , $("#" + PayerId)
+                );
+            }
+            break;
+
+        case "editpatient":
+            if (strPatientId == "-1") {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Patient to edit.'
+                    , function () { $('#' + txtbxPatientId).focus(); }
+                    , $('#' + txtbxPatientId)
+                );
+            }
+            break;
+
+        case "deletepatient":
+            if (strPatientId == "-1") {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Patient to delete.'
+                    , function () { $('#' + txtbxPatientId).focus(); }
+                    , $('#' + txtbxPatientId)
+                );
+            }
+            else {
+                var msg = "Are you sure you want to delete Patient '" + $("#" + txtbxPatientId).val() + "'?";
+                return $.oa.confirm(
+                    'Confirm Delete'
+                    , msg
+                    , function () { Submit(strAction); }
+                    , function () { return false; }
+                    , $('#' + txtbxPatientId)
+                );
+            }
+            break;
+
+        case "editprovider":
+            if (strProviderId == -1) {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Provider to edit.'
+                    , function () { $("#" + ProviderId).focus(); }
+                    , $("#" + ProviderId)
+                );
+            }
+            break;
+
+        case "deleteprovider":
+            if (strProviderId == -1) {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Provider to delete.'
+                    , function () { $("#" + ProviderId).focus(); }
+                    , $("#" + ProviderId)
+                );
+            }
+            else {
+                var msg = "Are you sure you want to delete Provider '" + $("#" + ProviderId + " option:selected").text() + "'?";
+                return $.oa.confirm(
+                    'Confirm Delete'
+                    , msg
+                    , function () { Submit(strAction); }
+                    , function () { return false; }
+                    , $('#' + ProviderId)
+                );
+            }
+            break;
+
+        case "edittemplate":
+            if (strTemplateId == -1) {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Template to edit.'
+                    , function () { $("#" + TemplateId).focus(); }
+                    , $("#" + TemplateId)
+                );
+            }
+            break;
+
+        case "deletetemplate":
+            if (strTemplateId == -1) {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Template to delete.'
+                    , function () { $("#" + TemplateId).focus(); }
+                    , $("#" + TemplateId)
+                );
+            }
+            else {
+                var msg = "Are you sure you want to delete Template '" + $("#" + TemplateId + " option:selected").text() + "'?"
+                return $.oa.confirm(
+                    'Confirm Delete'
+                    , msg
+                    , function () { Submit(strAction); }
+                    , function () { return false; }
+                    , $("#" + TemplateId)
+                );
+                break;
+            }
+
+        case "editphysician":
+            if (strPhysicianId == -1) {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Physician to edit.'
+                    , function () { $("#" + AttendingPhysicianId).focus(); }
+                    , $("#" + AttendingPhysicianId)
+                );
+            }
+            break;
+
+        case "deletephysician":
+            if (strPhysicianId == -1) {
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Please select a Physician to delete.'
+                    , function () { $("#" + AttendingPhysicianId).focus(); }
+                    , $("#" + AttendingPhysicianId)
+                );
+            }
+            else {
+                var msg = "Are you sure you want to delete Physician '" + $("#" + AttendingPhysicianId + " option:selected").text() + "'?";
+                $.oa.confirm(
+                    'Confirm Delete'
+                    , msg
+                    , function () { Submit(strAction); }
+                    , function () { return false; }
+                    , $("#" + AttendingPhysicianId)
+                );
+            }
+            break;
+    }
+    Submit(strAction);
+}
+
+function Submit(strAction) {
+    $("#txtPageAction").val(strAction);
+    $("form").submit();
+}
+
+function CreateNewClaim() {
+    var parentPage = window.parent.location.href.split("?");
+    var strGO = parentPage[0];
+    strGO += "?GOTO=UB92OnlineEntry&TaskAction=UB92Claim&ClaimId=-1";
+
+    var strPayerId = $("#" + PayerId).val();
+    var strPatientId = $("#" + PatientId).val();
+    var strProviderId = $("#" + ProviderId).val();
+    var strTemplateId = $("#" + TemplateId).val();
+    var strAttendingPhysId = $("#" + AttendingPhysicianId).val();
+    var strOtherAttendingPhysId = $("#" + OtherAttendingPhysicianId).val();
+    var strOperatingPhysId = $("#" + OperatingPhysicianId).val();
+    var strReferringPhysId = $("#" + ReferringPhysicianId).val();
+
+    strGO += '&sPatientId=' + strPatientId + '&sProviderId=' + strProviderId;
+    strGO += '&sPayerId=' + strPayerId + '&sTemplateId=' + strTemplateId;
+    strGO += '&sAttendingPhysicianId=' + strAttendingPhysId + '&sOtherAttendingPhysicianId=' + strOtherAttendingPhysId;
+    strGO += '&sOperatingPhysicianId=' + strOperatingPhysId + '&sReferringPhysicianId=' + strReferringPhysId + '&Mode=Create';
+
+    window.parent.location.href = strGO;
+}
+
+function UpdateFormInfo() {
+    txtPayerId.val($("#" + PayerId).val());
+    txtPatientId.val($("#" + PatientId).val());
+    txtProviderId.val($("#" + ProviderId).val());
+    txtTemplateId.val($("#" + TemplateId).val());
+    txtAttendingPhysicianId.val($("#" + AttendingPhysicianId).val());
+    txtOtherAttendingPhysicianId.val($("#" + OtherAttendingPhysicianId).val());
+    txtOperatingPhysicianId.val($("#" + OperatingPhysicianId).val());
+    txtReferringPhysicianId.val($("#" + ReferringPhysicianId).val());
+}
+
+function EditPatient(intMode) {
+    UpdateFormInfo();
+    if (intMode == 0) {
+        $("#txtPageAction").val("");
+        $("form").submit();
+        return;
+    }
+    if (IsValid(PatientForm, PatientObjects)) {
+        $("#txtPageAction").val("updatepatient");
+        $("form").submit();
+    }
+}
+
+function EditPayer(intMode) {
+    UpdateFormInfo();
+    if (intMode == 0) {
+        $("#txtPageAction").val("");
+        $("form").submit();
+        return;
+    }
+    if (IsValid(PayerForm, PayerObjects)) {
+        $("#txtPageAction").val("updatepayer");
+        $("form").submit();
+    }
+}
+
+function EditProvider(intMode) {
+    UpdateFormInfo();
+    if (intMode == 0) {
+        $("#txtPageAction").val("");
+        $("form").submit();
+        return;
+    }
+    if (IsValid(ProviderForm, ProviderObjects)) {
+        $("#txtPageAction").val("updateprovider");
+        $("form").submit();
+    }
+}
+
+function EditTemplate(intMode) {
+    UpdateFormInfo();
+    if (intMode == 0) {
+        $("#txtPageAction").val("");
+        $("form").submit();
+        return;
+    }
+    if (IsValid(TemplateForm, TemplateObjects)) {
+        $("#txtPageAction").val("updatetemplate");
+        var ObjLineItems = [];
+        for (i = 0; i <= 21; i++) {
+            var tempJSON = {
+                LineSequenceNum: (i + 1).toString(),
+                RevCode: $("input[name=tmpltRevCode" + (i + 1) + "]").val(),
+                Description: $("input[name=tmpltDescription" + (i + 1) + "]").val(),
+                Rate: $("input[name=tmpltRate" + (i + 1) + "]").val(),
+                Units: $("input[name=tmpltUnits" + (i + 1) + "]").val(),
+                TotalCharge: $("input[name=tmpltTotalCharge" + (i + 1) + "]").val(),
+                NonCoveredAmount: $("input[name=tmpltNonCoveredAmount" + (i + 1) + "]").val(),
+                NDCcode: $("input[name=tmpltNDCCode" + (i + 1) + "]").val(),
+                NDCcharge: $("input[name=tmpltNDCCharge" + (i + 1) + "]").val(),
+                NDCunits: $("input[name=tmpltNDCUnits" + (i + 1) + "]").val(),
+                NDCmeasure: $("input[name=tmpltNDCMeasure" + (i + 1) + "]").val(),
+            }
+            if (tempJSON.TotalCharge != "") {
+                ObjLineItems.push(tempJSON);
+            }
+        }
+        $("#" + TemplateLineItemRows).val(JSON.stringify(ObjLineItems));
+        $("form").submit();
+    }
+}
+
+
+function EditPhysician(intMode) {
+
+    UpdateFormInfo();
+    if (intMode == 0) {
+        $("#txtPageAction").val("");
+        $("form").submit();
+        return;
+    }
+    if (IsValid(PhysicianForm, PhysicianObjects)) {
+        $("#txtPageAction").val("updatephysician");
+        $("form").submit();
+    }
+}
+
+function IsValid(FormName, FormObjects) {
+    var arrErrors = new Array();
+    var lngErrors = 0;
+    $("#" + FormName + " input[type=text]").each(function () {
+        this.value = this.value.replace(/^\s*/, '');
+        this.value = this.value.replace(/\s*$/, '');
+        this.value = this.value.replace('$', '');
+        this.value = this.value.replace('\"', '');
+        this.value = this.value.replace("'", "");
+    });
+
+    switch (FormName) {
+        case PatientForm:
+            if (isEmpty($("#" + FormObjects.PatLastName)) || isEmpty($("#" + FormObjects.PatFirstName))) {
+                arrErrors[lngErrors++] = "- Patient Last and First Name are required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.PatStrAddr)) || isEmpty($("#" + FormObjects.PatCity)) || isEmpty($("#" + FormObjects.PatState)) || isEmpty($("#" + FormObjects.PatZip))) {
+                arrErrors[lngErrors++] = "- Patient Street Address, City, State and Zipcode are required.";
+            }
+
+            if (!isValidDate($("#" + FormObjects.PatDOB + "_Month").val() + "/" + $("#" + FormObjects.PatDOB + "_Day").val() + "/" + $("#" + FormObjects.PatDOB + "_Year").val())) {
+                arrErrors[lngErrors++] = "- Valid Patient DOB is required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.PatGender))) {
+                arrErrors[lngErrors++] = "- Patient Gender is required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.PatPayerName))) {
+                arrErrors[lngErrors++] = "- Payer Name is required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.PatPayerStreetAddr)) || isEmpty($("#" + FormObjects.PatPayerCity)) || isEmpty($("#" + FormObjects.PatPayerState)) || isEmpty($("#" + FormObjects.PatPayerZip))) {
+                arrErrors[lngErrors++] = "- Payer Address, City, State and Zipcode are required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.SubFirstName)) || isEmpty($("#" + FormObjects.SubLastName))) {
+                arrErrors[lngErrors++] = "- Subscriber First and Last Name are required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.SubMaritalStat))) {
+                arrErrors[lngErrors++] = "- Subscriber Marital Status is required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.SubStreetAddr)) || isEmpty($("#" + FormObjects.SubCity)) || isEmpty($("#" + FormObjects.SubState)) || isEmpty($("#" + FormObjects.SubZip))) {
+                arrErrors[lngErrors++] = "- Subscriber Address, City, State and Zipcode are required.";
+            }
+
+            if ($("#" + FormObjects.PatRelation).val() == "-1") {
+                arrErrors[lngErrors++] = "- Subscriber Relation to Patient is required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.SubID))) {
+                arrErrors[lngErrors++] = "- Subscriber SSN/ID is required.";
+            }
+
+            if (!isEmpty($("#" + FormObjects.COBPayerName1)) || !isEmpty($("#" + FormObjects.COBSubFirstName1)) || !isEmpty($("#" + FormObjects.COBSubMiddleName1)) || !isEmpty($("#" + FormObjects.COBSubLastName1)) || !isEmpty($("#" + FormObjects.COBSubID1)) || !isEmpty($("#" + FormObjects.COBGroupName1)) || !isEmpty($("#" + FormObjects.COBGroupNum1)) || !$("#" + FormObjects.COBPatRelation1).val() === "-1" || !isEmpty($("#" + FormObjects.COBSubEmployStat1)) || !isEmpty($("#" + FormObjects.COBSubEmployerName1)) || !isEmpty($("#" + FormObjects.COBSubEmployerStreetAddr1)) || !isEmpty($("#" + FormObjects.COBSubEmployerCityStateZip1))) {
+                if (isEmpty($("#" + FormObjects.COBPayerName1))) {
+                    arrErrors[lngErrors++] = "- Other Insured 1. Payer Name is required.";
+                }
+
+                if (isEmpty($("#" + FormObjects.COBSubFirstName1)) || isEmpty($("#" + FormObjects.COBSubLastName1))) {
+                    arrErrors[lngErrors++] = "- Other Insured 1. Insured First and Last Name are required.";
+                }
+
+                if ($("#" + FormObjects.COBPatRelation1).val() == "-1") {
+                    arrErrors[lngErrors++] = "- Other Insured 1. Patient Relation to Insured is required.";
+                }
+
+                if (isEmpty($("#" + FormObjects.COBSubID1))) {
+                    arrErrors[lngErrors++] = "- Other Insured 1. Subscriber ID is required.";
+                }
+            }
+
+            if (!isEmpty($("#" + FormObjects.COBPayerName2)) || !isEmpty($("#" + FormObjects.COBSubFirstName2)) || !isEmpty($("#" + FormObjects.COBSubMiddleName2)) || !isEmpty($("#" + FormObjects.COBSubLastName2)) || !isEmpty($("#" + FormObjects.COBSubID2)) || !isEmpty($("#" + FormObjects.COBGroupName2)) || !isEmpty($("#" + FormObjects.COBGroupNum2)) || !$("#" + FormObjects.COBPatRelation2).val() === "-1" || !isEmpty($("#" + FormObjects.COBSubEmployStat2)) || !isEmpty($("#" + FormObjects.COBSubEmployerName2)) || !isEmpty($("#" + FormObjects.COBSubEmployerStreetAddr2)) || !isEmpty($("#" + FormObjects.COBSubEmployerCityStateZip2))) {
+                if (isEmpty($("#" + FormObjects.COBPayerName2))) {
+                    arrErrors[lngErrors++] = "- Other Insured 2. Payer Name is required.";
+                }
+
+                if (isEmpty($("#" + FormObjects.COBSubFirstName2)) || isEmpty($("#" + FormObjects.COBSubLastName2))) {
+                    arrErrors[lngErrors++] = "- Other Insured 2. Insured First and Last Name are required.";
+                }
+
+                if ($("#" + FormObjects.COBPatRelation2).val() == "-1") {
+                    arrErrors[lngErrors++] = "- Other Insured 2. Patient Relation to Insured is required.";
+                }
+
+                if (isEmpty($("#" + FormObjects.COBSubID2))) {
+                    arrErrors[lngErrors++] = "- Other Insured 2. Subscriber ID is required.";
+                }
+            }
+
+
+            break;
+
+        case PayerForm:
+            if (isEmpty($("#" + FormObjects.PayerName))) {
+                arrErrors[lngErrors++] = "- Payer Name is required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.PayerStreetAddr)) || isEmpty($("#" + FormObjects.PayerCity)) || isEmpty($("#" + FormObjects.PayerState)) || isEmpty($("#" + FormObjects.PayerZip))) {
+                arrErrors[lngErrors++] = "- Payer Address, City, State and Zip are required.";
+            }
+            break;
+
+        case ProviderForm:
+            if (isEmpty($("#" + FormObjects.ProvGroupName))) {
+                if (isEmpty($("#" + FormObjects.ProvFirstName)) || isEmpty($("#" + FormObjects.ProvLastName))) {
+                    arrErrors[lngErrors++] = "- Provider First and Last name are required if no group name is supplied.";
+                }
+            }
+
+            if (isEmpty($("#" + FormObjects.ProvStreetAddr)) || isEmpty($("#" + FormObjects.ProvCity)) || isEmpty($("#" + FormObjects.ProvState)) || isEmpty($("#" + FormObjects.ProvZip))) {
+                arrErrors[lngErrors++] = "- Address, City, State and Zip are required.";
+            }
+
+            if (isEmpty($("#" + FormObjects.ProvTaxId))) {
+                arrErrors[lngErrors++] = "- Tax ID is required.";
+            }
+
+            strNPI = $("#" + FormObjects.ProvNPI).val();
+            if (strNPI != '' && !IsValidNPI(strNPI)) {
+                arrErrors[lngErrors++] = "- NPI, if enter, must be a valid number.";
+            }
+            break;
+
+        case TemplateForm:
+            if (isEmpty($("#" + FormObjects.TmpltName))) {
+                arrErrors[lngErrors++] = "- Template Name is required.";
+                return $.oa.alert(
+                    'Missing Information'
+                    , 'Template name is required.'
+                    , function () { return false; }
+                    , $("#" + FormObjects.TmpltName)
+                );
+                $("#" + FormObjects.TmpltName).focus();
+                return;
+            }
+
+            //------------------------------------------------ Line Items ------------------------------------------------//
+            var arrLineItemFields = new Array();
+            arrLineItemFields[0] = "tmpltRevCode";
+            arrLineItemFields[1] = "tmpltDescription";
+            arrLineItemFields[2] = "tmpltUnits";
+            arrLineItemFields[3] = "tmpltTotalCharge";
+            arrLineItemFields[4] = "tmpltNonCoveredAmount";
+            var bolData = false;
+            var bolHasLineItem = false;
+            for (i = 1; i <= 22; i++) {
+                bolData = false;
+                for (j = 0; j < arrLineItemFields.length && !bolData; j++) {
+                    if (eval($("input[name=" + arrLineItemFields[j] + i + "]").val().length > 0)) {
+                        bolData = true;
+                        bolHasLineItem = true;
+                    }
+                }
+                if (bolData && !isValidMoney($("input[name=" + arrLineItemFields[3] + i + "]").val().toString())) {
+                    arrErrors[lngErrors++] = "LineItem " + i + ": Valid Total Charge is required.";
+                }
+            }
+
+            // -- Make sure we have a line item...
+            if (!bolHasLineItem) {
+                arrErrors[lngErrors++] = "42. Line Items: at least one Line Item is required.";
+            }
+            break;
+        case PhysicianForm:
+            if (isEmpty($("#" + FormObjects.PhysFirstName)) || isEmpty($("#" + FormObjects.PhysLastName))) {
+                arrErrors[lngErrors++] = "- Provider First and Last name are required.";
+            }
+
+            strNPI = $("#" + FormObjects.PhysNPI).val();
+            if (strNPI != '' && !IsValidNPI(strNPI)) {
+                arrErrors[lngErrors++] = "- NPI, if enter, must be a valid number.";
+            }
+            break;
+    };
+    if (lngErrors > 0) {
+        var msg = "Please repair the following(s):<br />" + arrErrors.join("<br />");
+        return $.oa.alert(
+            'Errors/Missing Information'
+            , msg
+            , function () { return false; }
+            , $("input[name*='btnUpdate']")
+        );
+    } else {
+        return true;
+    }
+}
+
+function IsValidNPI(NPI) {
+    //example NPI (32b) 1234567893
+    //example Other ID (32b) 1BZ5678901234
+
+    if (NPI.length != 10) return false;
+
+    strFirstDigit = NPI.substring(0, 1);
+
+    if (strFirstDigit != '1' && strFirstDigit != '2') return false;
+
+    return true;
+}
+
+function isValidMoney(strMoney) {
+    strMoney = strMoney.replace("$", "");
+    var regMoney = /^\d+(\.\d{2})?$/;
+    return regMoney.test(strMoney);
+}
+
+function isValidDate(strDate) {
+    var datePat = /^(\d{1,2})(\/|-)(\d{1,2})\2(\d{2}|\d{4})$/;
+    var matchArray = strDate.match(datePat);
+    var datToday = new Date();
+
+
+    if (matchArray == null)
+        return false;
+
+    // matchArray[0] will be the original entire string, for example, 4-12-02 or 4/12/2002
+    var month = matchArray[1];		// (\d{1,2}) - 1st parenthesis Set - 4
+    var day = matchArray[3];		// (\d{1,2}) - 3rd parenthesis Set - 12
+    var year = matchArray[4];		// (\d{2}|\d{4}) - 5th parenthesis Set - 02 or 2002
+
+    if (month < 1 || month > 12 || day < 1 || day > 31)
+        return false;
+    if (day == 31 && (month == 4 || month == 6 || month == 9 || month == 11))
+        return false;
+    if (month == 2 && (day > 29 || (day == 29 && !(!(year % 4) && ((year % 100) || !(year % 400))))))
+        return false;
+
+    var datDate = new Date(year, month - 1, day);
+
+    if (datDate > datToday)
+        return false;
+
+    return true;
+}
+
+
+function isValidPhone(strPhone) {
+    var regPhone = /^(\d{10})$/;
+    return regPhone.test(strPhone);
+}
+
+function getControlValue(control) {
+    for (var i = 0; i < control.length; i++) {
+        if (control[i].checked) {
+            return control[i].value;
+        }
+    }
+    return "";
+}
+
+function isControlFilled(control) {
+    var bolControl = false;
+    var lngControlLength = control.length - 1;
+
+    for (var i = 0; i <= lngControlLength; i++) {
+        if (control[i].checked) {
+            bolControl = true;
+            break;
+        }
+    }
+
+    return bolControl;
+}
+
+function isNum(intNum) {
+    if (intNum < 1) {
+        return false;
+    }
+    else {
+        if (Math.abs(intNum) != intNum) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+}
+
+function Trim(s) {
+    return s.replace(/^\s*|\s*$/g, "");
+}
+
+function isEmpty(objInput) {
+    strValue = Trim(objInput.val());
+
+    if (strValue.length < 1) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+function ExpandCollapsePhysicians() {
+    if ($("#imgUpDownArrow").attr("src") === "/oa/images/down.gif") {
+        $("#imgUpDownArrow").attr("src", "/oa/images/up.gif");
+        $("#divPhysician1a").css("display", "");
+        $("#divPhysician2a").css("display", "");
+        $("#divPhysician3a").css("display", "");
+    } else if ($("#imgUpDownArrow").attr("src") === "/oa/images/up.gif") {
+        $("#imgUpDownArrow").attr("src", "/oa/images/down.gif");
+        $("#divPhysician1a").css("display", "none");
+        $("#divPhysician2a").css("display", "none");
+        $("#divPhysician3a").css("display", "none");
+    }
+}
+
+function ShowCalendarPopup(event, MonthID, DayID, YearID) {
+    var winEvent = window.event;
+    var popupWidth = 240;
+    var popupHeight = 175;
+
+    //x = window.event.screenX;
+    //y = window.event.screenY;
+    x = event.screenX;
+    y = event.screenY;
+
+    if ((x + popupWidth) > window.screen.width) {
+        x = window.screen.width - popupWidth - 30;
+    }
+    if ((y + popupHeight + 60) > window.screen.height) {
+        y = window.screen.height - popupHeight - 60;
+    }
+    winCalendar = window.open(SSL_PATH + "Common/CalendarPopup/CalendarPopup.asp?MonthID=" + MonthID + "&DayID=" + DayID + "&YearID=" + YearID, "frmCalendar", "toolbar=no, scrollbars=no, width=240, height=175, top=" + y + ", left=" + x + ", onblur=\"window.close()\"");
+}

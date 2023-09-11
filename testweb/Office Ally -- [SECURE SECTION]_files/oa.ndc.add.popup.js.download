@@ -1,0 +1,232 @@
+﻿/**
+ * Logic for NDC Add New Popup
+ */
+
+// name space for ndc feature
+var oaNDC = window.oaNDC || {};
+
+/**
+ * Data calls for ndc popup
+ */
+oaNDC.Dal = (function ($) {
+
+	function addNdc(ndc) {
+		return $.oaAjax({
+			method: 'POST',
+			url: 'ndcs',
+			data: JSON.stringify(ndc)
+		});
+	}
+
+	return {
+		addNdc: addNdc
+	}
+}(jQuery));
+
+
+oaNDC.ConfirmPopup = (function($) {
+    var confirmPopup = function () {
+
+        //events
+        $('#yes-confirm-ndc').off().on('click', this._onConfirmClose.bind(this));
+        $('#no-confirm-ndc').off().on('click', this._onClose.bind(this));
+
+        // main dialog
+        this.$dialog = $('#confirmNdcPopup').dialog({
+            title: 'Exit',
+            modal: true,
+            draggable: false,
+            resizable: false,
+            autoOpen: false,
+            position: 'center',
+            width: 500,
+            height: 'auto',
+            dialogClass: 'add-ndc-header'
+        });
+    };
+
+    confirmPopup.prototype.open = function () {
+        this.$dfd = $.Deferred();
+        this.$dialog.dialog('open');
+        return this.$dfd;
+    };
+
+    confirmPopup.prototype._onConfirmClose = function () {
+        this.$dfd.resolve(true);
+        this.$dialog.dialog('close');
+    };
+
+    confirmPopup.prototype._onClose = function() {
+        this.$dialog.dialog('close');
+    };
+
+    return confirmPopup;
+}(jQuery));
+
+
+oaNDC.AddNDCPopup = (function ($, toastr, dataService, oaApp, confirm) {
+	if (!toastr) {
+		throw Error('Toastr is not defined.');
+	}
+	if (!oaApp) {
+        throw Error('oaApp is not defined.');
+    }
+
+	var addNdcPopup = function () {
+		this.toastrOptions = {
+			closeButton: true,
+			positionClass: 'toast-top-full-width',
+			timeOut: '7000',
+			bodyOutputType: 'trustedHtml'
+		};
+
+		// controls
+		this.$codeInput = $('#code-input').ndcCode({
+			onValidate: this._displayErrors($('#code-input-errors')).bind(this)
+		});
+		this.$quantityInput = $('#quantity-input').ndcNumber({
+			decimalPlaces: 3,
+			nonDecimalPlaces: 5,
+			errorMessage: 'Please enter a valid quantity.',
+			onValidate: this._displayErrors($('#quantity-input-errors')).bind(this)
+		});
+		this.$priceInput = $('#price-input').ndcNumber({
+			decimalPlaces: 2,
+			nonDecimalPlaces: 7,
+			errorMessage: 'Please enter a valid unit price.',
+			onValidate: this._displayErrors($('#price-input-errors')).bind(this)
+		});
+
+		// events
+		$('#addNdcPopup').off().on('keyup', function (event) {
+			event.preventDefault();
+			// Number 13 is the "Enter" key
+			if (event.keyCode === 13) {
+				this._onAddNdc(event);
+			}
+		}.bind(this));
+		$('#addndcbtn').off().on('click', this._onAddNdc.bind(this));
+		$('#closendcbtn').off().on('click', this._onCloseNdc.bind(this));
+
+        // jquery tooltips
+	    $('.tips').tooltip({
+	        content: function () {
+	            return this.getAttribute('title');
+	        },
+	        tooltipClass: 'add-ndc-tips'
+	    });
+
+        // main dialog
+		this.$dialog = $('#addNdcPopup').dialog({
+			title: 'Add New NDC',
+			modal: true,
+			autoOpen: false,
+			draggable: false,
+			resizable: false,
+			position: 'center',
+			width: 760,
+			height: 'auto',
+			dialogClass: 'add-ndc-header',
+			beforeClose: function (event) {
+                if (event.hasOwnProperty('delegateTarget')) {
+                    confirm
+                        .open()
+                        .done(function () {
+                            this.$dialog.dialog('close');
+                        }.bind(this));
+                    return false;
+                }
+            }.bind(this),
+			close: function () {
+				this._resetPopup();
+			}.bind(this),
+			open: function () {
+				this.$codeInput.focus();
+				[this.$codeInput, this.$quantityInput, this.$priceInput].forEach(this._clearValidation);
+			}.bind(this)
+		});
+	}
+
+	addNdcPopup.prototype._onAddNdc = function (e) {
+		e.preventDefault();
+		if ([this.$codeInput, this.$quantityInput, this.$priceInput].every(this._validateField)) {
+			var ndc = {
+				Code: this.$codeInput.val(),
+				Description: $('#desc-input').val().replace(/(\$|%24)(\{|%7B|%7b)jndi(\:|%3A|%3a)[^\n]+/g, ''),
+				QualifierID: $('#qual-input').val(),
+				Quantity: this.$quantityInput.val(),
+				UnitPrice: this.$priceInput.val()
+			};
+			oaApp.loadingBar.show(true);
+			dataService
+				.addNdc(ndc)
+	            .done(function (ndc) {
+	            	toastr.success('NDC (' + ndc.Code + ') has been successfully added.', '', this.toastrOptions);
+			        this.$dialog.dialog('close');
+	            	this.$dfd.resolve(ndc);
+	            }.bind(this))
+	            .fail(function () {
+	            	toastr.error('An error occurred while adding NDC.', '', this.toastrOptions);
+	            }.bind(this))
+	    		.always(function () {
+	    			oaApp.loadingBar.hide(true);
+	    		});
+
+		}
+	};
+
+	addNdcPopup.prototype._validateField = function ($elem) {
+		if ($elem.data('oa-ndcCode')) {
+			return !$elem.ndcCode('validate').length;
+		}
+		if ($elem.data('oa-ndcNumber')) {
+			return !$elem.ndcNumber('validate').length;
+		}
+		return false;
+	}
+
+	addNdcPopup.prototype._onCloseNdc = function () {
+	    confirm
+            .open()
+            .done(function () {
+	            this.$dialog.dialog('close');
+	        }.bind(this));
+	};
+
+	addNdcPopup.prototype._resetPopup = function () {
+		this.$codeInput.val('');
+		$('#desc-input').val('');
+		$('#qual-input').val(0);
+		this.$quantityInput.val('');
+		this.$priceInput.val('');
+	};
+
+	addNdcPopup.prototype.open = function (item) {
+	    this.$dfd = $.Deferred();
+		// if it is ndc like put in the ndc field
+		/^[0-9\-]+$/.test(item) ? this.$codeInput.val(item) : $('#desc-input').val(item.replace(/(\$|%24)(\{|%7B|%7b)jndi(\:|%3A|%3a)[^\n]+/g, ''));
+
+		this.$dialog.dialog('open');
+	    return this.$dfd;
+	};
+
+	addNdcPopup.prototype._clearValidation = function ($elem) {
+		if ($elem.data('oa-ndcCode')) {
+			$elem.ndcCode('clearValidation');
+		}
+		if ($elem.data('oa-ndcNumber')) {
+			$elem.ndcNumber('clearValidation');
+		}
+	};
+
+	addNdcPopup.prototype._displayErrors = function ($elem) {
+		return function (event, errors) {
+			$elem.children().remove();
+			errors.forEach(function (error) {
+				$elem.append($('<div>', { text: error.text }));
+			});
+		}
+	};
+
+	return addNdcPopup;
+}(jQuery, toastr, oaNDC.Dal, oaApp, new oaNDC.ConfirmPopup()));
